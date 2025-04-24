@@ -5,6 +5,26 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+    reactStrictMode: true,
+    experimental: {
+        nodeMiddleware: true,
+        reactCompiler: true
+    },
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'http',
+                hostname: process.env.MINIO_ENDPOINT || 'localhost',
+                pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: process.env.MINIO_ENDPOINT || 'localhost',
+                pathname: '/**',
+            },
+        ],
+    },
+};
 
 export default config;

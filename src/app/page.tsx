@@ -1,69 +1,108 @@
-import Link from "next/link";
+"use client";
 
-import { LatestPost } from "~/app/_components/post";
-import { auth } from "~/server/auth";
-import { api, HydrateClient } from "~/trpc/server";
+import { Suspense, useState } from "react";
+import { type Book } from "~/schemas/book";
+import { api } from "~/trpc/react";
+import { Button } from "~/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { BookGrid } from "~/components/books/BookGrid";
+import { BookTable } from "~/components/books/BookTable";
+import { BookForm } from "~/components/books/BookForm";
+import { useViewMode } from "~/hooks/useViewMode";
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-  const session = await auth();
+export default function BooksPage() {
+  const [viewMode, setViewMode] = useViewMode("grid");
+  const [isAddingBook, setIsAddingBook] = useState(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
 
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
+  // Fetch books from API
+  const { data: books = [], isLoading: isBooksLoading } =
+    api.book.getAll.useQuery();
+
+  // Fetch authors and series for dropdowns
+  const { data: authors = [] } = api.author.getAll.useQuery();
+  const { data: series = [] } = api.series.getAll.useQuery();
+
+  const handleEditBook = (book: Book) => {
+    setEditingBook(book);
+  };
 
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
+    <div className="container mx-auto p-4">
+      <div className="mb-6 flex flex-col items-start justify-between sm:flex-row sm:items-center">
+        <h1 className="mb-4 text-2xl font-bold sm:mb-0">Books</h1>
 
-            <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-center text-2xl text-white">
-                {session && <span>Logged in as {session.user?.name}</span>}
-              </p>
-              <Link
-                href={session ? "/api/auth/signout" : "/api/auth/signin"}
-                className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-              >
-                {session ? "Sign out" : "Sign in"}
-              </Link>
-            </div>
-          </div>
+        <div className="flex items-center gap-4">
+          <Tabs
+            value={viewMode}
+            onValueChange={setViewMode as (value: string) => void}
+            className="w-32"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="grid">Grid</TabsTrigger>
+              <TabsTrigger value="table">Table</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-          {session?.user && <LatestPost />}
+          <Button
+            onClick={() => {
+              setIsAddingBook(true);
+              setEditingBook(null);
+            }}
+          >
+            Add Book
+          </Button>
         </div>
-      </main>
-    </HydrateClient>
+      </div>
+
+      {isAddingBook && !editingBook && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold">Add New Book</h2>
+          <BookForm
+            authors={authors}
+            series={series}
+            onSuccess={() => {
+              setIsAddingBook(false);
+            }}
+            onCancel={() => setIsAddingBook(false)}
+          />
+        </div>
+      )}
+
+      {editingBook && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-xl font-semibold">Edit Book</h2>
+          <BookForm
+            initialData={editingBook}
+            authors={authors}
+            series={series}
+            onSuccess={() => {
+              setEditingBook(null);
+            }}
+            onCancel={() => setEditingBook(null)}
+          />
+        </div>
+      )}
+
+      <div className={`${isAddingBook || editingBook ? "mt-8" : ""}`}>
+        <Suspense
+          fallback={<div className="py-10 text-center">Loading books...</div>}
+        >
+          {viewMode === "grid" ? (
+            <BookGrid
+              books={books}
+              onEditBook={handleEditBook}
+              isLoading={isBooksLoading}
+            />
+          ) : (
+            <BookTable
+              books={books}
+              onEditBook={handleEditBook}
+              isLoading={isBooksLoading}
+            />
+          )}
+        </Suspense>
+      </div>
+    </div>
   );
 }

@@ -11,12 +11,17 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string()
         : z.string().optional(),
-    AUTH_DISCORD_ID: z.string(),
-    AUTH_DISCORD_SECRET: z.string(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    // MinIO Configuration
+    MINIO_ENDPOINT: z.string().default("localhost"),
+    MINIO_USE_SSL: z.string().default("false"),
+    MINIO_ACCESS_KEY: z.string().default("minioadmin"),
+    MINIO_SECRET_KEY: z.string().default("minioadmin"),
+    MINIO_BUCKET_NAME: z.string().default("bookworm"),
+    MINIO_REGION: z.string().default("us-east-1"),
   },
 
   /**
@@ -34,10 +39,15 @@ export const env = createEnv({
    */
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
-    AUTH_DISCORD_ID: process.env.AUTH_DISCORD_ID,
-    AUTH_DISCORD_SECRET: process.env.AUTH_DISCORD_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
+    // MinIO Configuration
+    MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,
+    MINIO_USE_SSL: process.env.MINIO_USE_SSL,
+    MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
+    MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
+    MINIO_BUCKET_NAME: process.env.MINIO_BUCKET_NAME,
+    MINIO_REGION: process.env.MINIO_REGION,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

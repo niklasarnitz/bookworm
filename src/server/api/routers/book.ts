@@ -94,8 +94,11 @@ export const bookRouter = createTRPCRouter({
           ...(newSeriesName
             ? {
                 series: {
-                  create: {
-                    name: newSeriesName,
+                  connectOrCreate: {
+                    where: { name: newSeriesName },
+                    create: {
+                      name: newSeriesName,
+                    },
                   },
                 },
               }
@@ -115,7 +118,7 @@ export const bookRouter = createTRPCRouter({
   update: protectedProcedure
     .input(bookSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, bookAuthors, seriesId, ...rest } = input;
+      const { id, bookAuthors, seriesId, newSeriesName, ...rest } = input;
 
       // First delete existing book-author relationships
       await ctx.db.bookAuthorRelation.deleteMany({
@@ -136,6 +139,15 @@ export const bookRouter = createTRPCRouter({
           series: seriesId
             ? { connect: { id: seriesId } }
             : { disconnect: true },
+          ...(newSeriesName
+            ? {
+                series: {
+                  create: {
+                    name: newSeriesName,
+                  },
+                },
+              }
+            : {}),
         },
         include: {
           bookAuthors: {

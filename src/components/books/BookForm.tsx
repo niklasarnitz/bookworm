@@ -70,7 +70,7 @@ export function BookForm({
       seriesId: "",
       newSeriesName: "",
       seriesNumber: null,
-      coverUrl: "",
+      coverUrl: null,
     },
   });
 

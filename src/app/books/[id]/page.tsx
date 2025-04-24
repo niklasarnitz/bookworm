@@ -4,10 +4,12 @@ import { api } from "~/trpc/server";
 export default async function BookDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   // Fetch data server-side
-  const book = await api.book.getById({ id: params.id });
+  const { id } = await params;
+
+  const book = await api.book.getById({ id });
   const authors = await api.author.getAll();
   const series = await api.series.getAll();
 

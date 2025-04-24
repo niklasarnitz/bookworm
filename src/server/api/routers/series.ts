@@ -28,7 +28,13 @@ export const seriesRouter = createTRPCRouter({
         where: { id: input.id },
         include: {
           books: {
-            include: { author: true },
+            include: {
+              bookAuthors: {
+                include: {
+                  author: true,
+                },
+              },
+            },
             orderBy: { seriesNumber: "asc" },
           },
         },

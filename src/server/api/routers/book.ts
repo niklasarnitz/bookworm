@@ -79,6 +79,18 @@ export const bookRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { bookAuthors, seriesId, newSeriesName, ...rest } = input;
 
+      // If newSeriesName is provided, first create the series
+      let resolvedSeriesId = seriesId;
+      if (newSeriesName && !seriesId) {
+        // Create or find the series first
+        const series = await ctx.db.series.create({
+          data: {
+            name: newSeriesName,
+          },
+        });
+        resolvedSeriesId = series.id;
+      }
+
       // Create the book with relationships
       return ctx.db.book.create({
         data: {
@@ -89,20 +101,11 @@ export const bookRouter = createTRPCRouter({
               tag: tag ?? null,
             })),
           },
-          ...(seriesId ? { series: { connect: { id: seriesId } } } : {}),
-          createdBy: { connect: { id: ctx.session.user.id } },
-          ...(newSeriesName
-            ? {
-                series: {
-                  connectOrCreate: {
-                    where: { name: newSeriesName },
-                    create: {
-                      name: newSeriesName,
-                    },
-                  },
-                },
-              }
+          // Connect to series if we have an ID
+          ...(resolvedSeriesId
+            ? { series: { connect: { id: resolvedSeriesId } } }
             : {}),
+          createdBy: { connect: { id: ctx.session.user.id } },
         },
         include: {
           bookAuthors: {

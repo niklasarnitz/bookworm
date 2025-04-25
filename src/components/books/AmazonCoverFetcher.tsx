@@ -33,7 +33,9 @@ export function AmazonCoverFetcher({
   onClose,
 }: Readonly<AmazonCoverFetcherProps>) {
   const [error, setError] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [selectedCoverIndex, setSelectedCoverIndex] = useState<number | null>(
+    null,
+  );
 
   // Use tRPC query for fetching covers
   const coversQuery = api.amazon.getCoverByIsbn.useQuery(
@@ -71,30 +73,10 @@ export function AmazonCoverFetcher({
   // Get type-safe covers
   const covers = validateCovers(coversQuery.data);
 
-  // Handle cover selection with image preloading
-  const handleCoverSelect = async (coverUrl: string) => {
-    try {
-      setIsProcessing(true);
-
-      // Preload the image to ensure it's in the cache
-      const imagePromise = new Promise<void>((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error("Failed to load image"));
-        img.src = coverUrl;
-      });
-
-      await imagePromise;
-
-      // Now call the onCoverSelect prop with the URL
-      onCoverSelect(coverUrl);
-      onClose();
-    } catch (err) {
-      console.error("Error selecting cover:", err);
-      setError("Failed to load the selected cover image");
-    } finally {
-      setIsProcessing(false);
-    }
+  // Handle cover selection
+  const handleCoverSelect = (coverUrl: string, index: number) => {
+    setSelectedCoverIndex(index);
+    onCoverSelect(coverUrl);
   };
 
   return (
@@ -102,7 +84,12 @@ export function AmazonCoverFetcher({
       <Card className="w-full max-w-md overflow-hidden">
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-lg font-semibold">Select Cover</h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            disabled={selectedCoverIndex !== null}
+          >
             ✕
           </Button>
         </div>
@@ -114,15 +101,11 @@ export function AmazonCoverFetcher({
             </div>
           )}
 
-          {coversQuery.isLoading || isProcessing ? (
+          {coversQuery.isLoading ? (
             <div className="flex justify-center p-8 text-center">
               <div>
                 <div className="border-primary mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-                <p>
-                  {isProcessing
-                    ? "Processing cover image..."
-                    : "Searching for covers..."}
-                </p>
+                <p>Searching for covers...</p>
               </div>
             </div>
           ) : (
@@ -132,15 +115,35 @@ export function AmazonCoverFetcher({
                   {covers.map((cover, index) => (
                     <div
                       key={index}
-                      className="cursor-pointer overflow-hidden rounded border transition-colors hover:bg-gray-50"
-                      onClick={() => handleCoverSelect(cover.coverUrl)}
+                      className={`cursor-pointer overflow-hidden rounded border transition-colors ${
+                        selectedCoverIndex === index
+                          ? "border-blue-500 ring-2 ring-blue-300"
+                          : "hover:bg-gray-50"
+                      } ${selectedCoverIndex !== null && selectedCoverIndex !== index ? "opacity-50" : ""}`}
+                      onClick={() => {
+                        if (selectedCoverIndex === null) {
+                          handleCoverSelect(cover.coverUrl, index);
+                        }
+                      }}
                     >
                       <div className="relative aspect-[3/4] w-full">
                         <img
                           src={cover.coverUrl}
                           alt={`Cover for ${cover.title}`}
                           className="h-full w-full object-contain"
+                          onLoad={() => {
+                            // Preload image when it's displayed in the grid
+                            const preloadImg = new Image();
+                            preloadImg.src = cover.coverUrl;
+                          }}
                         />
+                        {selectedCoverIndex === index && (
+                          <div className="bg-opacity-30 absolute inset-0 flex items-center justify-center bg-black">
+                            <div className="rounded-full bg-white p-2">
+                              <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="p-2 text-xs">
                         <p className="line-clamp-2 font-medium">
@@ -162,7 +165,11 @@ export function AmazonCoverFetcher({
               )}
 
               <div className="mt-4 flex justify-end">
-                <Button variant="outline" onClick={onClose}>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={selectedCoverIndex !== null}
+                >
                   Cancel
                 </Button>
               </div>

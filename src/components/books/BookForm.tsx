@@ -49,6 +49,7 @@ export function BookForm({
   const [showAmazonSearch, setShowAmazonSearch] = useState(false);
   const [showCoverFetcher, setShowCoverFetcher] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [isProcessingCover, setIsProcessingCover] = useState(false);
 
   // Transform initialData to match our new schema
   const transformedInitialData =
@@ -250,9 +251,21 @@ export function BookForm({
     setShowAmazonSearch(false);
   };
 
-  const handleCoverSelect = (coverUrl: string) => {
-    form.setValue("coverUrl", coverUrl);
-    setShowCoverFetcher(false);
+  // Handle cover selection with proper loading state management
+  const handleCoverSelect = async (coverUrl: string) => {
+    try {
+      setIsProcessingCover(true);
+      // We don't need to preload here, as the CoverUploader component will handle the image processing
+      form.setValue("coverUrl", coverUrl);
+      setShowCoverFetcher(false);
+    } catch (error) {
+      console.error("Failed to handle cover selection:", error);
+    } finally {
+      // Short delay to ensure state changes are applied in the right order
+      setTimeout(() => {
+        setIsProcessingCover(false);
+      }, 100);
+    }
   };
 
   return (
@@ -603,6 +616,16 @@ export function BookForm({
           onCoverSelect={handleCoverSelect}
           onClose={() => setShowCoverFetcher(false)}
         />
+      )}
+
+      {/* Processing overlay to prevent UI flickering */}
+      {isProcessingCover && (
+        <div className="bg-opacity-50 fixed inset-0 z-[60] flex items-center justify-center bg-black">
+          <div className="rounded-lg bg-white p-4 text-center">
+            <div className="border-primary mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
+            <p>Processing cover image...</p>
+          </div>
+        </div>
       )}
     </Card>
   );

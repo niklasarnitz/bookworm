@@ -54,17 +54,28 @@ export function CoverUploader({
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
-  // Function to centralize cropping with a 3:4 aspect ratio
-  const centerAspectCrop = useCallback(
-    (mediaWidth: number, mediaHeight: number, aspect: number) => {
+  // Clean up any existing blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current?.startsWith("blob:")) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, []);
+
+  // Function to initialize cropping without aspect ratio constraints
+  const initializeCrop = useCallback(
+    (mediaWidth: number, mediaHeight: number) => {
       return centerCrop(
         makeAspectCrop(
           {
             unit: "%",
             width: 100,
           },
-          aspect,
+          mediaWidth / mediaHeight, // Use the image's natural aspect ratio
           mediaWidth,
           mediaHeight,
         ),
@@ -77,19 +88,39 @@ export function CoverUploader({
 
   // Effect to handle when defaultImageUrl is updated externally (e.g., from Amazon search)
   useEffect(() => {
-    if (defaultImageUrl && defaultImageUrl !== imageUrl) {
+    // Only process if defaultImageUrl changes and it's different from the current imageUrl
+    if (
+      defaultImageUrl &&
+      defaultImageUrl !== imageUrl &&
+      !defaultImageUrl.startsWith("blob:")
+    ) {
       setImageUrl(defaultImageUrl);
-      void handleExternalImageUrl(defaultImageUrl);
+
+      // Skip processing for our own uploaded images that come back from the server
+      if (!defaultImageUrl.includes("/api/") && !isProcessing) {
+        void handleExternalImageUrl(defaultImageUrl);
+      }
     }
-  }, [defaultImageUrl, imageUrl]); // Include imageUrl in dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultImageUrl]);
 
   // Handle external image URL (e.g., from Amazon)
   const handleExternalImageUrl = async (url: string) => {
+    // Prevent reprocessing the same URL
+    if (isProcessing) return;
+
     try {
       setIsProcessing(true);
       setError(null);
 
+      // Clean up any existing blob URL first
+      if (blobUrlRef.current?.startsWith("blob:")) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+
       // Fetch the image as a blob
+      console.log(`Fetching external image: ${url}`);
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Failed to fetch image: ${response.status}`);
@@ -104,11 +135,21 @@ export function CoverUploader({
       // Set the file and prepare for cropping
       setFile(fileFromBlob);
       const objectUrl = URL.createObjectURL(fileFromBlob);
+      blobUrlRef.current = objectUrl;
+
+      // Wait for the image to load before showing the cropper
+      await new Promise<void>((resolve) => {
+        const img = new window.Image();
+        img.onload = () => resolve();
+        img.src = objectUrl;
+      });
+
       setImageUrl(objectUrl);
       setShowCropper(true);
     } catch (err) {
       console.error("Error processing external image:", err);
       setError("Failed to load the external image");
+      setImageUrl(defaultImageUrl ?? null); // Revert to default if available
     } finally {
       setIsProcessing(false);
     }
@@ -116,8 +157,8 @@ export function CoverUploader({
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    // Use 3:4 aspect ratio (common for book covers)
-    setCrop(centerAspectCrop(width, height, width / height));
+    // Initialize with the image's natural aspect ratio
+    setCrop(initializeCrop(width, height));
   };
 
   const uploadImage = async () => {
@@ -129,6 +170,8 @@ export function CoverUploader({
     try {
       const formData = new FormData();
       formData.append("file", file);
+
+      // Get the natural dimensions of the image and the displayed dimensions
       const { naturalWidth, naturalHeight, width, height } = imgRef.current;
       console.log("Original image dimensions:", {
         naturalWidth,
@@ -175,6 +218,13 @@ export function CoverUploader({
 
       if (result.success) {
         const data = result.data;
+
+        // Clean up the blob URL before setting the new server URL
+        if (blobUrlRef.current?.startsWith("blob:")) {
+          URL.revokeObjectURL(blobUrlRef.current);
+          blobUrlRef.current = null;
+        }
+
         setImageUrl(data.url);
         onImageUpload(data.url);
         setShowCropper(false);
@@ -203,7 +253,15 @@ export function CoverUploader({
     if (selectedFile) {
       console.log("Processing file:", selectedFile.name);
       setFile(selectedFile);
+
+      // Clean up any existing blob URL first
+      if (blobUrlRef.current?.startsWith("blob:")) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+
+      // Create new blob URL
       const objectUrl = URL.createObjectURL(selectedFile);
+      blobUrlRef.current = objectUrl;
       setImageUrl(objectUrl);
       setShowCropper(true);
     }
@@ -220,11 +278,20 @@ export function CoverUploader({
 
   const cancelCrop = () => {
     setShowCropper(false);
-    if (!defaultImageUrl) {
-      setImageUrl(null);
-      setFile(null);
-    } else {
+
+    // If we were using a blob URL, clean it up and revert to default
+    if (
+      imageUrl?.startsWith("blob:") &&
+      defaultImageUrl &&
+      !defaultImageUrl.startsWith("blob:")
+    ) {
+      // Clean up blob URL
+      URL.revokeObjectURL(imageUrl);
+      blobUrlRef.current = null;
+
+      // Revert to server URL
       setImageUrl(defaultImageUrl);
+      setFile(null);
     }
   };
 
@@ -242,8 +309,15 @@ export function CoverUploader({
   };
 
   const handleRemoveCover = () => {
+    // Clean up any blob URLs
+    if (imageUrl?.startsWith("blob:")) {
+      URL.revokeObjectURL(imageUrl);
+      blobUrlRef.current = null;
+    }
+
     setImageUrl(null);
     setFile(null);
+
     if (onRemoveCover) {
       onRemoveCover();
     }
@@ -307,7 +381,6 @@ export function CoverUploader({
               crop={crop}
               onChange={(c) => setCrop(c)}
               onComplete={handleCropComplete}
-              aspect={3 / 4}
               className="max-h-80"
             >
               <img

@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Card } from "~/components/ui/card";
 import { api } from "~/trpc/react";
 import { z } from "zod";
 import type { AmazonBookDetail } from "~/lib/amazon-scraper";
 import { AmazonBookDetailSchema } from "~/lib/amazon-scraper";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 
 // Define schema for search results
 const AmazonBookSearchResultSchema = z.object({
@@ -125,6 +130,7 @@ export function AmazonBookSearch({
 
   const handleBookSelect = (detailUrl: string) => {
     setSelectedBookUrl(detailUrl);
+    setStep("detail");
   };
 
   const handleConfirmSelection = () => {
@@ -134,20 +140,17 @@ export function AmazonBookSearch({
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
-      <Card className="w-full max-w-md overflow-hidden">
-        <div className="flex items-center justify-between border-b p-4">
-          <h2 className="text-lg font-semibold">
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
             {step === "search" && "Search Book by ISBN"}
             {step === "select" && "Select Book"}
             {step === "detail" && "Confirm Book Details"}
-          </h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            ✕
-          </Button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
 
-        <div className="p-4">
+        <div>
           {error && (
             <div className="mb-4 rounded border border-red-400 bg-red-100 p-3 text-red-700">
               {error}
@@ -254,7 +257,7 @@ export function AmazonBookSearch({
             </div>
           )}
         </div>
-      </Card>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

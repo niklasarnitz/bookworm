@@ -11,13 +11,6 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
 import { type BookCreate, bookCreateSchema } from "~/schemas/book";
 import { api } from "~/trpc/react";
 import { X, Plus, ChevronDown } from "lucide-react";
@@ -269,337 +262,331 @@ export function BookForm({
   };
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>{isEditing ? "Edit Book" : "Add New Book"}</CardTitle>
+    <div className="w-full">
+      <div className="mb-4 flex items-center justify-between">
+        {!isEditing && (
+          <div className="relative">
+            <Button
+              onClick={() => setShowAddMenu(!showAddMenu)}
+              className="flex items-center gap-1"
+              variant="outline"
+            >
+              Add Book <ChevronDown className="h-4 w-4" />
+            </Button>
 
-          {!isEditing && (
-            <div className="relative">
-              <Button
-                onClick={() => setShowAddMenu(!showAddMenu)}
-                className="flex items-center gap-1"
-                variant="outline"
-              >
-                Add Book <ChevronDown className="h-4 w-4" />
-              </Button>
-
-              {showAddMenu && (
-                <div className="absolute right-0 z-10 mt-1 w-48 rounded-md border bg-white shadow-lg">
-                  <div className="py-1">
-                    <button
-                      className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
-                      onClick={() => {
-                        setShowAddMenu(false);
-                        setShowAmazonSearch(true);
-                      }}
-                    >
-                      Import via ISBN
-                    </button>
-                    <button
-                      className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
-                      onClick={() => setShowAddMenu(false)}
-                    >
-                      Create from Scratch
-                    </button>
-                  </div>
+            {showAddMenu && (
+              <div className="absolute right-0 z-10 mt-1 w-48 rounded-md border bg-white shadow-lg">
+                <div className="py-1">
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                    onClick={() => {
+                      setShowAddMenu(false);
+                      setShowAmazonSearch(true);
+                    }}
+                  >
+                    Import via ISBN
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                    onClick={() => setShowAddMenu(false)}
+                  >
+                    Create from Scratch
+                  </button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Book title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="subtitle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subtitle</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Book subtitle (optional)"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="isbn"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ISBN</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="ISBN (optional)"
-                      {...field}
-                      value={field.value ?? ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <FormLabel>Authors</FormLabel>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => append({ authorId: "", tag: "" })}
-                >
-                  <Plus className="mr-1 h-4 w-4" />
-                  Add Author
-                </Button>
               </div>
+            )}
+          </div>
+        )}
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Book title" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              {fields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="flex flex-col gap-2 rounded-md border p-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">Author {index + 1}</h4>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove(index)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+          <FormField
+            control={form.control}
+            name="subtitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subtitle</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Book subtitle (optional)"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                  <div className="flex w-full items-end gap-2">
-                    <div className="flex-1">
-                      {!showNewAuthorInputs[index] ? (
-                        <FormField
-                          control={form.control}
-                          name={`bookAuthors.${index}.authorId`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Select Author</FormLabel>
-                              <FormControl>
-                                <select
-                                  className="w-full rounded border p-2"
-                                  {...field}
-                                >
-                                  <option value="">Select an author</option>
-                                  {authors.map((author) => (
-                                    <option key={author.id} value={author.id}>
-                                      {author.name}
-                                    </option>
-                                  ))}
-                                </select>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      ) : (
-                        <FormField
-                          control={form.control}
-                          name={`bookAuthors.${index}.authorName`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>New Author Name</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Enter author name"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-                    </div>
+          <FormField
+            control={form.control}
+            name="isbn"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ISBN</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="ISBN (optional)"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <FormLabel>Authors</FormLabel>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ authorId: "", tag: "" })}
+              >
+                <Plus className="mr-1 h-4 w-4" />
+                Add Author
+              </Button>
+            </div>
+
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className="flex flex-col gap-2 rounded-md border p-3"
+              >
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">Author {index + 1}</h4>
+                  {fields.length > 1 && (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      className="mb-[2px]"
-                      onClick={() => toggleNewAuthorInput(index)}
+                      onClick={() => remove(index)}
                     >
-                      {showNewAuthorInputs[index]
-                        ? "Select Existing"
-                        : "Create New"}
+                      <X className="h-4 w-4" />
                     </Button>
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name={`bookAuthors.${index}.tag`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tag (Optional)</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g. herausgeber, editor, etc."
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  )}
                 </div>
-              ))}
-            </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <FormLabel>Series</FormLabel>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={toggleNewSeriesInput}
-                >
-                  {showNewSeriesInput ? "Select Existing" : "Create New"}
-                </Button>
-              </div>
+                <div className="flex w-full items-end gap-2">
+                  <div className="flex-1">
+                    {!showNewAuthorInputs[index] ? (
+                      <FormField
+                        control={form.control}
+                        name={`bookAuthors.${index}.authorId`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Select Author</FormLabel>
+                            <FormControl>
+                              <select
+                                className="w-full rounded border p-2"
+                                {...field}
+                              >
+                                <option value="">Select an author</option>
+                                {authors.map((author) => (
+                                  <option key={author.id} value={author.id}>
+                                    {author.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ) : (
+                      <FormField
+                        control={form.control}
+                        name={`bookAuthors.${index}.authorName`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>New Author Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Enter author name"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mb-[2px]"
+                    onClick={() => toggleNewAuthorInput(index)}
+                  >
+                    {showNewAuthorInputs[index]
+                      ? "Select Existing"
+                      : "Create New"}
+                  </Button>
+                </div>
 
-              {!showNewSeriesInput ? (
                 <FormField
                   control={form.control}
-                  name="seriesId"
+                  name={`bookAuthors.${index}.tag`}
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel>Tag (Optional)</FormLabel>
                       <FormControl>
-                        <select
-                          className="w-full rounded border p-2"
+                        <Input
+                          placeholder="e.g. herausgeber, editor, etc."
                           {...field}
                           value={field.value ?? ""}
-                          onChange={(e) => {
-                            const value =
-                              e.target.value === "" ? null : e.target.value;
-                            field.onChange(value);
-                          }}
-                        >
-                          <option value="">None</option>
-                          {series.map((series) => (
-                            <option key={series.id} value={series.id}>
-                              {series.name}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              ) : (
-                <FormField
-                  control={form.control}
-                  name="newSeriesName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input placeholder="Enter new series name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <FormLabel>Series</FormLabel>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={toggleNewSeriesInput}
+              >
+                {showNewSeriesInput ? "Select Existing" : "Create New"}
+              </Button>
             </div>
 
-            <FormField
-              control={form.control}
-              name="seriesNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Series Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.1"
-                      placeholder="Series number (optional)"
-                      {...field}
-                      value={field.value === null ? "" : field.value}
-                      onChange={(e) => {
-                        const value =
-                          e.target.value === ""
-                            ? null
-                            : parseFloat(e.target.value);
-                        field.onChange(value);
-                      }}
-                      disabled={!form.watch("seriesId") && !showNewSeriesInput}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {!showNewSeriesInput ? (
+              <FormField
+                control={form.control}
+                name="seriesId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <select
+                        className="w-full rounded border p-2"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const value =
+                            e.target.value === "" ? null : e.target.value;
+                          field.onChange(value);
+                        }}
+                      >
+                        <option value="">None</option>
+                        {series.map((series) => (
+                          <option key={series.id} value={series.id}>
+                            {series.name}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="newSeriesName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="Enter new series name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
 
-            {/* Replace cover URL input with our enhanced image uploader */}
-            <FormField
-              control={form.control}
-              name="coverUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Book Cover</FormLabel>
-                  <FormControl>
-                    <CoverUploader
-                      onImageUpload={handleCoverImageUpload}
-                      defaultImageUrl={field.value ?? undefined}
-                      isbn={form.watch("isbn")}
-                      onFetchFromAmazon={() => setShowCoverFetcher(true)}
-                      onRemoveCover={handleRemoveCover}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="seriesNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Series Number</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    placeholder="Series number (optional)"
+                    {...field}
+                    value={field.value === null ? "" : field.value}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === ""
+                          ? null
+                          : parseFloat(e.target.value);
+                      field.onChange(value);
+                    }}
+                    disabled={!form.watch("seriesId") && !showNewSeriesInput}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <CardFooter className="flex justify-between px-0">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={
-                  createMutation.isPending ||
-                  updateMutation.isPending ||
-                  createAuthorMutation.isPending ||
-                  createSeriesMutation.isPending
-                }
-              >
-                {isEditing ? "Update Book" : "Add Book"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
-      </CardContent>
+          {/* Replace cover URL input with our enhanced image uploader */}
+          <FormField
+            control={form.control}
+            name="coverUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Book Cover</FormLabel>
+                <FormControl>
+                  <CoverUploader
+                    onImageUpload={handleCoverImageUpload}
+                    defaultImageUrl={field.value ?? undefined}
+                    isbn={form.watch("isbn")}
+                    onFetchFromAmazon={() => setShowCoverFetcher(true)}
+                    onRemoveCover={handleRemoveCover}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-between pt-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={
+                createMutation.isPending ||
+                updateMutation.isPending ||
+                createAuthorMutation.isPending ||
+                createSeriesMutation.isPending
+              }
+            >
+              {isEditing ? "Update Book" : "Add Book"}
+            </Button>
+          </div>
+        </form>
+      </Form>
 
       {/* Amazon Search Modal */}
       {showAmazonSearch && (
@@ -627,6 +614,6 @@ export function BookForm({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

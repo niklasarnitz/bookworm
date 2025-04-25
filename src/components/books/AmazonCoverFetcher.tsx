@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { api } from "~/trpc/react";
 import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/ui/dialog";
 
 // Define a schema for cover data returned from the API
 const AmazonCoverSchema = z.object({
@@ -80,21 +85,13 @@ export function AmazonCoverFetcher({
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
-      <Card className="w-full max-w-md overflow-hidden">
-        <div className="flex items-center justify-between border-b p-4">
-          <h2 className="text-lg font-semibold">Select Cover</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            disabled={selectedCoverIndex !== null}
-          >
-            ✕
-          </Button>
-        </div>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Select Cover</DialogTitle>
+        </DialogHeader>
 
-        <div className="p-4">
+        <div className="py-2">
           {error && (
             <div className="mb-4 rounded border border-red-400 bg-red-100 p-3 text-red-700">
               {error}
@@ -138,7 +135,7 @@ export function AmazonCoverFetcher({
                           }}
                         />
                         {selectedCoverIndex === index && (
-                          <div className="bg-opacity-30 absolute inset-0 flex items-center justify-center bg-black">
+                          <div className="absolute inset-0 flex items-center justify-center bg-white/30">
                             <div className="rounded-full bg-white p-2">
                               <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
                             </div>
@@ -176,7 +173,7 @@ export function AmazonCoverFetcher({
             </>
           )}
         </div>
-      </Card>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

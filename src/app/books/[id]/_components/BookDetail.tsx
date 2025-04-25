@@ -59,18 +59,18 @@ export function BookDetail({ book, authors, series }: BookDetailProps) {
 
   return (
     <>
-      <div className="mb-6 flex items-center">
+      <div className="flex items-center p-4">
         <Button
           variant="outline"
           onClick={() => router.push("/")}
-          className="mr-2"
+          className="mr-4"
         >
           Back
         </Button>
         <h1 className="text-2xl font-bold">{book.name}</h1>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 px-4 md:grid-cols-3">
         <div className="md:col-span-1">
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md bg-gray-200">
             <BookCover book={book} priority showDetails isDetail />

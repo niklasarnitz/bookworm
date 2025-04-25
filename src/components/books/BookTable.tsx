@@ -39,32 +39,32 @@ export function BookTable({
   if (isLoading) {
     return (
       <div className="rounded-md border">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Author</TableHead>
-              <TableHead>Series</TableHead>
-              <TableHead>ISBN</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="w-[35%]">Title</TableHead>
+              <TableHead className="w-[25%]">Author</TableHead>
+              <TableHead className="w-[15%]">Series</TableHead>
+              <TableHead className="w-[10%]">ISBN</TableHead>
+              <TableHead className="w-[15%] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }, (_, index) => (
               <TableRow key={index}>
-                <TableCell>
+                <TableCell className="w-[35%]">
                   <div className="h-5 w-32 animate-pulse rounded bg-gray-200"></div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-[25%]">
                   <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-[15%]">
                   <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="w-[10%]">
                   <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="w-[15%] text-right">
                   <div className="flex justify-end gap-2">
                     <div className="h-8 w-16 animate-pulse rounded bg-gray-200"></div>
                     <div className="h-8 w-16 animate-pulse rounded bg-gray-200"></div>
@@ -80,14 +80,14 @@ export function BookTable({
 
   return (
     <div className="rounded-md border">
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Author</TableHead>
-            <TableHead>Series</TableHead>
-            <TableHead>ISBN</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="w-[35%]">Title</TableHead>
+            <TableHead className="w-[25%]">Author</TableHead>
+            <TableHead className="w-[15%]">Series</TableHead>
+            <TableHead className="w-[10%]">ISBN</TableHead>
+            <TableHead className="w-[15%] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -100,32 +100,40 @@ export function BookTable({
           ) : (
             books.map((book) => (
               <TableRow key={book.id}>
-                <TableCell>
-                  <div>
-                    <Link
-                      href={`/books/${book.id}`}
-                      className="font-medium hover:underline"
-                    >
+                <TableCell className="w-[35%]">
+                  <Link
+                    href={`/books/${book.id}`}
+                    className="font-medium hover:underline"
+                  >
+                    <p className="break-words hyphens-auto whitespace-normal">
                       {book.name}
-                    </Link>
-                    {book.subtitle && (
-                      <p className="text-sm text-gray-500">{book.subtitle}</p>
-                    )}
+                    </p>
+                  </Link>
+                  {book.subtitle && (
+                    <p className="text-sm break-words hyphens-auto whitespace-normal text-gray-500">
+                      {book.subtitle}
+                    </p>
+                  )}
+                </TableCell>
+                <TableCell className="w-[25%]">
+                  <div className="break-words hyphens-auto whitespace-normal">
+                    {formatAuthors(book.bookAuthors)}
                   </div>
                 </TableCell>
-                <TableCell>{formatAuthors(book.bookAuthors)}</TableCell>
-                <TableCell>
+                <TableCell className="w-[15%]">
                   {book.series ? (
-                    <span>
+                    <div className="break-words hyphens-auto whitespace-normal">
                       {book.series.name}
                       {book.seriesNumber !== null && ` #${book.seriesNumber}`}
-                    </span>
+                    </div>
                   ) : (
                     "-"
                   )}
                 </TableCell>
-                <TableCell>{book.isbn ?? "-"}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="w-[10%] truncate">
+                  {book.isbn ?? "-"}
+                </TableCell>
+                <TableCell className="w-[15%] text-right">
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"

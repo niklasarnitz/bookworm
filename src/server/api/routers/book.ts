@@ -123,6 +123,18 @@ export const bookRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, bookAuthors, seriesId, newSeriesName, ...rest } = input;
 
+      // If newSeriesName is provided, first create the series
+      let resolvedSeriesId = seriesId;
+      if (newSeriesName && !seriesId) {
+        // Create or find the series first
+        const series = await ctx.db.series.create({
+          data: {
+            name: newSeriesName,
+          },
+        });
+        resolvedSeriesId = series.id;
+      }
+
       // First delete existing book-author relationships
       await ctx.db.bookAuthorRelation.deleteMany({
         where: { bookId: id },
@@ -139,17 +151,8 @@ export const bookRouter = createTRPCRouter({
               tag: tag ?? null,
             })),
           },
-          series: seriesId
-            ? { connect: { id: seriesId } }
-            : { disconnect: true },
-          ...(newSeriesName
-            ? {
-                series: {
-                  create: {
-                    name: newSeriesName,
-                  },
-                },
-              }
+          ...(resolvedSeriesId
+            ? { series: { connect: { id: resolvedSeriesId } } }
             : {}),
         },
         include: {

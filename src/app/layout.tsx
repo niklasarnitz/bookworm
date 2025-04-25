@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Book Tracker",
+  title: "BookWorm",
   description: "Track your book collection with ease",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
@@ -37,7 +37,7 @@ export default async function RootLayout({
                 <div className="container mx-auto flex items-center justify-between p-4">
                   <div className="flex items-center gap-6">
                     <Link href="/" className="text-xl font-bold">
-                      Book Tracker
+                      BookWorm
                     </Link>
 
                     {session?.user && (

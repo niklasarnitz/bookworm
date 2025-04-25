@@ -20,8 +20,11 @@ import {
 } from "~/components/ui/card";
 import { type BookCreate, bookCreateSchema } from "~/schemas/book";
 import { api } from "~/trpc/react";
-import { X, Plus } from "lucide-react";
+import { X, Plus, ChevronDown } from "lucide-react";
 import { CoverUploader } from "./CoverUploader";
+import { AmazonBookSearch } from "./AmazonBookSearch";
+import { AmazonCoverFetcher } from "./AmazonCoverFetcher";
+import type { AmazonBookDetail } from "~/lib/amazon-scraper";
 
 interface BookFormProps {
   initialData?: Partial<BookCreate & { id?: string }>;
@@ -43,6 +46,9 @@ export function BookForm({
     Record<number, boolean>
   >({});
   const [showNewSeriesInput, setShowNewSeriesInput] = useState(false);
+  const [showAmazonSearch, setShowAmazonSearch] = useState(false);
+  const [showCoverFetcher, setShowCoverFetcher] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
 
   // Transform initialData to match our new schema
   const transformedInitialData =
@@ -83,6 +89,11 @@ export function BookForm({
   // Handle image upload
   const handleCoverImageUpload = (url: string) => {
     form.setValue("coverUrl", url);
+  };
+
+  // Handle removing the cover
+  const handleRemoveCover = () => {
+    form.setValue("coverUrl", null);
   };
 
   const createMutation = api.book.create.useMutation({
@@ -211,10 +222,79 @@ export function BookForm({
     }
   };
 
+  const handleBookSelect = (bookData: AmazonBookDetail) => {
+    // Fill form with Amazon book data
+    form.setValue("name", bookData.title);
+    form.setValue("subtitle", bookData.subtitle ?? "");
+    form.setValue("isbn", bookData.isbn ?? "");
+
+    // Handle authors
+    if (bookData.authors.length > 0) {
+      // Clear existing authors first
+      while (fields.length > 0) {
+        remove(0);
+      }
+
+      // Add each author
+      bookData.authors.forEach((authorName, index) => {
+        append({ authorName, authorId: "", tag: "" });
+        setShowNewAuthorInputs((prev) => ({ ...prev, [index]: true }));
+      });
+    }
+
+    // Set cover URL if available
+    if (bookData.coverImageUrl) {
+      form.setValue("coverUrl", bookData.coverImageUrl);
+    }
+
+    setShowAmazonSearch(false);
+  };
+
+  const handleCoverSelect = (coverUrl: string) => {
+    form.setValue("coverUrl", coverUrl);
+    setShowCoverFetcher(false);
+  };
+
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Book" : "Add New Book"}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{isEditing ? "Edit Book" : "Add New Book"}</CardTitle>
+
+          {!isEditing && (
+            <div className="relative">
+              <Button
+                onClick={() => setShowAddMenu(!showAddMenu)}
+                className="flex items-center gap-1"
+                variant="outline"
+              >
+                Add Book <ChevronDown className="h-4 w-4" />
+              </Button>
+
+              {showAddMenu && (
+                <div className="absolute right-0 z-10 mt-1 w-48 rounded-md border bg-white shadow-lg">
+                  <div className="py-1">
+                    <button
+                      className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                      onClick={() => {
+                        setShowAddMenu(false);
+                        setShowAmazonSearch(true);
+                      }}
+                    >
+                      Import via ISBN
+                    </button>
+                    <button
+                      className="block w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                      onClick={() => setShowAddMenu(false)}
+                    >
+                      Create from Scratch
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -467,7 +547,7 @@ export function BookForm({
               )}
             />
 
-            {/* Replace cover URL input with our image uploader */}
+            {/* Replace cover URL input with our enhanced image uploader */}
             <FormField
               control={form.control}
               name="coverUrl"
@@ -478,6 +558,9 @@ export function BookForm({
                     <CoverUploader
                       onImageUpload={handleCoverImageUpload}
                       defaultImageUrl={field.value ?? undefined}
+                      isbn={form.watch("isbn")}
+                      onFetchFromAmazon={() => setShowCoverFetcher(true)}
+                      onRemoveCover={handleRemoveCover}
                     />
                   </FormControl>
                   <FormMessage />
@@ -504,6 +587,23 @@ export function BookForm({
           </form>
         </Form>
       </CardContent>
+
+      {/* Amazon Search Modal */}
+      {showAmazonSearch && (
+        <AmazonBookSearch
+          onBookSelect={handleBookSelect}
+          onClose={() => setShowAmazonSearch(false)}
+        />
+      )}
+
+      {/* Amazon Cover Fetcher Modal */}
+      {showCoverFetcher && form.watch("isbn") && (
+        <AmazonCoverFetcher
+          isbn={form.watch("isbn")}
+          onCoverSelect={handleCoverSelect}
+          onClose={() => setShowCoverFetcher(false)}
+        />
+      )}
     </Card>
   );
 }

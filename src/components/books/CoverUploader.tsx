@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import ReactCrop, {
   type Crop,
@@ -19,24 +19,29 @@ const uploadResponseSchema = z.object({
   etag: z.string(),
 });
 
-const cropDataSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-  width: z.number(),
-  height: z.number(),
-  unit: z.string().optional(),
-});
-
-type CropData = z.infer<typeof cropDataSchema>;
+// Define the crop data type directly without a separate schema
+type CropData = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  unit?: string;
+};
 
 interface CoverUploaderProps {
   onImageUpload: (url: string) => void;
   defaultImageUrl?: string;
+  isbn?: string | null;
+  onFetchFromAmazon?: () => void;
+  onRemoveCover?: () => void;
 }
 
 export function CoverUploader({
   onImageUpload,
   defaultImageUrl,
+  isbn,
+  onFetchFromAmazon,
+  onRemoveCover,
 }: Readonly<CoverUploaderProps>) {
   const [imageUrl, setImageUrl] = useState<string | null>(
     defaultImageUrl ?? null,
@@ -47,6 +52,7 @@ export function CoverUploader({
   const [completedCrop, setCompletedCrop] = useState<CropData | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   // Function to centralize cropping with a 3:4 aspect ratio
@@ -69,10 +75,49 @@ export function CoverUploader({
     [],
   );
 
+  // Effect to handle when defaultImageUrl is updated externally (e.g., from Amazon search)
+  useEffect(() => {
+    if (defaultImageUrl && defaultImageUrl !== imageUrl) {
+      setImageUrl(defaultImageUrl);
+      void handleExternalImageUrl(defaultImageUrl);
+    }
+  }, [defaultImageUrl, imageUrl]); // Include imageUrl in dependencies
+
+  // Handle external image URL (e.g., from Amazon)
+  const handleExternalImageUrl = async (url: string) => {
+    try {
+      setIsProcessing(true);
+      setError(null);
+
+      // Fetch the image as a blob
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+
+      // Create a File object from the blob
+      const fileName = url.split("/").pop() ?? "cover.jpg";
+      const fileFromBlob = new File([blob], fileName, { type: blob.type });
+
+      // Set the file and prepare for cropping
+      setFile(fileFromBlob);
+      const objectUrl = URL.createObjectURL(fileFromBlob);
+      setImageUrl(objectUrl);
+      setShowCropper(true);
+    } catch (err) {
+      console.error("Error processing external image:", err);
+      setError("Failed to load the external image");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     // Use 3:4 aspect ratio (common for book covers)
-    setCrop(centerAspectCrop(width, height, 3 / 4));
+    setCrop(centerAspectCrop(width, height, width / height));
   };
 
   const uploadImage = async () => {
@@ -84,8 +129,6 @@ export function CoverUploader({
     try {
       const formData = new FormData();
       formData.append("file", file);
-
-      // Get the natural dimensions of the image and the displayed dimensions
       const { naturalWidth, naturalHeight, width, height } = imgRef.current;
       console.log("Original image dimensions:", {
         naturalWidth,
@@ -198,6 +241,14 @@ export function CoverUploader({
     setCompletedCrop(typedCrop);
   };
 
+  const handleRemoveCover = () => {
+    setImageUrl(null);
+    setFile(null);
+    if (onRemoveCover) {
+      onRemoveCover();
+    }
+  };
+
   return (
     <div className="w-full space-y-4">
       {error && (
@@ -206,7 +257,7 @@ export function CoverUploader({
         </div>
       )}
 
-      {!showCropper && (
+      {!showCropper && !isProcessing && (
         <div
           {...getRootProps()}
           className={`cursor-pointer rounded-md border-2 border-dashed p-6 text-center transition-colors ${isDragActive ? "border-primary bg-primary/10" : "hover:border-primary/50 border-gray-300"}`}
@@ -240,6 +291,15 @@ export function CoverUploader({
         </div>
       )}
 
+      {(isProcessing || isUploading) && (
+        <div className="flex justify-center p-8 text-center">
+          <div>
+            <div className="border-primary mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
+            <p>{isUploading ? "Uploading..." : "Processing image..."}</p>
+          </div>
+        </div>
+      )}
+
       {showCropper && imageUrl && (
         <Card className="space-y-4 p-4">
           <div className="flex justify-center">
@@ -269,6 +329,36 @@ export function CoverUploader({
             </Button>
           </div>
         </Card>
+      )}
+
+      {/* Action buttons */}
+      {!showCropper && !isProcessing && !isUploading && (
+        <div className="flex flex-wrap gap-2">
+          {onFetchFromAmazon && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onFetchFromAmazon}
+              disabled={!isbn}
+              className="text-xs"
+            >
+              Get Cover from Amazon
+            </Button>
+          )}
+
+          {imageUrl && onRemoveCover && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRemoveCover}
+              className="border-red-200 text-xs text-red-500 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+            >
+              Remove Cover
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

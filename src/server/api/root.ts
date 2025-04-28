@@ -5,6 +5,7 @@ import { authRouter } from "~/server/api/routers/auth";
 import { amazonRouter } from "~/server/api/routers/amazon";
 import { categoryRouter } from "~/server/api/routers/category";
 import { userManagementRouter } from "~/server/api/routers/userManagement";
+import { userProfileRouter } from "~/server/api/routers/userProfile";
 
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
   amazon: amazonRouter,
   category: categoryRouter,
   userManagement: userManagementRouter,
+  userProfile: userProfileRouter,
 });
 
 // export type definition of API

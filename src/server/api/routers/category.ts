@@ -8,10 +8,15 @@ import {
 import type { Category } from "@prisma/client";
 import { ObjectHelper, type URecord } from "@ainias42/js-helper";
 import { sortCategoriesByPath } from "~/lib/category-utils";
+import { TRPCError } from "@trpc/server";
 
 export const categoryRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const categories = await ctx.db.category.findMany({
+      where: {
+        // Add user filter to ensure users only see their own categories
+        userId: ctx.session.user.id,
+      },
       include: {
         _count: {
           select: {
@@ -31,6 +36,8 @@ export const categoryRouter = createTRPCRouter({
       const categories = await ctx.db.category.findMany({
         where: {
           parentId: input.parentId ?? null,
+          // Add user filter
+          userId: ctx.session.user.id,
         },
       });
 
@@ -47,6 +54,8 @@ export const categoryRouter = createTRPCRouter({
         where: {
           name: query ? { contains: query, mode: "insensitive" } : undefined,
           parentId: parentId !== undefined ? parentId : undefined,
+          // Add user filter
+          userId: ctx.session.user.id,
         },
         take: 20,
       });
@@ -58,22 +67,60 @@ export const categoryRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.category.findUnique({
+      const category = await ctx.db.category.findUnique({
         where: { id: input.id },
       });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Category not found",
+        });
+      }
+
+      // Verify category belongs to current user
+      if (category.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to access this category",
+        });
+      }
+
+      return category;
     }),
 
   getByPath: protectedProcedure
     .input(getByPathSchema)
     .query(async ({ ctx, input }) => {
-      return ctx.db.category.findUnique({
+      const category = await ctx.db.category.findUnique({
         where: { path: input.path },
       });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Category not found",
+        });
+      }
+
+      // Verify category belongs to current user
+      if (category.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to access this category",
+        });
+      }
+
+      return category;
     }),
 
   getTree: protectedProcedure.query(async ({ ctx }) => {
     // First fetch all categories sorted by level for constructing the tree efficiently
     const allCategories = await ctx.db.category.findMany({
+      // Add user filter to ensure users only see their own categories
+      where: {
+        userId: ctx.session.user.id,
+      },
       orderBy: { level: "asc" },
     });
 
@@ -136,6 +183,14 @@ export const categoryRouter = createTRPCRouter({
 
       if (!category) return [];
 
+      // Verify category belongs to current user
+      if (category.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to access this category",
+        });
+      }
+
       const pathParts = category.path.split(".");
       const result = [];
       let currentPath = "";
@@ -157,7 +212,11 @@ export const categoryRouter = createTRPCRouter({
     .input(z.object({ ids: z.array(z.string()) }))
     .query(async ({ ctx, input }) => {
       const categories = await ctx.db.category.findMany({
-        where: { id: { in: input.ids } },
+        where: {
+          id: { in: input.ids },
+          // Add user filter
+          userId: ctx.session.user.id,
+        },
       });
 
       return categories.reduce(
@@ -174,6 +233,28 @@ export const categoryRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { name, parentId } = input;
 
+      // If parent is provided, verify it belongs to the current user
+      if (parentId) {
+        const parent = await ctx.db.category.findUnique({
+          where: { id: parentId },
+          select: { userId: true },
+        });
+
+        if (!parent) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Parent category not found",
+          });
+        }
+
+        if (parent.userId !== ctx.session.user.id) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You don't have permission to use this parent category",
+          });
+        }
+      }
+
       // Transaction to ensure we get proper paths and sort orders
       return ctx.db.$transaction(async (tx) => {
         // Find parent if provided
@@ -185,7 +266,11 @@ export const categoryRouter = createTRPCRouter({
 
         // Find the highest sort order at the given parent level
         const lastCategory = await tx.category.findFirst({
-          where: { parentId: parentId ?? null },
+          where: {
+            parentId: parentId ?? null,
+            // Add user filter to find last category for this user
+            userId: ctx.session.user.id,
+          },
           orderBy: { sortOrder: "desc" },
         });
 
@@ -207,6 +292,7 @@ export const categoryRouter = createTRPCRouter({
             level,
             sortOrder,
             parentId,
+            userId: ctx.session.user.id, // Add user ID
           },
         });
       });
@@ -222,6 +308,48 @@ export const categoryRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, name, parentId } = input;
+
+      // Check if the category belongs to the current user
+      const existingCategory = await ctx.db.category.findUnique({
+        where: { id },
+        select: { userId: true },
+      });
+
+      if (!existingCategory) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Category not found",
+        });
+      }
+
+      if (existingCategory.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to update this category",
+        });
+      }
+
+      // If parent is specified, verify it belongs to the current user
+      if (parentId) {
+        const parent = await ctx.db.category.findUnique({
+          where: { id: parentId },
+          select: { userId: true },
+        });
+
+        if (!parent) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Parent category not found",
+          });
+        }
+
+        if (parent.userId !== ctx.session.user.id) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You don't have permission to use this parent category",
+          });
+        }
+      }
 
       // Only update name if parentId is not changing
       if (parentId === undefined) {
@@ -239,12 +367,18 @@ export const categoryRouter = createTRPCRouter({
         });
 
         if (!category) {
-          throw new Error("Category not found");
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Category not found",
+          });
         }
 
         // Check if the new parent is valid (not itself or one of its descendants)
         if (parentId === id) {
-          throw new Error("Category cannot be its own parent");
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Category cannot be its own parent",
+          });
         }
 
         if (parentId) {
@@ -253,18 +387,27 @@ export const categoryRouter = createTRPCRouter({
           });
 
           if (!newParent) {
-            throw new Error("Parent category not found");
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Parent category not found",
+            });
           }
 
           // Make sure we're not making a category a child of its own descendant
           if (newParent.path.startsWith(category.path + ".")) {
-            throw new Error("Cannot move a category to one of its descendants");
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Cannot move a category to one of its descendants",
+            });
           }
         }
 
         // Find the highest sort order at the new parent level
         const lastCategory = await tx.category.findFirst({
-          where: { parentId: parentId ?? null },
+          where: {
+            parentId: parentId ?? null,
+            userId: ctx.session.user.id,
+          },
           orderBy: { sortOrder: "desc" },
         });
 
@@ -285,7 +428,10 @@ export const categoryRouter = createTRPCRouter({
           });
 
           if (!newParent) {
-            throw new Error("Parent category not found");
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Parent category not found",
+            });
           }
 
           path = `${newParent.path}.${sortOrder}`;
@@ -314,32 +460,62 @@ export const categoryRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id } = input;
 
+      // Check if the category belongs to the current user
+      const category = await ctx.db.category.findUnique({
+        where: { id },
+        select: { userId: true },
+      });
+
+      if (!category) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Category not found",
+        });
+      }
+
+      if (category.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to delete this category",
+        });
+      }
+
       // First check if the category has any books assigned
       const booksWithCategory = await ctx.db.book.findMany({
-        where: { categoryId: id },
+        where: {
+          categoryId: id,
+          userId: ctx.session.user.id,
+        },
         select: { id: true },
       });
 
       if (booksWithCategory.length > 0) {
-        throw new Error(
-          "Cannot delete a category that has books assigned to it",
-        );
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot delete a category that has books assigned to it",
+        });
       }
 
       return ctx.db.$transaction(async (tx) => {
         // Get the category and its children
-        const category = await tx.category.findUnique({
+        const categoryWithChildren = await tx.category.findUnique({
           where: { id },
           include: { children: true },
         });
 
-        if (!category) {
-          throw new Error("Category not found");
+        if (!categoryWithChildren) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Category not found",
+          });
         }
 
         // If there are children categories, prevent deletion
-        if (category.children.length > 0) {
-          throw new Error("Cannot delete a category that has subcategories");
+        if (categoryWithChildren.children.length > 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Cannot delete a category that has subcategories",
+          });
         }
 
         return tx.category.delete({

@@ -2,13 +2,17 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { bookCreateSchema, bookSchema, bookSearchSchema } from "~/schemas/book";
 import { type Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 export const bookRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(bookSearchSchema.optional())
     .query(async ({ ctx, input }) => {
       // Build where clause based on search parameters
-      const where: Prisma.BookWhereInput = {};
+      const where: Prisma.BookWhereInput = {
+        // Add user filter to ensure users only see their own books
+        userId: ctx.session.user.id,
+      };
 
       if (input?.query) {
         where.OR = [
@@ -83,7 +87,7 @@ export const bookRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.book.findUnique({
+      const book = await ctx.db.book.findUnique({
         where: { id: input.id },
         include: {
           bookAuthors: {
@@ -95,6 +99,23 @@ export const bookRouter = createTRPCRouter({
           category: true,
         },
       });
+
+      // Check if book exists and belongs to the current user
+      if (!book) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Book not found",
+        });
+      }
+
+      if (book.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to access this book",
+        });
+      }
+
+      return book;
     }),
 
   create: protectedProcedure
@@ -110,6 +131,7 @@ export const bookRouter = createTRPCRouter({
         const series = await ctx.db.series.create({
           data: {
             name: newSeriesName,
+            userId: ctx.session.user.id, // Add user ID
           },
         });
         resolvedSeriesId = series.id;
@@ -130,7 +152,7 @@ export const bookRouter = createTRPCRouter({
           ...(resolvedSeriesId
             ? { series: { connect: { id: resolvedSeriesId } } }
             : {}),
-          createdBy: { connect: { id: ctx.session.user.id } },
+          user: { connect: { id: ctx.session.user.id } },
         },
         include: {
           bookAuthors: {
@@ -149,6 +171,26 @@ export const bookRouter = createTRPCRouter({
       const { id, bookAuthors, seriesId, newSeriesName, categoryId, ...rest } =
         input;
 
+      // Check if the book belongs to the current user
+      const book = await ctx.db.book.findUnique({
+        where: { id },
+        select: { userId: true },
+      });
+
+      if (!book) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Book not found",
+        });
+      }
+
+      if (book.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to update this book",
+        });
+      }
+
       // If newSeriesName is provided, first create the series
       let resolvedSeriesId = seriesId;
       if (newSeriesName && !seriesId) {
@@ -156,6 +198,7 @@ export const bookRouter = createTRPCRouter({
         const series = await ctx.db.series.create({
           data: {
             name: newSeriesName,
+            userId: ctx.session.user.id, // Add user ID
           },
         });
         resolvedSeriesId = series.id;
@@ -196,6 +239,26 @@ export const bookRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // Check if book exists and belongs to the current user
+      const book = await ctx.db.book.findUnique({
+        where: { id: input.id },
+        select: { userId: true },
+      });
+
+      if (!book) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Book not found",
+        });
+      }
+
+      if (book.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to delete this book",
+        });
+      }
+
       // First delete all book-author relationships
       await ctx.db.bookAuthorRelation.deleteMany({
         where: { bookId: input.id },

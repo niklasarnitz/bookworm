@@ -1,7 +1,6 @@
 import * as Minio from "minio";
 import { env } from "~/env";
 
-// Create and configure the MinIO client
 export const minioClient = new Minio.Client({
   endPoint: env.MINIO_ENDPOINT || "localhost",
   useSSL: env.MINIO_USE_SSL === "true",
@@ -11,7 +10,6 @@ export const minioClient = new Minio.Client({
 
 export const MINIO_BUCKET_NAME = env.MINIO_BUCKET_NAME || "bookworm";
 
-// Function to ensure bucket exists
 export async function ensureBucketExists(): Promise<void> {
   const bucketExists = await minioClient.bucketExists(MINIO_BUCKET_NAME);
   if (!bucketExists) {
@@ -45,7 +43,6 @@ export async function ensureBucketExists(): Promise<void> {
   console.log(`Bucket '${MINIO_BUCKET_NAME}' policy set to public read`);
 }
 
-// Get URL for an object
 export function getObjectUrl(objectName: string): string {
   const protocol = env.MINIO_USE_SSL === "true" ? "https" : "http";
   return `${protocol}://${env.MINIO_ENDPOINT}/${MINIO_BUCKET_NAME}/${objectName}`;

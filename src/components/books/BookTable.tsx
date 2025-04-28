@@ -11,7 +11,6 @@ import {
 } from "~/components/ui/table";
 import { api, type RouterOutputs } from "~/trpc/react";
 
-// Helper function to format all authors with commas
 export function formatAuthors(
   bookAuthorRelations: { id: string; author: { id: string; name: string } }[],
 ): string {
@@ -40,7 +39,6 @@ export function BookTable({
     },
   });
 
-  // Add query to fetch category information for all books with categories
   const { data: categories } = api.category.getMultiplePaths.useQuery(
     {
       ids:

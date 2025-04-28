@@ -9,17 +9,14 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
-// Define a schema for cover data returned from the API
 const AmazonCoverSchema = z.object({
   title: z.string(),
   author: z.string(),
   coverUrl: z.string().url(),
 });
 
-// Type for cover data
 type AmazonCover = z.infer<typeof AmazonCoverSchema>;
 
-// Type for the API response
 interface AmazonCoverResponse {
   success: boolean;
   covers?: AmazonCover[];
@@ -42,7 +39,6 @@ export function AmazonCoverFetcher({
     null,
   );
 
-  // Use tRPC query for fetching covers
   const coversQuery = api.amazon.getCoverByIsbn.useQuery(
     { isbn: isbn ?? "" },
     {
@@ -51,13 +47,11 @@ export function AmazonCoverFetcher({
     },
   );
 
-  // Validate the response data with our schema
   const validateCovers = (data: unknown): AmazonCover[] => {
     if (!data || typeof data !== "object" || !("covers" in data)) {
       return [];
     }
 
-    // Cast to the response type and check for covers
     const response = data as AmazonCoverResponse;
 
     if (
@@ -68,17 +62,14 @@ export function AmazonCoverFetcher({
       return [];
     }
 
-    // Validate each cover
     return response.covers.filter((cover): cover is AmazonCover => {
       const result = AmazonCoverSchema.safeParse(cover);
       return result.success;
     });
   };
 
-  // Get type-safe covers
   const covers = validateCovers(coversQuery.data);
 
-  // Handle cover selection
   const handleCoverSelect = (coverUrl: string, index: number) => {
     setSelectedCoverIndex(index);
     onCoverSelect(coverUrl);

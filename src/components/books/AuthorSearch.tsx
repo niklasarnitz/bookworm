@@ -33,10 +33,8 @@ export function AuthorSearch({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Get all authors
   const { data: authors = [], isLoading } = api.author.getAll.useQuery();
 
-  // Keep track of the current selected author
   const [selectedAuthor, setSelectedAuthor] = useState<{
     id: string;
     name: string;
@@ -60,7 +58,6 @@ export function AuthorSearch({
     }
   }, [value, authors]);
 
-  // Filter authors based on search query
   const filteredAuthors = React.useMemo(() => {
     return authors
       .filter(

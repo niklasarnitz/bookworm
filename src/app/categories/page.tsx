@@ -44,15 +44,12 @@ export default function CategoryPage() {
     new Set(),
   );
 
-  // Form state
   const [name, setName] = useState("");
   const [parentId, setParentId] = useState<string | undefined>();
 
-  // Fetch categories tree
   const { data: categoryTree, refetch: refetchCategories } =
     api.category.getTree.useQuery();
 
-  // Mutations
   const createCategory = api.category.create.useMutation({
     onSuccess: () => {
       toast.success("Category created successfully");
@@ -85,7 +82,6 @@ export default function CategoryPage() {
     },
   });
 
-  // Helper functions
   const resetForm = () => {
     setName("");
     setParentId(undefined);
@@ -149,7 +145,6 @@ export default function CategoryPage() {
     setExpandedCategories(newExpanded);
   };
 
-  // Recursive component for rendering the category tree
   const renderCategoryTree = (
     categories: CategoryWithChildren[],
     level = 0,

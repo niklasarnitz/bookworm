@@ -11,7 +11,6 @@ import { Card } from "~/components/ui/card";
 import Image from "next/image";
 import { z } from "zod";
 
-// Zod schema for the upload response
 const uploadResponseSchema = z.object({
   success: z.boolean(),
   url: z.string().url(),
@@ -19,7 +18,6 @@ const uploadResponseSchema = z.object({
   etag: z.string(),
 });
 
-// Define the crop data type directly without a separate schema
 type CropData = {
   x: number;
   y: number;

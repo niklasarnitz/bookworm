@@ -12,17 +12,14 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
-// Define schema for search results
 const AmazonBookSearchResultSchema = z.object({
   title: z.string(),
   author: z.string(),
   detailUrl: z.string().url(),
 });
 
-// Types for search results
 type AmazonBookSearchResult = z.infer<typeof AmazonBookSearchResultSchema>;
 
-// Types for API responses
 interface AmazonSearchResponse {
   success: boolean;
   results?: AmazonBookSearchResult[];
@@ -49,7 +46,6 @@ export function AmazonBookSearch({
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"search" | "select" | "detail">("search");
 
-  // Use tRPC queries
   const searchQuery = api.amazon.searchByIsbn.useQuery(
     { isbn },
     {
@@ -66,7 +62,6 @@ export function AmazonBookSearch({
     },
   );
 
-  // Validate search results with schema
   const validateSearchResults = (data: unknown): AmazonBookSearchResult[] => {
     if (!data || typeof data !== "object" || !("results" in data)) {
       return [];
@@ -90,7 +85,6 @@ export function AmazonBookSearch({
     );
   };
 
-  // Validate book details with schema
   const validateBookDetail = (data: unknown): AmazonBookDetail | null => {
     if (!data || typeof data !== "object" || !("bookDetail" in data)) {
       return null;

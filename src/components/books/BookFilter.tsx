@@ -35,18 +35,15 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     [],
   );
 
-  // Fetch data for showing current selections
   const { data: authors = [] } = api.author.getAll.useQuery();
   const { data: series = [] } = api.series.getAll.useQuery();
 
-  // Get any selected category path
   const selectedCategoryId = searchParams.get("categoryId") ?? undefined;
   const { data: categoryPath } = api.category.getPath.useQuery(
     { id: selectedCategoryId ?? "" },
     { enabled: !!selectedCategoryId },
   );
 
-  // Count active filters for displaying badge
   useEffect(() => {
     let count = 0;
     if (searchParams.has("query")) count++;
@@ -103,7 +100,6 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     router.push("/");
   };
 
-  // Selected item display names
   const selectedAuthor = searchParams.has("authorId")
     ? authors.find((a) => a.id === searchParams.get("authorId"))?.name
     : undefined;

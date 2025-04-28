@@ -5,19 +5,15 @@ import { clsx } from "clsx";
 
 // Function to generate a pseudo-random color based on book data
 export function generateBookColor(bookId: string, index = 0) {
-  // Use the book ID and optional index to create a deterministic but seemingly random color
   let hash = 0;
   for (let i = 0; i < bookId.length; i++) {
     hash = bookId.charCodeAt(i) + ((hash << 5) - hash);
   }
 
-  // Add the index to get different colors for different elements
   hash += index * 10000;
 
-  // Convert to hex
   const c = Math.abs(hash) % 360;
 
-  // Return a hue value, we'll use HSL to create variations
   return c;
 }
 
@@ -30,7 +26,7 @@ interface BookCoverProps {
   priority?: boolean;
   className?: string;
   showDetails?: boolean;
-  isDetail?: boolean; // New prop to indicate if this is in detail view
+  isDetail?: boolean;
 }
 
 export function BookCover({
@@ -58,7 +54,6 @@ export function BookCover({
     );
   }
 
-  // Generate base colors using the book ID
   const baseHue = generateBookColor(book.id);
   const secondHue = (baseHue + 40) % 360; // Complementary color
 

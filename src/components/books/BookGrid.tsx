@@ -37,7 +37,6 @@ export function BookGrid({
     },
   });
 
-  // Add query to fetch category information for all books with categories
   const categoriesData = api.category.getMultiplePaths.useQuery(
     {
       ids: books.map((book) => book.categoryId).filter(Boolean) as string[],

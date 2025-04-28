@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from "uuid";
 import sharp from "sharp";
 import { z } from "zod";
 
-// Create a schema for crop data validation
 const cropDataSchema = z.object({
   x: z.number(),
   y: z.number(),

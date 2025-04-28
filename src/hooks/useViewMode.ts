@@ -16,7 +16,6 @@ export function useViewMode(
 
   const setViewMode = (mode: ViewMode) => {
     try {
-      // Validate the view mode
       const parsedMode = viewModeSchema.parse(mode);
       setViewModeState(parsedMode);
     } catch (error) {

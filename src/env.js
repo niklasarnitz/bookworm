@@ -15,7 +15,6 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    // MinIO Configuration
     MINIO_ENDPOINT: z.string().default("localhost"),
     MINIO_USE_SSL: z.string().default("false"),
     MINIO_ACCESS_KEY: z.string().default("minioadmin"),
@@ -30,7 +29,6 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
   },
 
   /**

@@ -21,7 +21,6 @@ export const categoryRouter = createTRPCRouter({
       },
     });
 
-    // Sort categories by their numeric path
     return sortCategoriesByPath(categories);
   }),
 
@@ -34,7 +33,6 @@ export const categoryRouter = createTRPCRouter({
         },
       });
 
-      // Sort categories by their numeric path
       return sortCategoriesByPath(categories);
     }),
 
@@ -51,7 +49,6 @@ export const categoryRouter = createTRPCRouter({
         take: 20,
       });
 
-      // Sort categories by their numeric path
       return sortCategoriesByPath(categories);
     }),
 

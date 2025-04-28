@@ -12,10 +12,8 @@ async function importBooks(csvFilePath: string, userId: string) {
     return;
   }
 
-  // Read the CSV file
   const fileContent = fs.readFileSync(csvFilePath, { encoding: "utf-8" });
 
-  // Parse the CSV content
   const records = parse(fileContent, {
     columns: true,
     skip_empty_lines: true,
@@ -27,17 +25,14 @@ async function importBooks(csvFilePath: string, userId: string) {
 
   console.log(`Found ${records.length} records to import`);
 
-  // Create a map to track authors we've already created
   const authorCache: Record<string, string> = {};
 
-  // Process each record
   for (const [index, record] of records.entries()) {
     try {
       console.log(
         `Processing record ${index + 1}/${records.length}: ${record.Title}`,
       );
 
-      // Extract relevant fields from the record
       const {
         "Book Id": bookId,
         ISBN: isbn,
@@ -60,7 +55,6 @@ async function importBooks(csvFilePath: string, userId: string) {
         "Ended Reading On": endedReadingOn,
       } = record;
 
-      // Handle authors - split by comma or semicolon if multiple
       const authorNames = authors
         ? authors
             .split(/[,;]/)
@@ -73,17 +67,13 @@ async function importBooks(csvFilePath: string, userId: string) {
         continue;
       }
 
-      // Create or get the author IDs
       const bookAuthors = await Promise.all(
         authorNames.map(async (authorName: string) => {
-          // Check if we've already processed this author
           if (!authorCache[authorName]) {
-            // Check if author exists in database
             let author = await prisma.author.findFirst({
               where: { name: { equals: authorName, mode: "insensitive" } },
             });
 
-            // Create author if not exists
             if (!author) {
               author = await prisma.author.create({
                 data: {
@@ -99,18 +89,16 @@ async function importBooks(csvFilePath: string, userId: string) {
         }),
       );
 
-      // Create the book
       const book = await prisma.book.create({
         data: {
           isbn: isbn || null,
           name,
           subtitle: subtitle || null,
           publisher: publisher || null,
-          coverUrl: null, // You might want to handle cover uploads separately
+          coverUrl: null,
           bookAuthors: {
             create: bookAuthors,
           },
-          // Add seriesId and seriesNumber if needed - for now skipped as you mentioned series will be done manually
           seriesNumber: volume ? parseFloat(volume) : null,
           createdById: userId,
         },
@@ -134,10 +122,8 @@ async function importBooks(csvFilePath: string, userId: string) {
   console.log("Import completed");
 }
 
-// Main function to run the import
 async function main() {
   try {
-    // Check for command line arguments
     const args = process.argv.slice(2);
 
     if (args.length < 2) {
@@ -149,7 +135,6 @@ async function main() {
 
     const csvFilePath = args[0]!;
 
-    // Validate the CSV file path
     if (!fs.existsSync(csvFilePath)) {
       console.error(`Error: CSV file not found: ${csvFilePath}`);
       process.exit(1);
@@ -164,5 +149,4 @@ async function main() {
   }
 }
 
-// Run the script
 void main();

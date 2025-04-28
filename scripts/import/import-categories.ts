@@ -2,13 +2,11 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Structure of book categories to import
 interface CategoryData {
   name: string;
   children?: CategoryData[];
 }
 
-// Define the theological categories from the PDF
 const theologicalCategories: CategoryData[] = [
   {
     name: "Allgemeines zur Theologie",
@@ -261,7 +259,6 @@ const theologicalCategories: CategoryData[] = [
   },
 ];
 
-// Function to create categories recursively
 async function createCategories(
   categories: CategoryData[],
   parentId: string | null = null,
@@ -270,10 +267,8 @@ async function createCategories(
   let sortOrder = 1;
 
   for (const category of categories) {
-    // Generate path
     let path: string;
     if (parentId) {
-      // Get parent path
       const parent = await prisma.category.findUnique({
         where: { id: parentId },
       });
@@ -286,7 +281,6 @@ async function createCategories(
       path = sortOrder.toString();
     }
 
-    // Create the category
     const newCategory = await prisma.category.create({
       data: {
         name: category.name,
@@ -299,7 +293,6 @@ async function createCategories(
 
     console.log(`Created category: ${category.name} (${path})`);
 
-    // Recursively create children if any
     if (category.children && category.children.length > 0) {
       await createCategories(category.children, newCategory.id, level + 1);
     }
@@ -308,22 +301,18 @@ async function createCategories(
   }
 }
 
-// Main function to import categories
 async function importCategories() {
   try {
     console.log("Starting theological category import...");
 
-    // Check if categories already exist
     const existingCategories = await prisma.category.count();
     if (existingCategories > 0) {
       console.log(
         `Found ${existingCategories} existing categories. Do you want to proceed and potentially create duplicates? (Y/N)`,
       );
-      // In a real script you'd add user input here, but for this demo we'll proceed
       console.log("Proceeding with import...");
     }
 
-    // Import root categories
     await createCategories(theologicalCategories);
 
     console.log("Theological category import completed successfully!");
@@ -334,7 +323,6 @@ async function importCategories() {
   }
 }
 
-// Execute the import function
 importCategories()
   .then(() => console.log("Import script finished"))
   .catch((e) => console.error("Import script error:", e));

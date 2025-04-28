@@ -20,20 +20,16 @@ export function ThemeProvider({ children }: Readonly<ThemeProviderProps>) {
 
   const setTheme = (theme: Theme) => {
     try {
-      // Validate the theme
       if (!["light", "dark", "system"].includes(theme)) {
         theme = "system";
       }
 
-      // Update state
       setThemeState(theme);
 
-      // Save to cookie (30 days expiry)
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 30);
       document.cookie = `bookworm-theme=${theme}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
 
-      // Apply theme to document
       if (theme === "system") {
         const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
           .matches
@@ -51,10 +47,8 @@ export function ThemeProvider({ children }: Readonly<ThemeProviderProps>) {
     }
   };
 
-  // Initialize theme from cookie or system preference
   useEffect(() => {
     try {
-      // Check for cookie
       const cookieValue = document.cookie
         .split("; ")
         .find((row) => row.startsWith("bookworm-theme="))
@@ -64,7 +58,6 @@ export function ThemeProvider({ children }: Readonly<ThemeProviderProps>) {
         setThemeState(cookieValue as Theme);
       }
 
-      // Apply theme
       if (theme === "system") {
         const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
           .matches
@@ -78,7 +71,6 @@ export function ThemeProvider({ children }: Readonly<ThemeProviderProps>) {
         document.documentElement.classList.toggle("dark", theme === "dark");
       }
 
-      // Listen for system preference changes
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handleChange = () => {
         if (theme === "system") {

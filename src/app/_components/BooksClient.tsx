@@ -22,7 +22,6 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const searchParams = useSearchParams();
 
-  // Build filter object from search params
   const filters: BookSearch = {
     query: searchParams.get("query") ?? undefined,
     authorId: searchParams.get("authorId") ?? undefined,
@@ -32,14 +31,12 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
     noCategory: searchParams.has("noCategory") ? true : undefined,
   };
 
-  // Fetch books from API with filters
   const {
     data: books = [],
     isLoading: isBooksLoading,
     refetch,
   } = api.book.getAll.useQuery(filters, {});
 
-  // Fetch authors and series for dropdowns
   const { data: authors = [] } = api.author.getAll.useQuery();
   const { data: series = [] } = api.series.getAll.useQuery();
 
@@ -90,7 +87,6 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
         </div>
       </div>
 
-      {/* Add Book Filter component */}
       <BookFilter />
 
       {viewMode === "grid" ? (
@@ -109,7 +105,6 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
         />
       )}
 
-      {/* Dialog for adding new books */}
       <BookFormDialog
         isOpen={isAddingBook}
         onClose={handleCloseDialog}
@@ -119,7 +114,6 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
         title="Add New Book"
       />
 
-      {/* Dialog for editing books in table view */}
       {viewMode === "table" && (
         <BookFormDialog
           isOpen={!!editingBook}

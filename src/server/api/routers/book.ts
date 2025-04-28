@@ -130,7 +130,7 @@ export const bookRouter = createTRPCRouter({
           ...(resolvedSeriesId
             ? { series: { connect: { id: resolvedSeriesId } } }
             : {}),
-          createdBy: { connect: { id: ctx.session.user.id } },
+          user: { connect: { id: ctx.session.user.id } },
         },
         include: {
           bookAuthors: {

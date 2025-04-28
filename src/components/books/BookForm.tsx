@@ -49,7 +49,6 @@ export function BookForm({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [isProcessingCover, setIsProcessingCover] = useState(false);
 
-  // Transform initialData to match our new schema
   const transformedInitialData =
     initialData && "authorId" in initialData
       ? {
@@ -82,18 +81,15 @@ export function BookForm({
     },
   });
 
-  // Set up field array for multiple authors
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "bookAuthors",
   });
 
-  // Handle image upload
   const handleCoverImageUpload = (url: string) => {
     form.setValue("coverUrl", url);
   };
 
-  // Handle removing the cover
   const handleRemoveCover = () => {
     form.setValue("coverUrl", null);
   };
@@ -139,7 +135,6 @@ export function BookForm({
   const onSubmit = async (data: BookCreate) => {
     console.log("Form submitted", { isEditing, initialData, data });
 
-    // Process authors first - create any new authors
     const newAuthors = await Promise.all(
       data.bookAuthors
         .filter((ba) => !ba.authorId && ba.authorName)
@@ -154,7 +149,6 @@ export function BookForm({
         }),
     );
 
-    // Update bookAuthors with newly created author IDs
     const processedBookAuthors = data.bookAuthors
       .map((ba) => {
         if (ba.authorId) {
@@ -165,7 +159,6 @@ export function BookForm({
           };
         }
 
-        // Look for newly created author
         const newAuthor = newAuthors.find(
           (na) => na.originalAuthor.authorName === ba.authorName,
         );
@@ -177,12 +170,10 @@ export function BookForm({
           };
         }
 
-        // This should not happen if validation is working
         return { authorId: "", tag: ba.tag };
       })
-      .filter((ba) => ba.authorId); // Remove any invalid entries
+      .filter((ba) => ba.authorId);
 
-    // Handle creation of new series if needed
     let finalSeriesId = data.seriesId;
     if (!data.seriesId && data.newSeriesName) {
       const newSeries = await createSeriesMutation.mutateAsync({
@@ -191,7 +182,6 @@ export function BookForm({
       finalSeriesId = newSeries.id;
     }
 
-    // Prepare final data
     const finalData = {
       ...data,
       bookAuthors: processedBookAuthors,
@@ -216,7 +206,6 @@ export function BookForm({
   const onInvalid: SubmitErrorHandler<BookCreate> = (errors) => {
     console.error("Form validation errors:", errors);
 
-    // Show errors to the user
     const errorMessages = Object.entries(errors).map(([key, value]) => {
       const fieldName = key.charAt(0).toUpperCase() + key.slice(1);
       return `${fieldName}: ${value.message}`;
@@ -231,7 +220,6 @@ export function BookForm({
       [index]: !prev[index],
     }));
 
-    // Reset the field
     if (!showNewAuthorInputs[index]) {
       // Switching to "Create New" - clear authorId
       form.setValue(`bookAuthors.${index}.authorId`, undefined);
@@ -253,26 +241,21 @@ export function BookForm({
   };
 
   const handleBookSelect = (bookData: AmazonBookDetail) => {
-    // Fill form with Amazon book data
     form.setValue("name", bookData.title);
     form.setValue("subtitle", bookData.subtitle ?? "");
     form.setValue("isbn", bookData.isbn ?? "");
 
-    // Handle authors
     if (bookData.authors.length > 0) {
-      // Clear existing authors first
       while (fields.length > 0) {
         remove(0);
       }
 
-      // Add each author
       bookData.authors.forEach((authorName, index) => {
         append({ authorName, authorId: "", tag: "" });
         setShowNewAuthorInputs((prev) => ({ ...prev, [index]: true }));
       });
     }
 
-    // Set cover URL if available
     if (bookData.coverImageUrl) {
       form.setValue("coverUrl", bookData.coverImageUrl);
     }

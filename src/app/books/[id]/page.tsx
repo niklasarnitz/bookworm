@@ -6,7 +6,6 @@ export default async function BookDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Fetch data server-side
   const { id } = await params;
 
   const book = await api.book.getById({ id });

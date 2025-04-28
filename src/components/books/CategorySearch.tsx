@@ -32,29 +32,24 @@ export function CategorySearch({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Get all categories first
   const { data: categories, isLoading } = api.category.getAll.useQuery();
 
-  // Keep track of the current selected category (including its full path for display)
   const [selectedCategory, setSelectedCategory] = useState<{
     id: string;
     display: string;
   } | null>(null);
 
-  // Look up a category by ID to get its details, including parents
   const { data: categoryPath } = api.category.getPath.useQuery(
     { id: value ?? "" },
     { enabled: !!value },
   );
 
-  // Update the selected category based on the provided value
   useEffect(() => {
     if (!value || !categoryPath?.length) {
       setSelectedCategory(null);
       return;
     }
 
-    // Format the category path into a readable format (e.g., "1.2.3 > Science > Physics > Quantum")
     const displayPath = categoryPath.map((cat) => cat.name).join(" > ");
     const pathDisplay = `${categoryPath[categoryPath.length - 1]?.path} > ${displayPath}`;
 
@@ -64,7 +59,6 @@ export function CategorySearch({
     });
   }, [value, categoryPath]);
 
-  // Format categories into a tree structure for display
   const organizedCategories = React.useMemo(() => {
     if (!categories) return [];
 

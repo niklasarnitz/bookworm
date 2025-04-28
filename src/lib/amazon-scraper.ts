@@ -16,7 +16,6 @@ export interface AmazonBookDetail {
   isbn?: string;
 }
 
-// Schema for validating book details
 export const AmazonBookDetailSchema = z.object({
   title: z.string(),
   subtitle: z.string().optional(),

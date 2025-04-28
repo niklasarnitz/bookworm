@@ -33,17 +33,14 @@ export function SeriesSearch({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Get all series
   const { data: seriesList = [], isLoading } = api.series.getAll.useQuery();
 
-  // Keep track of the current selected series
   const [selectedSeries, setSelectedSeries] = useState<{
     id: string;
     name: string;
     bookCount?: number;
   } | null>(null);
 
-  // Update the selected series based on the provided value
   useEffect(() => {
     if (!value) {
       setSelectedSeries(null);
@@ -60,7 +57,6 @@ export function SeriesSearch({
     }
   }, [value, seriesList]);
 
-  // Filter series based on search query
   const filteredSeries = React.useMemo(() => {
     return seriesList
       .filter(

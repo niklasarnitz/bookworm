@@ -25,7 +25,6 @@ export function BookDetail({ book, authors, series }: BookDetailProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
-  // Fetch the category path for this book if it has a category
   const { data: categoryPath } = api.category.getPath.useQuery(
     { id: book?.categoryId ?? "" },
     { enabled: !!book?.categoryId },

@@ -11,7 +11,6 @@ export function useCookieViewMode(
 ): [ViewMode, (mode: ViewMode) => void] {
   const [viewMode, setViewModeState] = useState<ViewMode>(defaultMode);
 
-  // Read the cookie on initial render
   useEffect(() => {
     try {
       const cookieValue = document.cookie
@@ -30,16 +29,12 @@ export function useCookieViewMode(
     }
   }, []);
 
-  // Function to update the view mode and save to cookie
   const setViewMode = (mode: ViewMode) => {
     try {
-      // Validate the view mode
       const parsedMode = viewModeSchema.parse(mode);
 
-      // Update state
       setViewModeState(parsedMode);
 
-      // Save to cookie (30 days expiry)
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 30);
       document.cookie = `bookworm-view-mode=${parsedMode}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;

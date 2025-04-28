@@ -3,7 +3,6 @@ import { hash } from "bcryptjs";
 import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
-// Schema for user registration
 const registerSchema = z.object({
   username: z.string().min(3),
   name: z.string().min(1),
@@ -39,10 +38,8 @@ export const authRouter = createTRPCRouter({
         });
       }
 
-      // Hash the password
       const hashedPassword = await hash(input.password, 12);
 
-      // Create the new user
       const user = await ctx.db.user.create({
         data: {
           username: input.username,

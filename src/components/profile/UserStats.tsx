@@ -10,7 +10,6 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
-import { BookCover } from "../books/BookCover";
 import type { RouterOutputs } from "~/trpc/react";
 
 interface UserStatsProps {

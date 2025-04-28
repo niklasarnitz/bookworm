@@ -97,7 +97,7 @@ export default function UserPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="p-8">
       <Card className="mb-6">
         <CardHeader>
           <div className="flex items-center justify-between">

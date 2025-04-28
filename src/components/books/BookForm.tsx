@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  type SubmitErrorHandler,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -73,6 +77,8 @@ export function BookForm({
       seriesNumber: null,
       coverUrl: null,
       categoryId: undefined,
+      publisher: "",
+      pages: null,
     },
   });
 
@@ -98,6 +104,9 @@ export function BookForm({
       form.reset();
       onSuccess?.();
     },
+    onError: (error) => {
+      console.error("Failed to create book:", error);
+    },
   });
 
   const updateMutation = api.book.update.useMutation({
@@ -107,6 +116,9 @@ export function BookForm({
         void utils.book.getById.invalidate({ id: initialData.id });
       }
       onSuccess?.();
+    },
+    onError: (error) => {
+      console.error("Failed to update book:", error);
     },
   });
 
@@ -125,6 +137,8 @@ export function BookForm({
   const isEditing = !!initialData?.id;
 
   const onSubmit = async (data: BookCreate) => {
+    console.log("Form submitted", { isEditing, initialData, data });
+
     // Process authors first - create any new authors
     const newAuthors = await Promise.all(
       data.bookAuthors
@@ -184,11 +198,31 @@ export function BookForm({
       seriesId: finalSeriesId,
     };
 
+    console.log("Final data prepared", {
+      finalData,
+      isEditing,
+      id: initialData?.id,
+    });
+
     if (isEditing && initialData?.id) {
+      console.log("Updating book with ID:", initialData.id);
       updateMutation.mutate({ ...finalData, id: initialData.id });
     } else {
+      console.log("Creating new book");
       createMutation.mutate(finalData);
     }
+  };
+
+  const onInvalid: SubmitErrorHandler<BookCreate> = (errors) => {
+    console.error("Form validation errors:", errors);
+
+    // Show errors to the user
+    const errorMessages = Object.entries(errors).map(([key, value]) => {
+      const fieldName = key.charAt(0).toUpperCase() + key.slice(1);
+      return `${fieldName}: ${value.message}`;
+    });
+
+    alert(`Invalid form: ${errorMessages.join(", ")}`);
   };
 
   const toggleNewAuthorInput = (index: number) => {
@@ -301,7 +335,10 @@ export function BookForm({
         )}
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+          className="space-y-6"
+        >
           <FormField
             control={form.control}
             name="name"

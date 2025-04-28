@@ -125,9 +125,7 @@ export const bookRouter = createTRPCRouter({
               tag: tag ?? null,
             })),
           },
-          category: {
-            connect: { id: categoryId ?? undefined },
-          },
+          ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
           // Connect to series if we have an ID
           ...(resolvedSeriesId
             ? { series: { connect: { id: resolvedSeriesId } } }

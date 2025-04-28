@@ -100,7 +100,7 @@ async function importBooks(csvFilePath: string, userId: string) {
             create: bookAuthors,
           },
           seriesNumber: volume ? parseFloat(volume) : null,
-          createdById: userId,
+          userId,
         },
         include: {
           bookAuthors: {

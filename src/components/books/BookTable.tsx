@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCategoryName } from "~/app/helpers/getCategoryName";
+import { LinkTag } from "~/components/LinkTag";
 import { Button } from "~/components/ui/button";
 import {
   Table,
@@ -38,20 +39,6 @@ export function BookTable({
       window.alert(`Error deleting book: ${error.message}`);
     },
   });
-
-  const { data: categories } = api.category.getMultiplePaths.useQuery(
-    {
-      ids:
-        books.length > 0
-          ? books
-              .map((book) => book.categoryId)
-              .filter((categoryId): categoryId is string => Boolean(categoryId))
-          : [],
-    },
-    {
-      enabled: books.length > 0 && books.some((book) => !!book.categoryId),
-    },
-  );
 
   if (isLoading) {
     return (
@@ -140,10 +127,10 @@ export function BookTable({
                 <TableCell className="w-[20%]">
                   <div className="flex flex-wrap gap-1 break-words hyphens-auto whitespace-normal">
                     {book.bookAuthors.map((bookAuthor) => (
-                      <Link
+                      <LinkTag
                         key={bookAuthor.id}
                         href={`/?authorId=${bookAuthor.author.id}`}
-                        className="inline-flex items-center rounded-full bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700 hover:bg-blue-100"
+                        color="blue"
                       >
                         {bookAuthor.author.name}
                         {bookAuthor.tag && (
@@ -151,21 +138,21 @@ export function BookTable({
                             ({bookAuthor.tag})
                           </span>
                         )}
-                      </Link>
+                      </LinkTag>
                     ))}
                   </div>
                 </TableCell>
                 <TableCell className="w-[15%]">
                   {book.series ? (
-                    <Link
+                    <LinkTag
                       href={`/?seriesId=${book.series.id}`}
-                      className="inline-flex items-center rounded-full bg-purple-50 px-1.5 py-0.5 text-xs text-purple-700 hover:bg-purple-100"
+                      color="purple"
                     >
                       {book.series.name}
                       {book.seriesNumber !== null && (
                         <span className="ml-1">#{book.seriesNumber}</span>
                       )}
-                    </Link>
+                    </LinkTag>
                   ) : (
                     "-"
                   )}
@@ -174,13 +161,13 @@ export function BookTable({
                   {book.isbn ?? "-"}
                 </TableCell>
                 <TableCell className="w-[10%]">
-                  {book.categoryId && categories?.[book.categoryId] ? (
-                    <Link
+                  {book.category ? (
+                    <LinkTag
                       href={`/?categoryId=${book.categoryId}`}
-                      className="inline-flex items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs text-green-700 hover:bg-green-100"
+                      color="green"
                     >
-                      {getCategoryName(categories, book.categoryId)}
-                    </Link>
+                      {getCategoryName(book.category)}
+                    </LinkTag>
                   ) : (
                     "-"
                   )}

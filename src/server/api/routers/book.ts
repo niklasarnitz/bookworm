@@ -28,6 +28,11 @@ export const bookRouter = createTRPCRouter({
               },
             },
           },
+          {
+            series: {
+              name: { contains: input.query, mode: "insensitive" },
+            },
+          },
         ];
       }
 

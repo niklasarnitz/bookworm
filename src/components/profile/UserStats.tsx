@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardContent,
@@ -11,6 +9,7 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import type { RouterOutputs } from "~/trpc/react";
+import { BookCover } from "~/components/books/BookCover";
 
 interface UserStatsProps {
   data:
@@ -26,10 +25,9 @@ interface UserStatsProps {
       }
     | undefined;
   isLoading: boolean;
-  userId: string;
 }
 
-export default function UserStats({ data, isLoading, userId }: UserStatsProps) {
+export const UserStats = ({ data, isLoading }: UserStatsProps) => {
   if (isLoading ?? !data) {
     return (
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -39,8 +37,8 @@ export default function UserStats({ data, isLoading, userId }: UserStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex gap-4">
+              {["skeleton-1", "skeleton-2", "skeleton-3"].map((id) => (
+                <div key={id} className="flex gap-4">
                   <Skeleton className="h-16 w-16" />
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-40" />
@@ -58,8 +56,8 @@ export default function UserStats({ data, isLoading, userId }: UserStatsProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-1">
+              {["author-1", "author-2", "author-3"].map((id) => (
+                <div key={id} className="space-y-1">
                   <Skeleton className="h-4 w-32" />
                   <Skeleton className="h-3 w-20" />
                 </div>
@@ -85,6 +83,14 @@ export default function UserStats({ data, isLoading, userId }: UserStatsProps) {
             {data.recentBooks.length > 0 ? (
               data.recentBooks.map((book) => (
                 <div key={book.id} className="flex items-start gap-4">
+                  <div className="relative h-24 w-16 flex-shrink-0">
+                    <BookCover
+                      book={book}
+                      isDetail={false}
+                      showDetails={false}
+                      className="max-h-full"
+                    />
+                  </div>
                   <div>
                     <h4 className="text-base font-semibold">{book.name}</h4>
                     <p className="text-muted-foreground text-sm">
@@ -172,4 +178,4 @@ export default function UserStats({ data, isLoading, userId }: UserStatsProps) {
       </Card>
     </div>
   );
-}
+};

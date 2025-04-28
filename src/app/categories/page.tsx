@@ -218,7 +218,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="container py-8">
+    <div className="p-8">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>

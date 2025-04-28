@@ -327,9 +327,9 @@ export function BookForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Title</FormLabel>
+                <FormLabel htmlFor="book-title">Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Book title" {...field} />
+                  <Input id="book-title" placeholder="Book title" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -341,9 +341,10 @@ export function BookForm({
             name="subtitle"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Subtitle</FormLabel>
+                <FormLabel htmlFor="book-subtitle">Subtitle</FormLabel>
                 <FormControl>
                   <Input
+                    id="book-subtitle"
                     placeholder="Book subtitle (optional)"
                     {...field}
                     value={field.value ?? ""}
@@ -359,9 +360,10 @@ export function BookForm({
             name="isbn"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ISBN</FormLabel>
+                <FormLabel htmlFor="book-isbn">ISBN</FormLabel>
                 <FormControl>
                   <Input
+                    id="book-isbn"
                     placeholder="ISBN (optional)"
                     {...field}
                     value={field.value ?? ""}
@@ -377,9 +379,10 @@ export function BookForm({
             name="publisher"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Publisher</FormLabel>
+                <FormLabel htmlFor="book-publisher">Publisher</FormLabel>
                 <FormControl>
                   <Input
+                    id="book-publisher"
                     placeholder="Publisher (optional)"
                     {...field}
                     value={field.value ?? ""}

@@ -71,6 +71,7 @@ export const authConfig: NextAuthConfig = {
             image: true,
             password: true,
             role: true,
+            username: true,
           },
         });
 
@@ -94,6 +95,7 @@ export const authConfig: NextAuthConfig = {
           name: user.name,
           image: user.image,
           role: user.role,
+          username: user.username,
         };
       },
     }),
@@ -109,6 +111,15 @@ export const authConfig: NextAuthConfig = {
     newUser: "/signin",
   },
   callbacks: {
+    redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Redirect to homepage after sign in
+      if (url.startsWith(baseUrl)) return "/";
+      // Allows callback URLs on the same origin
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     jwt({ token, user }) {
       if (user) {
         // @ts-expect-error - this is fine

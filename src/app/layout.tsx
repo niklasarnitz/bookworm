@@ -11,6 +11,7 @@ import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "~/contexts/ThemeContext";
 import { ThemeToggle } from "~/components/ThemeToggle";
 import { Toaster } from "~/components/ui/sonner";
+import { UserAvatar } from "~/components/UserAvatar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -109,14 +110,7 @@ export default async function RootLayout({
                     <div className="flex items-center gap-4">
                       <ThemeToggle />
                       {session?.user ? (
-                        <div className="flex items-center gap-4">
-                          <span className="hidden md:inline">
-                            {session.user.name}
-                          </span>
-                          <Button asChild variant="outline" size="sm">
-                            <Link href="/api/auth/signout">Sign out</Link>
-                          </Button>
-                        </div>
+                        <UserAvatar user={session.user} />
                       ) : (
                         <Button asChild size="sm">
                           <Link href="/api/auth/signin">Sign in</Link>

@@ -50,8 +50,7 @@ export function CategorySearch({
       return;
     }
 
-    const displayPath = categoryPath.map((cat) => cat.name).join(" > ");
-    const pathDisplay = `${categoryPath[categoryPath.length - 1]?.path} > ${displayPath}`;
+    const pathDisplay = `${categoryPath[categoryPath.length - 1]?.path} ${categoryPath[categoryPath.length - 1]?.name}`;
 
     setSelectedCategory({
       id: value,
@@ -67,7 +66,7 @@ export function CategorySearch({
     ): { id: string; display: string } => {
       return {
         id: category.id,
-        display: `${category.path} > ${category.name}`,
+        display: `${category.path} ${category.name}`,
       };
     };
 
@@ -78,12 +77,11 @@ export function CategorySearch({
             cat.path.includes(searchQuery)
           : true,
       )
-      .map(formatCategory)
-      .sort((a, b) => a.display.localeCompare(b.display));
+      .map(formatCategory);
   }, [categories, searchQuery]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -115,7 +113,7 @@ export function CategorySearch({
             value={searchQuery}
             onValueChange={setSearchQuery}
           />
-          <CommandList>
+          <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty>No category found.</CommandEmpty>
             <CommandGroup>
               {!isLoading &&
@@ -130,7 +128,9 @@ export function CategorySearch({
                           : category.id,
                       );
                       setSelectedCategory(
-                        category.id === selectedCategory?.id ? null : category,
+                        category.id === selectedCategory?.id
+                          ? null
+                          : { id: category.id, display: category.display },
                       );
                       setOpen(false);
                     }}

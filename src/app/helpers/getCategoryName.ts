@@ -1,15 +1,8 @@
 import type { RouterOutputs } from "~/trpc/react";
 
-type MultiplePathsResponse = RouterOutputs["category"]["getMultiplePaths"];
+type Category = RouterOutputs["book"]["getAll"][number]["category"];
 
-export const getCategoryName = (
-  categories: MultiplePathsResponse | undefined,
-  categoryId: string | null | undefined,
-) => {
-  if (!categoryId) return "-";
-
-  const category = categories?.[categoryId];
-
+export const getCategoryName = (category: Category | undefined) => {
   if (category) {
     return `${category.path} ${category.name}`;
   }

@@ -12,6 +12,7 @@ import { api, type RouterOutputs } from "~/trpc/react";
 import { BookCover } from "./BookCover";
 import { BookFormDialog } from "./BookFormDialog";
 import { getCategoryName } from "~/app/helpers/getCategoryName";
+import { LinkTag } from "~/components/LinkTag";
 
 interface BookGridProps {
   books: RouterOutputs["book"]["getAll"];
@@ -36,15 +37,6 @@ export function BookGrid({
       void utils.book.getAll.invalidate();
     },
   });
-
-  const categoriesData = api.category.getMultiplePaths.useQuery(
-    {
-      ids: books.map((book) => book.categoryId).filter(Boolean) as string[],
-    },
-    {
-      enabled: books.length > 0 && books.some((book) => !!book.categoryId),
-    },
-  );
 
   const handleEditBook = (book: Book) => {
     setEditingBook(book);
@@ -116,11 +108,10 @@ export function BookGrid({
                 <div className="space-y-2 text-sm">
                   <div className="flex flex-wrap gap-1">
                     {book.bookAuthors.map((bookAuthor) => (
-                      <Link
-                        key={bookAuthor.id}
+                      <LinkTag
                         href={`/?authorId=${bookAuthor.author.id}`}
-                        className="bg-primary/10 text-primary hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30 inline-flex items-center rounded-full px-1.5 py-0.5 text-xs"
-                        onClick={(e) => e.stopPropagation()}
+                        color="blue"
+                        key={bookAuthor.id}
                       >
                         {bookAuthor.author.name}
                         {bookAuthor.tag && (
@@ -128,40 +119,30 @@ export function BookGrid({
                             ({bookAuthor.tag})
                           </span>
                         )}
-                      </Link>
+                      </LinkTag>
                     ))}
                   </div>
 
                   {book.series && (
-                    <div>
-                      <Link
-                        href={`/?seriesId=${book.series.id}`}
-                        className="bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex items-center rounded-full px-1.5 py-0.5 text-xs"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {book.series.name}
-                        {book.seriesNumber !== null && (
-                          <span className="ml-1">#{book.seriesNumber}</span>
-                        )}
-                      </Link>
-                    </div>
+                    <LinkTag
+                      href={`/?seriesId=${book.series.id}`}
+                      color="purple"
+                    >
+                      {book.series.name}
+                      {book.seriesNumber !== null && (
+                        <span className="ml-1">#{book.seriesNumber}</span>
+                      )}
+                    </LinkTag>
                   )}
 
-                  {book.categoryId &&
-                    categoriesData.data?.[book.categoryId] && (
-                      <div>
-                        <Link
-                          href={`/?categoryId=${book.categoryId}`}
-                          className="bg-accent text-accent-foreground hover:bg-accent/80 inline-flex items-center rounded-full px-1.5 py-0.5 text-xs"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {getCategoryName(
-                            categoriesData.data,
-                            book.categoryId,
-                          )}
-                        </Link>
-                      </div>
-                    )}
+                  {book.category && (
+                    <LinkTag
+                      href={`/?categoryId=${book.categoryId}`}
+                      color="green"
+                    >
+                      {getCategoryName(book.category)}
+                    </LinkTag>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between pt-2">

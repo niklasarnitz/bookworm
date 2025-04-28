@@ -7,7 +7,7 @@ type LinkTagProps = {
   children?: React.ReactNode;
 };
 
-const colors: Record<(typeof LinkTagProps)["color"], string> = {
+const colors: Record<LinkTagProps["color"], string> = {
   blue: "bg-blue-100/50 text-blue-700 hover:bg-blue-200/50 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-800/30",
   purple:
     "bg-purple-100/50 text-purple-700 hover:bg-purple-200/50 dark:bg-purple-900/20 dark:text-purple-300 dark:hover:bg-purple-800/30",

@@ -5,14 +5,19 @@ import {
   seriesSchema,
   seriesSearchSchema,
 } from "~/schemas/series";
+import { TRPCError } from "@trpc/server";
 
 export const seriesRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(seriesSearchSchema.optional())
     .query(async ({ ctx, input }) => {
-      const where = input?.query
-        ? { name: { contains: input.query, mode: "insensitive" as const } }
-        : {};
+      const where = {
+        // Add user filter to ensure users only see their own series
+        userId: ctx.session.user.id,
+        ...(input?.query
+          ? { name: { contains: input.query, mode: "insensitive" as const } }
+          : {}),
+      };
 
       return ctx.db.series.findMany({
         where,
@@ -24,7 +29,7 @@ export const seriesRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.series.findUnique({
+      const series = await ctx.db.series.findUnique({
         where: { id: input.id },
         include: {
           books: {
@@ -39,13 +44,33 @@ export const seriesRouter = createTRPCRouter({
           },
         },
       });
+
+      if (!series) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Series not found",
+        });
+      }
+
+      // Verify series belongs to current user
+      if (series.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to access this series",
+        });
+      }
+
+      return series;
     }),
 
   create: protectedProcedure
     .input(seriesCreateSchema)
     .mutation(async ({ ctx, input }) => {
       return ctx.db.series.create({
-        data: { name: input.name },
+        data: {
+          name: input.name,
+          userId: ctx.session.user.id,
+        },
       });
     }),
 
@@ -53,6 +78,27 @@ export const seriesRouter = createTRPCRouter({
     .input(seriesSchema.extend({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
+
+      // Check if series exists and belongs to current user
+      const series = await ctx.db.series.findUnique({
+        where: { id },
+        select: { userId: true },
+      });
+
+      if (!series) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Series not found",
+        });
+      }
+
+      if (series.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to update this series",
+        });
+      }
+
       return ctx.db.series.update({
         where: { id },
         data,
@@ -62,6 +108,26 @@ export const seriesRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
+      // Check if series exists and belongs to current user
+      const series = await ctx.db.series.findUnique({
+        where: { id: input.id },
+        select: { userId: true },
+      });
+
+      if (!series) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Series not found",
+        });
+      }
+
+      if (series.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to delete this series",
+        });
+      }
+
       return ctx.db.series.delete({
         where: { id: input.id },
       });

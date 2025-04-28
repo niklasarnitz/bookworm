@@ -17,6 +17,7 @@ import { X, Plus, ChevronDown } from "lucide-react";
 import { CoverUploader } from "./CoverUploader";
 import { AmazonBookSearch } from "./AmazonBookSearch";
 import { AmazonCoverFetcher } from "./AmazonCoverFetcher";
+import { CategorySearch } from "./CategorySearch";
 import type { AmazonBookDetail } from "~/lib/amazon-scraper";
 
 interface BookFormProps {
@@ -71,6 +72,7 @@ export function BookForm({
       newSeriesName: "",
       seriesNumber: null,
       coverUrl: null,
+      categoryId: undefined,
     },
   });
 
@@ -350,6 +352,50 @@ export function BookForm({
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="publisher"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Publisher</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Publisher (optional)"
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="pages"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pages</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Number of pages (optional)"
+                    {...field}
+                    value={field.value === null ? "" : field.value}
+                    onChange={(e) => {
+                      const value =
+                        e.target.value === ""
+                          ? null
+                          : parseInt(e.target.value, 10);
+                      field.onChange(value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <FormLabel>Authors</FormLabel>
@@ -562,6 +608,25 @@ export function BookForm({
                     isbn={form.watch("isbn")}
                     onFetchFromAmazon={() => setShowCoverFetcher(true)}
                     onRemoveCover={handleRemoveCover}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Add Category selector field */}
+          <FormField
+            control={form.control}
+            name="categoryId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <FormControl>
+                  <CategorySearch
+                    value={field.value ?? undefined}
+                    onChange={(value) => field.onChange(value)}
+                    placeholder="Select a category (optional)"
                   />
                 </FormControl>
                 <FormMessage />

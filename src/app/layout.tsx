@@ -8,11 +8,42 @@ import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { auth } from "~/server/auth";
 import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "~/contexts/ThemeContext";
+import { ThemeToggle } from "~/components/ThemeToggle";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 });
+
+// Script to prevent theme flashing
+const themeScript = `
+  (function() {
+    function getThemePreference() {
+      const cookieValue = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("bookworm-theme="))
+        ?.split("=")[1];
+
+      if (cookieValue && ["light", "dark", "system"].includes(cookieValue)) {
+        return cookieValue;
+      }
+      return "system";
+    }
+
+    const theme = getThemePreference();
+
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.classList.toggle("dark", systemTheme === "dark");
+    } else {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+    }
+
+    // Block page rendering until the theme is applied
+    document.documentElement.style.visibility = "visible";
+  })()
+`;
 
 export const metadata = {
   title: "BookWorm",
@@ -28,62 +59,72 @@ export default async function RootLayout({
   const session = await auth();
 
   return (
-    <html lang="en">
-      <body className={cn("font-sans", inter.variable)}>
-        <SessionProvider>
-          <TRPCReactProvider>
-            <div className="flex min-h-screen flex-col">
-              <header className="border-b">
-                <div className="container mx-auto flex items-center justify-between p-4">
-                  <div className="flex items-center gap-6">
-                    <Link href="/" className="text-xl font-bold">
-                      BookWorm
-                    </Link>
+    <html lang="en" style={{ visibility: "hidden" }}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body
+        className={cn("font-sans", inter.variable)}
+        suppressHydrationWarning
+      >
+        <ThemeProvider>
+          <SessionProvider>
+            <TRPCReactProvider>
+              <div className="flex min-h-screen flex-col">
+                <header className="border-b">
+                  <div className="container mx-auto flex items-center justify-between p-4">
+                    <div className="flex items-center gap-6">
+                      <Link href="/" className="text-xl font-bold">
+                        BookWorm
+                      </Link>
 
-                    {session?.user && (
-                      <nav className="hidden items-center gap-4 md:flex">
-                        <Link href="/" className="hover:underline">
-                          Books
-                        </Link>
-                        <Link href="/authors" className="hover:underline">
-                          Authors
-                        </Link>
-                        <Link href="/series" className="hover:underline">
-                          Series
-                        </Link>
-                      </nav>
-                    )}
-                  </div>
+                      {session?.user && (
+                        <nav className="hidden items-center gap-4 md:flex">
+                          <Link href="/" className="hover:underline">
+                            Books
+                          </Link>
+                          <Link href="/authors" className="hover:underline">
+                            Authors
+                          </Link>
+                          <Link href="/series" className="hover:underline">
+                            Series
+                          </Link>
+                          <Link href="/categories" className="hover:underline">
+                            Categories
+                          </Link>
+                        </nav>
+                      )}
+                    </div>
 
-                  <div className="flex items-center gap-4">
-                    {session?.user ? (
-                      <div className="flex items-center gap-4">
-                        <span className="hidden md:inline">
-                          {session.user.name}
-                        </span>
-                        <Button asChild variant="outline" size="sm">
-                          <Link href="/api/auth/signout">Sign out</Link>
+                    <div className="flex items-center gap-4">
+                      <ThemeToggle />
+                      {session?.user ? (
+                        <div className="flex items-center gap-4">
+                          <span className="hidden md:inline">
+                            {session.user.name}
+                          </span>
+                          <Button asChild variant="outline" size="sm">
+                            <Link href="/api/auth/signout">Sign out</Link>
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button asChild size="sm">
+                          <Link href="/api/auth/signin">Sign in</Link>
                         </Button>
-                      </div>
-                    ) : (
-                      <Button asChild size="sm">
-                        <Link href="/api/auth/signin">Sign in</Link>
-                      </Button>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
-              </header>
-              <main className="flex-1 bg-gray-50 dark:bg-gray-900">
-                {children}
-              </main>
-              <footer className="border-t py-4">
-                <div className="container mx-auto text-center text-sm text-gray-500">
-                  © {new Date().getFullYear()} BookWorm
-                </div>
-              </footer>
-            </div>
-          </TRPCReactProvider>
-        </SessionProvider>
+                </header>
+                <main className="bg-background flex-1">{children}</main>
+                <footer className="border-t py-4">
+                  <div className="text-muted-foreground container mx-auto text-center text-sm">
+                    © {new Date().getFullYear()} BookWorm
+                  </div>
+                </footer>
+              </div>
+            </TRPCReactProvider>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

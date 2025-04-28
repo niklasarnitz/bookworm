@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { type Book } from "~/schemas/book";
+import { getCategoryName } from "~/app/helpers/getCategoryName";
 import { Button } from "~/components/ui/button";
 import {
   Table,
@@ -20,7 +20,7 @@ export function formatAuthors(
 
 interface BookTableProps {
   books: RouterOutputs["book"]["getAll"];
-  onEditBook: (book: Book) => void;
+  onEditBook: (book: RouterOutputs["book"]["getAll"][number]) => void;
   isLoading?: boolean;
 }
 
@@ -34,7 +34,26 @@ export function BookTable({
     onSuccess: () => {
       void utils.book.getAll.invalidate();
     },
+    onError: (error) => {
+      console.error("Failed to delete book:", error);
+      window.alert(`Error deleting book: ${error.message}`);
+    },
   });
+
+  // Add query to fetch category information for all books with categories
+  const { data: categories } = api.category.getMultiplePaths.useQuery(
+    {
+      ids:
+        books.length > 0
+          ? books
+              .map((book) => book.categoryId)
+              .filter((categoryId): categoryId is string => Boolean(categoryId))
+          : [],
+    },
+    {
+      enabled: books.length > 0 && books.some((book) => !!book.categoryId),
+    },
+  );
 
   if (isLoading) {
     return (
@@ -42,20 +61,21 @@ export function BookTable({
         <Table className="table-fixed">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[35%]">Title</TableHead>
-              <TableHead className="w-[25%]">Author</TableHead>
+              <TableHead className="w-[30%]">Title</TableHead>
+              <TableHead className="w-[20%]">Author</TableHead>
               <TableHead className="w-[15%]">Series</TableHead>
               <TableHead className="w-[10%]">ISBN</TableHead>
+              <TableHead className="w-[10%]">Category</TableHead>
               <TableHead className="w-[15%] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 5 }, (_, index) => (
               <TableRow key={index}>
-                <TableCell className="w-[35%]">
+                <TableCell className="w-[30%]">
                   <div className="h-5 w-32 animate-pulse rounded bg-gray-200"></div>
                 </TableCell>
-                <TableCell className="w-[25%]">
+                <TableCell className="w-[20%]">
                   <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
                 </TableCell>
                 <TableCell className="w-[15%]">
@@ -63,6 +83,9 @@ export function BookTable({
                 </TableCell>
                 <TableCell className="w-[10%]">
                   <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
+                </TableCell>
+                <TableCell className="w-[10%]">
+                  <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
                 </TableCell>
                 <TableCell className="w-[15%] text-right">
                   <div className="flex justify-end gap-2">
@@ -83,24 +106,25 @@ export function BookTable({
       <Table className="table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[35%]">Title</TableHead>
-            <TableHead className="w-[25%]">Author</TableHead>
+            <TableHead className="w-[30%]">Title</TableHead>
+            <TableHead className="w-[20%]">Author</TableHead>
             <TableHead className="w-[15%]">Series</TableHead>
             <TableHead className="w-[10%]">ISBN</TableHead>
+            <TableHead className="w-[10%]">Category</TableHead>
             <TableHead className="w-[15%] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {books.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center">
+              <TableCell colSpan={6} className="text-center">
                 No books found
               </TableCell>
             </TableRow>
           ) : (
             books.map((book) => (
               <TableRow key={book.id}>
-                <TableCell className="w-[35%]">
+                <TableCell className="w-[30%]">
                   <Link
                     href={`/books/${book.id}`}
                     className="font-medium hover:underline"
@@ -115,23 +139,53 @@ export function BookTable({
                     </p>
                   )}
                 </TableCell>
-                <TableCell className="w-[25%]">
-                  <div className="break-words hyphens-auto whitespace-normal">
-                    {formatAuthors(book.bookAuthors)}
+                <TableCell className="w-[20%]">
+                  <div className="flex flex-wrap gap-1 break-words hyphens-auto whitespace-normal">
+                    {book.bookAuthors.map((bookAuthor) => (
+                      <Link
+                        key={bookAuthor.id}
+                        href={`/?authorId=${bookAuthor.author.id}`}
+                        className="inline-flex items-center rounded-full bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700 hover:bg-blue-100"
+                      >
+                        {bookAuthor.author.name}
+                        {bookAuthor.tag && (
+                          <span className="ml-1 opacity-75">
+                            ({bookAuthor.tag})
+                          </span>
+                        )}
+                      </Link>
+                    ))}
                   </div>
                 </TableCell>
                 <TableCell className="w-[15%]">
                   {book.series ? (
-                    <div className="break-words hyphens-auto whitespace-normal">
+                    <Link
+                      href={`/?seriesId=${book.series.id}`}
+                      className="inline-flex items-center rounded-full bg-purple-50 px-1.5 py-0.5 text-xs text-purple-700 hover:bg-purple-100"
+                    >
                       {book.series.name}
-                      {book.seriesNumber !== null && ` #${book.seriesNumber}`}
-                    </div>
+                      {book.seriesNumber !== null && (
+                        <span className="ml-1">#{book.seriesNumber}</span>
+                      )}
+                    </Link>
                   ) : (
                     "-"
                   )}
                 </TableCell>
                 <TableCell className="w-[10%] truncate">
                   {book.isbn ?? "-"}
+                </TableCell>
+                <TableCell className="w-[10%]">
+                  {book.categoryId && categories?.[book.categoryId] ? (
+                    <Link
+                      href={`/?categoryId=${book.categoryId}`}
+                      className="inline-flex items-center rounded-full bg-green-50 px-1.5 py-0.5 text-xs text-green-700 hover:bg-green-100"
+                    >
+                      {getCategoryName(categories, book.categoryId)}
+                    </Link>
+                  ) : (
+                    "-"
+                  )}
                 </TableCell>
                 <TableCell className="w-[15%] text-right">
                   <div className="flex justify-end gap-2">

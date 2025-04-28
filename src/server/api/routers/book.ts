@@ -15,6 +15,15 @@ export const bookRouter = createTRPCRouter({
           { name: { contains: input.query, mode: "insensitive" } },
           { subtitle: { contains: input.query, mode: "insensitive" } },
           { isbn: { contains: input.query, mode: "insensitive" } },
+          {
+            bookAuthors: {
+              some: {
+                author: {
+                  name: { contains: input.query, mode: "insensitive" },
+                },
+              },
+            },
+          },
         ];
       }
 
@@ -30,6 +39,18 @@ export const bookRouter = createTRPCRouter({
         where.seriesId = input.seriesId;
       }
 
+      if (input?.categoryId) {
+        where.categoryId = input.categoryId;
+      }
+
+      if (input?.noCover) {
+        where.coverUrl = null;
+      }
+
+      if (input?.noCategory) {
+        where.categoryId = null;
+      }
+
       return ctx.db.book.findMany({
         where,
         include: {
@@ -39,6 +60,7 @@ export const bookRouter = createTRPCRouter({
             },
           },
           series: true,
+          category: true,
         },
         orderBy: [
           // Books with series come first (non-null seriesId)
@@ -70,6 +92,7 @@ export const bookRouter = createTRPCRouter({
             },
           },
           series: true,
+          category: true,
         },
       });
     }),
@@ -77,7 +100,8 @@ export const bookRouter = createTRPCRouter({
   create: protectedProcedure
     .input(bookCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      const { bookAuthors, seriesId, newSeriesName, ...rest } = input;
+      const { bookAuthors, seriesId, newSeriesName, categoryId, ...rest } =
+        input;
 
       // If newSeriesName is provided, first create the series
       let resolvedSeriesId = seriesId;
@@ -101,6 +125,9 @@ export const bookRouter = createTRPCRouter({
               tag: tag ?? null,
             })),
           },
+          category: {
+            connect: { id: categoryId ?? undefined },
+          },
           // Connect to series if we have an ID
           ...(resolvedSeriesId
             ? { series: { connect: { id: resolvedSeriesId } } }
@@ -121,7 +148,8 @@ export const bookRouter = createTRPCRouter({
   update: protectedProcedure
     .input(bookSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, bookAuthors, seriesId, newSeriesName, ...rest } = input;
+      const { id, bookAuthors, seriesId, newSeriesName, categoryId, ...rest } =
+        input;
 
       // If newSeriesName is provided, first create the series
       let resolvedSeriesId = seriesId;
@@ -154,6 +182,7 @@ export const bookRouter = createTRPCRouter({
           ...(resolvedSeriesId
             ? { series: { connect: { id: resolvedSeriesId } } }
             : {}),
+          ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
         },
         include: {
           bookAuthors: {

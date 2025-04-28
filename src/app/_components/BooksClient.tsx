@@ -1,27 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { type Book } from "~/schemas/book";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { type Book, type BookSearch } from "~/schemas/book";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { BookGrid } from "~/components/books/BookGrid";
 import { BookTable } from "~/components/books/BookTable";
 import { BookFormDialog } from "~/components/books/BookFormDialog";
+import { BookFilter } from "~/components/books/BookFilter";
 import { useCookieViewMode } from "~/hooks/useCookieViewMode";
 
 interface BooksClientProps {
   initialViewMode: "grid" | "table";
 }
 
-export function BooksClient({ initialViewMode }: BooksClientProps) {
+export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
   const [viewMode, setViewMode] = useCookieViewMode(initialViewMode);
   const [isAddingBook, setIsAddingBook] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const searchParams = useSearchParams();
 
-  // Fetch books from API
-  const { data: books = [], isLoading: isBooksLoading } =
-    api.book.getAll.useQuery();
+  // Build filter object from search params
+  const filters: BookSearch = {
+    query: searchParams.get("query") ?? undefined,
+    authorId: searchParams.get("authorId") ?? undefined,
+    seriesId: searchParams.get("seriesId") ?? undefined,
+    categoryId: searchParams.get("categoryId") ?? undefined,
+    noCover: searchParams.has("noCover") ? true : undefined,
+    noCategory: searchParams.has("noCategory") ? true : undefined,
+  };
+
+  // Fetch books from API with filters
+  const {
+    data: books = [],
+    isLoading: isBooksLoading,
+    refetch,
+  } = api.book.getAll.useQuery(filters, {});
 
   // Fetch authors and series for dropdowns
   const { data: authors = [] } = api.author.getAll.useQuery();
@@ -47,6 +63,12 @@ export function BooksClient({ initialViewMode }: BooksClientProps) {
     setEditingBook(null);
   };
 
+  useEffect(() => {
+    // Refetch books when filters change
+    void refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   return (
     <>
       <div className="mb-6 flex flex-col items-start justify-between sm:flex-row sm:items-center">
@@ -67,6 +89,9 @@ export function BooksClient({ initialViewMode }: BooksClientProps) {
           <Button onClick={handleAddBook}>Add Book</Button>
         </div>
       </div>
+
+      {/* Add Book Filter component */}
+      <BookFilter />
 
       {viewMode === "grid" ? (
         <BookGrid

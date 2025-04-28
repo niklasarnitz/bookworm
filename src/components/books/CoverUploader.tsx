@@ -318,6 +318,7 @@ export function CoverUploader({
     setImageUrl(null);
     setFile(null);
 
+    // Make sure we call the parent's onRemoveCover function
     if (onRemoveCover) {
       onRemoveCover();
     }

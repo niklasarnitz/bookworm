@@ -25,6 +25,9 @@ export const bookCreateSchema = z.object({
   newSeriesName: z.string().optional(),
   seriesNumber: z.number().optional().nullable(),
   coverUrl: z.string().url().optional().nullable(),
+  categoryId: z.string().optional().nullable(),
+  publisher: z.string().optional().nullable(),
+  pages: z.number().optional().nullable(),
 });
 
 export const bookSchema = bookCreateSchema.extend({
@@ -35,6 +38,9 @@ export const bookSearchSchema = z.object({
   query: z.string().optional(),
   authorId: z.string().optional(),
   seriesId: z.string().optional(),
+  categoryId: z.string().optional(),
+  noCover: z.boolean().optional(),
+  noCategory: z.boolean().optional(),
 });
 
 export type BookAuthorCreate = z.infer<typeof bookAuthorCreateSchema>;

@@ -7,11 +7,30 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
     url      = env("DATABASE_URL")
+}
+
+model Category {
+    id          String     @id @default(cuid())
+    name        String
+    path        String     @unique // Stores the hierarchical identifier (e.g., "1.2.3")
+    sortOrder   Int        // To maintain order within its level
+    level       Int        // Depth level in the hierarchy (0 for root)
+
+    // Self-relation for parent-child hierarchy
+    parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+    parentId    String?
+    children    Category[] @relation("CategoryHierarchy")
+
+    // Books in this category
+    books       Book[]
+
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+
+    @@index([parentId])
+    @@index([path])
+    @@index([name])
 }
 
 model Book {
@@ -21,6 +40,7 @@ model Book {
     subtitle  String?
 
     publisher String?
+    pages     Int?
 
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
@@ -33,11 +53,15 @@ model Book {
 
     coverUrl  String?
 
+    category  Category? @relation(fields: [categoryId], references: [id])
+    categoryId String?
+
     createdBy User      @relation(fields: [createdById], references: [id])
     createdById String
 
     @@index([name])
     @@index([seriesId])
+    @@index([categoryId])
 }
 
 model BookAuthorRelation {

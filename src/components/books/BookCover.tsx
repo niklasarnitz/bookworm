@@ -64,7 +64,7 @@ export function BookCover({
 
   return (
     <div
-      className={`mx-auto my-auto flex aspect-[3/4] h-full max-w-[75%] overflow-hidden rounded bg-gradient-to-br from-[hsl(var(--hue),70%,80%)] to-[hsl(var(--secondary-hue),60%,60%)] shadow-md ${className}`}
+      className={`mx-auto my-auto flex aspect-[3/4] h-full max-w-[75%] overflow-hidden rounded bg-gradient-to-br from-[hsl(var(--hue),70%,80%)] to-[hsl(var(--secondary-hue),60%,60%)] shadow-md dark:from-[hsl(var(--hue),60%,30%)] dark:to-[hsl(var(--secondary-hue),50%,20%)] ${className}`}
       style={
         {
           "--hue": `${baseHue}deg`,
@@ -77,7 +77,7 @@ export function BookCover({
           <div className={clsx("flex-1", isDetail ? "mt-4" : "mt-2")}>
             <h3
               className={clsx(
-                "line-clamp-3 font-bold text-gray-800",
+                "text-foreground line-clamp-3 font-bold",
                 isDetail ? "mb-3 text-xl" : "mb-2 text-lg",
               )}
             >
@@ -87,7 +87,7 @@ export function BookCover({
             {book.subtitle && (
               <p
                 className={clsx(
-                  "line-clamp-2 text-gray-700",
+                  "text-muted-foreground line-clamp-2",
                   isDetail ? "mb-4 text-base" : "mb-3 text-sm",
                 )}
               >
@@ -98,7 +98,7 @@ export function BookCover({
             {book.series && (
               <p
                 className={clsx(
-                  "line-clamp-3 text-gray-700 italic",
+                  "text-muted-foreground line-clamp-3 italic",
                   isDetail ? "mb-2 text-base" : "mb-1 text-sm",
                 )}
               >
@@ -111,7 +111,7 @@ export function BookCover({
           <div className={clsx("w-full", isDetail ? "mb-4" : "mb-2")}>
             <p
               className={clsx(
-                "line-clamp-3 text-gray-700",
+                "text-muted-foreground line-clamp-3",
                 isDetail ? "text-sm" : "text-xs",
               )}
             >

@@ -114,7 +114,7 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
       : undefined;
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-4 pb-3 ${className}`}>
       <form onSubmit={handleSearch} className="relative">
         <Input
           placeholder="Search book name, subtitle, author name, or ISBN..."

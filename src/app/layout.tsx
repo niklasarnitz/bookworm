@@ -10,6 +10,7 @@ import { auth } from "~/server/auth";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "~/contexts/ThemeContext";
 import { ThemeToggle } from "~/components/ThemeToggle";
+import { Toaster } from "~/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,6 +73,7 @@ export default async function RootLayout({
             <TRPCReactProvider>
               <div className="flex min-h-screen flex-col">
                 <header className="border-b">
+                  <Toaster />
                   <div className="container mx-auto flex items-center justify-between p-4">
                     <div className="flex items-center gap-6">
                       <Link href="/" className="text-xl font-bold">
@@ -92,6 +94,14 @@ export default async function RootLayout({
                           <Link href="/categories" className="hover:underline">
                             Categories
                           </Link>
+                          {session.user.role === "ADMIN" && (
+                            <Link
+                              href="/admin"
+                              className="text-primary font-medium hover:underline"
+                            >
+                              Admin
+                            </Link>
+                          )}
                         </nav>
                       )}
                     </div>

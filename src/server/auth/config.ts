@@ -16,6 +16,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: "USER" | "ADMIN";
     } & DefaultSession["user"];
   }
 
@@ -25,12 +26,14 @@ declare module "next-auth" {
     name?: string | null;
     username?: string | null;
     image?: string | null;
+    role?: "USER" | "ADMIN";
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
+    role: "USER" | "ADMIN"; // Add role to the JWT
   }
 }
 
@@ -61,6 +64,14 @@ export const authConfig: NextAuthConfig = {
 
         const user = await db.user.findUnique({
           where: { username: valid.data.username },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            image: true,
+            password: true,
+            role: true,
+          },
         });
 
         if (!user) {
@@ -82,6 +93,7 @@ export const authConfig: NextAuthConfig = {
           email: user.email,
           name: user.name,
           image: user.image,
+          role: user.role,
         };
       },
     }),
@@ -101,6 +113,8 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         // @ts-expect-error - this is fine
         token.id = user.id;
+        // @ts-expect-error - this is fine
+        token.role = user.role;
       }
       return token;
     },

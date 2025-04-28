@@ -86,11 +86,6 @@ export default function UserStats({ data, isLoading, userId }: UserStatsProps) {
             {data.recentBooks.length > 0 ? (
               data.recentBooks.map((book) => (
                 <div key={book.id} className="flex items-start gap-4">
-                  {book.coverUrl && (
-                    <div className="h-20 w-16 flex-shrink-0">
-                      <BookCover book={book} showDetails={false} />
-                    </div>
-                  )}
                   <div>
                     <h4 className="text-base font-semibold">{book.name}</h4>
                     <p className="text-muted-foreground text-sm">

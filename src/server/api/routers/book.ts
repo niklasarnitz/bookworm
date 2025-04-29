@@ -8,6 +8,10 @@ export const bookRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(bookSearchSchema.optional())
     .query(async ({ ctx, input }) => {
+      const page = input?.pagination?.page ?? 1;
+      const pageSize = input?.pagination?.pageSize ?? 12;
+      const skip = (page - 1) * pageSize;
+
       // Build where clause based on search parameters
       const where: Prisma.BookWhereInput = {
         // Add user filter to ensure users only see their own books
@@ -60,7 +64,12 @@ export const bookRouter = createTRPCRouter({
         where.categoryId = null;
       }
 
-      return ctx.db.book.findMany({
+      // Get total count for pagination
+      const totalCount = await ctx.db.book.count({ where });
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      // Get paginated results
+      const books = await ctx.db.book.findMany({
         where,
         include: {
           bookAuthors: {
@@ -86,7 +95,20 @@ export const bookRouter = createTRPCRouter({
           // Finally, sort by book name
           { name: "asc" },
         ],
+        skip,
+        take: pageSize,
       });
+
+      return {
+        books,
+        pagination: {
+          page,
+          pageSize,
+          totalCount,
+          totalPages,
+          hasMore: page < totalPages,
+        },
+      };
     }),
 
   getById: protectedProcedure

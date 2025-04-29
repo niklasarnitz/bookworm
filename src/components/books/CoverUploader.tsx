@@ -325,7 +325,10 @@ export function CoverUploader({
   return (
     <div className="w-full space-y-4">
       {error && (
-        <div className="rounded border border-red-400 bg-red-100 p-3 text-red-700">
+        <div
+          className="rounded border border-red-400 bg-red-100 p-3 text-red-700"
+          role="alert"
+        >
           {error}
         </div>
       )}
@@ -334,6 +337,9 @@ export function CoverUploader({
         <div
           {...getRootProps()}
           className={`cursor-pointer rounded-md border-2 border-dashed p-6 text-center transition-colors ${isDragActive ? "border-primary bg-primary/10" : "hover:border-primary/50 border-gray-300"}`}
+          role="button"
+          tabIndex={0}
+          aria-label="Upload cover image"
         >
           <input {...getInputProps()} />
 
@@ -367,8 +373,13 @@ export function CoverUploader({
       {(isProcessing || isUploading) && (
         <div className="flex justify-center p-8 text-center">
           <div>
-            <div className="border-primary mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-            <p>{isUploading ? "Uploading..." : "Processing image..."}</p>
+            <div
+              className="border-primary mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
+              aria-hidden="true"
+            ></div>
+            <p role="status">
+              {isUploading ? "Uploading..." : "Processing image..."}
+            </p>
           </div>
         </div>
       )}
@@ -414,6 +425,11 @@ export function CoverUploader({
               onClick={onFetchFromAmazon}
               disabled={!isbn}
               className="text-xs"
+              aria-label={
+                isbn
+                  ? "Get cover image from Amazon"
+                  : "ISBN required to fetch cover from Amazon"
+              }
             >
               Get Cover from Amazon
             </Button>
@@ -426,6 +442,7 @@ export function CoverUploader({
               size="sm"
               onClick={handleRemoveCover}
               className="border-red-200 text-xs text-red-500 hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+              aria-label="Remove cover image"
             >
               Remove Cover
             </Button>

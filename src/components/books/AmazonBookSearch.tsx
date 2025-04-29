@@ -112,14 +112,20 @@ export function AmazonBookSearch({
     }
 
     setError(null);
-    void searchQuery.refetch().then((result) => {
-      const validResults = validateSearchResults(result.data);
-      if (validResults.length > 0) {
-        setStep("select");
-      } else {
-        setError("No books found with this ISBN");
-      }
-    });
+    searchQuery
+      .refetch()
+      .then((result) => {
+        const validResults = validateSearchResults(result.data);
+        if (validResults.length > 0) {
+          setStep("select");
+        } else {
+          setError("No books found with this ISBN");
+        }
+      })
+      .catch((err) => {
+        setError("An error occurred while searching for the book");
+        console.error("Error searching for book:", err);
+      });
   };
 
   const handleBookSelect = (detailUrl: string) => {

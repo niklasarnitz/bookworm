@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Popover,
@@ -33,7 +33,7 @@ export function AuthorSearch({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: authors = [], isLoading } = api.author.getAll.useQuery();
+  const { data: authorsData, isLoading } = api.author.getAll.useQuery();
 
   const [selectedAuthor, setSelectedAuthor] = useState<{
     id: string;
@@ -48,7 +48,7 @@ export function AuthorSearch({
       return;
     }
 
-    const found = authors.find((author) => author.id === value);
+    const found = authorsData?.authors.find((author) => author.id === value);
     if (found) {
       setSelectedAuthor({
         id: found.id,
@@ -56,17 +56,17 @@ export function AuthorSearch({
         bookCount: found._count?.books,
       });
     }
-  }, [value, authors]);
+  }, [value, authorsData]);
 
-  const filteredAuthors = React.useMemo(() => {
-    return authors
+  const filteredAuthors = useMemo(() => {
+    return authorsData?.authors
       .filter(
         (author) =>
           !searchQuery ||
           author.name.toLowerCase().includes(searchQuery.toLowerCase()),
       )
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [authors, searchQuery]);
+  }, [authorsData, searchQuery]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -107,7 +107,7 @@ export function AuthorSearch({
             <CommandEmpty>No author found.</CommandEmpty>
             <CommandGroup>
               {!isLoading &&
-                filteredAuthors.map((author) => (
+                filteredAuthors?.map((author) => (
                   <CommandItem
                     key={author.id}
                     value={author.id}

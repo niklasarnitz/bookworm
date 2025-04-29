@@ -10,6 +10,12 @@ export const seriesSchema = seriesCreateSchema.extend({
 
 export const seriesSearchSchema = z.object({
   query: z.string().optional(),
+  pagination: z
+    .object({
+      page: z.number().int().positive().optional().default(1),
+      pageSize: z.number().int().positive().optional().default(20),
+    })
+    .optional(),
 });
 
 export type SeriesCreate = z.infer<typeof seriesCreateSchema>;

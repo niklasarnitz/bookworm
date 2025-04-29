@@ -8,8 +8,15 @@ export const authorSchema = authorCreateSchema.extend({
   id: z.string(),
 });
 
+// Add pagination schema
+export const paginationSchema = z.object({
+  page: z.number().int().positive().default(1),
+  pageSize: z.number().int().positive().default(10),
+});
+
 export const authorSearchSchema = z.object({
   query: z.string().optional(),
+  pagination: paginationSchema.optional(),
 });
 
 export type AuthorCreate = z.infer<typeof authorCreateSchema>;

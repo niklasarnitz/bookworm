@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import {
   Popover,
@@ -33,7 +33,7 @@ export function SeriesSearch({
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: seriesList = [], isLoading } = api.series.getAll.useQuery();
+  const { data: seriesData, isLoading } = api.series.getAll.useQuery();
 
   const [selectedSeries, setSelectedSeries] = useState<{
     id: string;
@@ -47,7 +47,7 @@ export function SeriesSearch({
       return;
     }
 
-    const found = seriesList.find((series) => series.id === value);
+    const found = seriesData?.series.find((series) => series.id === value);
     if (found) {
       setSelectedSeries({
         id: found.id,
@@ -55,17 +55,17 @@ export function SeriesSearch({
         bookCount: found._count?.books,
       });
     }
-  }, [value, seriesList]);
+  }, [value, seriesData?.series]);
 
-  const filteredSeries = React.useMemo(() => {
-    return seriesList
+  const filteredSeries = useMemo(() => {
+    return seriesData?.series
       .filter(
         (series) =>
           !searchQuery ||
           series.name.toLowerCase().includes(searchQuery.toLowerCase()),
       )
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [seriesList, searchQuery]);
+  }, [seriesData?.series, searchQuery]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -106,7 +106,7 @@ export function SeriesSearch({
             <CommandEmpty>No series found.</CommandEmpty>
             <CommandGroup>
               {!isLoading &&
-                filteredSeries.map((series) => (
+                filteredSeries?.map((series) => (
                   <CommandItem
                     key={series.id}
                     value={series.id}

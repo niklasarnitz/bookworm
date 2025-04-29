@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { type Book, type BookSearch } from "~/schemas/book";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
@@ -11,6 +11,7 @@ import { BookTable } from "~/components/books/BookTable";
 import { BookFormDialog } from "~/components/books/BookFormDialog";
 import { BookFilter } from "~/components/books/BookFilter";
 import { useCookieViewMode } from "~/hooks/useCookieViewMode";
+import { Pagination } from "~/components/ui/pagination";
 
 interface BooksClientProps {
   initialViewMode: "grid" | "table";
@@ -21,6 +22,11 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
   const [isAddingBook, setIsAddingBook] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const pageParam = searchParams.get("page");
+  const currentPage = pageParam ? parseInt(pageParam, 10) : 1;
+  const pageSize = viewMode === "grid" ? 12 : 10;
 
   const filters: BookSearch = {
     query: searchParams.get("query") ?? undefined,
@@ -29,16 +35,39 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
     categoryId: searchParams.get("categoryId") ?? undefined,
     noCover: searchParams.has("noCover") ? true : undefined,
     noCategory: searchParams.has("noCategory") ? true : undefined,
+    pagination: {
+      page: currentPage,
+      pageSize,
+    },
   };
 
   const {
-    data: books = [],
+    data,
     isLoading: isBooksLoading,
     refetch,
   } = api.book.getAll.useQuery(filters, {});
 
-  const { data: authors = [] } = api.author.getAll.useQuery();
-  const { data: series = [] } = api.series.getAll.useQuery();
+  const books = data?.books ?? [];
+  const pagination = data?.pagination;
+
+  // Prefetch the next page
+  const nextPage = currentPage + 1;
+  api.book.getAll.useQuery(
+    {
+      ...filters,
+      pagination: {
+        page: nextPage,
+        pageSize,
+      },
+    },
+    {
+      enabled: !!data?.pagination?.hasMore,
+      staleTime: 30 * 1000, // Consider data valid for 30 seconds
+    },
+  );
+
+  const { data: authors } = api.author.getAll.useQuery();
+  const { data: series } = api.series.getAll.useQuery();
 
   const handleEditBook = (book: Book) => {
     setEditingBook(book);
@@ -65,6 +94,13 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
     void refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <>
@@ -94,8 +130,6 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
           books={books}
           onEditBook={handleEditBook}
           isLoading={isBooksLoading}
-          authors={authors}
-          series={series}
         />
       ) : (
         <BookTable
@@ -105,26 +139,23 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
         />
       )}
 
+      {pagination && pagination.totalPages > 1 && (
+        <Pagination
+          currentPage={pagination.page}
+          totalPages={pagination.totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
+
       <BookFormDialog
-        isOpen={isAddingBook}
+        isOpen={isAddingBook || !!editingBook}
         onClose={handleCloseDialog}
+        initialData={editingBook ?? undefined}
         authors={authors}
         series={series}
         onSuccess={handleFormSuccess}
-        title="Add New Book"
+        title={isAddingBook ? "Add New Book" : "Edit Book"}
       />
-
-      {viewMode === "table" && (
-        <BookFormDialog
-          isOpen={!!editingBook}
-          onClose={handleCloseDialog}
-          initialData={editingBook ?? undefined}
-          authors={authors}
-          series={series}
-          onSuccess={handleFormSuccess}
-          title="Edit Book"
-        />
-      )}
     </>
   );
 }

@@ -11,6 +11,10 @@ export const authorRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(authorSearchSchema.optional())
     .query(async ({ ctx, input }) => {
+      const page = input?.pagination?.page ?? 1;
+      const pageSize = input?.pagination?.pageSize ?? 20;
+      const skip = (page - 1) * pageSize;
+
       const where = {
         // Add user filter to ensure users only see their own authors
         userId: ctx.session.user.id,
@@ -19,11 +23,29 @@ export const authorRouter = createTRPCRouter({
           : {}),
       };
 
-      return ctx.db.author.findMany({
+      // Get total count for pagination
+      const totalCount = await ctx.db.author.count({ where });
+      const totalPages = Math.ceil(totalCount / pageSize);
+
+      // Get paginated results
+      const authors = await ctx.db.author.findMany({
         where,
         orderBy: { name: "asc" },
         include: { _count: { select: { books: true } } },
+        skip,
+        take: pageSize,
       });
+
+      return {
+        authors,
+        pagination: {
+          page,
+          pageSize,
+          totalCount,
+          totalPages,
+          hasMore: page < totalPages,
+        },
+      };
     }),
 
   getById: protectedProcedure

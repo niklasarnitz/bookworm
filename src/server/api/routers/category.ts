@@ -5,7 +5,6 @@ import {
   categorySearchSchema,
   getByPathSchema,
 } from "../../../schemas/category";
-import type { Category } from "@prisma/client";
 import { ObjectHelper, type URecord } from "@ainias42/js-helper";
 import { sortCategoriesByPath } from "~/lib/category-utils";
 import { TRPCError } from "@trpc/server";
@@ -119,10 +118,11 @@ export const categoryRouter = createTRPCRouter({
         userId: ctx.session.user.id,
       },
       orderBy: { level: "asc" },
+      include: { _count: { select: { books: true } } },
     });
 
     // Sort by numeric path within each level
-    const categoriesByLevel: Record<number, Category[]> = {};
+    const categoriesByLevel: Record<number, typeof allCategories> = {};
     allCategories.forEach((category) => {
       categoriesByLevel[category.level] ??= [];
 
@@ -143,7 +143,9 @@ export const categoryRouter = createTRPCRouter({
       .flatMap((level) => categoriesByLevel[level]);
 
     // First organize by parent
-    const categoriesByParent: Record<string, Category[]> = { root: [] };
+    const categoriesByParent: Record<string, typeof allCategories> = {
+      root: [],
+    };
 
     sortedCategories.forEach((category) => {
       const parentKey = category?.parentId ?? "root";
@@ -153,22 +155,25 @@ export const categoryRouter = createTRPCRouter({
       }
     });
 
+    // Define the type for a category with children
+    type CategoryWithChildren = (typeof allCategories)[0] & {
+      children: CategoryWithChildren[];
+    };
+
     // Then build the tree recursively
-    function buildTree(parentId: string | null): Category[] {
+    function buildTree(parentId: string | null): CategoryWithChildren[] {
       const key = parentId ?? "root";
       if (!categoriesByParent[key]) return [];
 
-      return categoriesByParent[key].map((category) => ({
+      const categories = categoriesByParent[key];
+
+      return categories.map((category) => ({
         ...category,
         children: buildTree(category.id),
-      })) as (Category & {
-        children: Category[];
-      })[];
+      }));
     }
 
-    return buildTree(null) as (Category & {
-      children?: Category[];
-    })[];
+    return buildTree(null);
   }),
 
   getPath: protectedProcedure

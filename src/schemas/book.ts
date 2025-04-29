@@ -37,6 +37,10 @@ export const bookSearchSchema = z.object({
   categoryId: z.string().optional(),
   noCover: z.boolean().optional(),
   noCategory: z.boolean().optional(),
+  pagination: z.object({
+    page: z.number().int().positive().optional().default(1),
+    pageSize: z.number().int().positive().optional().default(12),
+  }),
 });
 
 export type BookAuthorCreate = z.infer<typeof bookAuthorCreateSchema>;

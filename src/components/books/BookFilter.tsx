@@ -35,8 +35,8 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     [],
   );
 
-  const { data: authors = [] } = api.author.getAll.useQuery();
-  const { data: series = [] } = api.series.getAll.useQuery();
+  const { data: authorsData } = api.author.getAll.useQuery();
+  const { data: seriesData } = api.series.getAll.useQuery();
 
   const selectedCategoryId = searchParams.get("categoryId") ?? undefined;
   const { data: categoryPath } = api.category.getPath.useQuery(
@@ -101,11 +101,13 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
   };
 
   const selectedAuthor = searchParams.has("authorId")
-    ? authors.find((a) => a.id === searchParams.get("authorId"))?.name
+    ? authorsData?.authors.find((a) => a.id === searchParams.get("authorId"))
+        ?.name
     : undefined;
 
   const selectedSeries = searchParams.has("seriesId")
-    ? series.find((s) => s.id === searchParams.get("seriesId"))?.name
+    ? seriesData?.series.find((s) => s.id === searchParams.get("seriesId"))
+        ?.name
     : undefined;
 
   const selectedCategory =
@@ -150,31 +152,33 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
         </Button>
 
         {/* Show active filters as badges */}
-        {searchParams.has("authorId") && authors.length > 0 && (
-          <div className="border-primary/20 bg-primary/10 text-primary dark:bg-primary/20 flex items-center rounded-full border px-2 py-1 text-xs">
-            <span className="mr-1">Author:</span>
-            <span className="font-medium">{selectedAuthor ?? "Unknown"}</span>
-            <Link
-              href={`/?${createQueryString("authorId", "")}`}
-              className="ml-1"
-            >
-              <X className="h-3 w-3" />
-            </Link>
-          </div>
-        )}
+        {searchParams.has("authorId") &&
+          (authorsData?.authors.length ?? 0) > 0 && (
+            <div className="border-primary/20 bg-primary/10 text-primary dark:bg-primary/20 flex items-center rounded-full border px-2 py-1 text-xs">
+              <span className="mr-1">Author:</span>
+              <span className="font-medium">{selectedAuthor ?? "Unknown"}</span>
+              <Link
+                href={`/?${createQueryString("authorId", "")}`}
+                className="ml-1"
+              >
+                <X className="h-3 w-3" />
+              </Link>
+            </div>
+          )}
 
-        {searchParams.has("seriesId") && series.length > 0 && (
-          <div className="border-secondary/20 bg-secondary/10 text-secondary-foreground dark:bg-secondary/20 flex items-center rounded-full border px-2 py-1 text-xs">
-            <span className="mr-1">Series:</span>
-            <span className="font-medium">{selectedSeries ?? "Unknown"}</span>
-            <Link
-              href={`/?${createQueryString("seriesId", "")}`}
-              className="ml-1"
-            >
-              <X className="h-3 w-3" />
-            </Link>
-          </div>
-        )}
+        {searchParams.has("seriesId") &&
+          (seriesData?.series.length ?? 0) > 0 && (
+            <div className="border-secondary/20 bg-secondary/10 text-secondary-foreground dark:bg-secondary/20 flex items-center rounded-full border px-2 py-1 text-xs">
+              <span className="mr-1">Series:</span>
+              <span className="font-medium">{selectedSeries ?? "Unknown"}</span>
+              <Link
+                href={`/?${createQueryString("seriesId", "")}`}
+                className="ml-1"
+              >
+                <X className="h-3 w-3" />
+              </Link>
+            </div>
+          )}
 
         {searchParams.has("categoryId") && selectedCategory && (
           <div className="border-accent/20 bg-accent/10 text-accent-foreground dark:bg-accent/20 flex items-center rounded-full border px-2 py-1 text-xs">

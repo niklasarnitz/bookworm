@@ -19,7 +19,7 @@ export function generateBookColor(bookId: string, index = 0) {
 
 type BookType =
   | RouterOutputs["book"]["getById"]
-  | RouterOutputs["book"]["getAll"][0];
+  | RouterOutputs["book"]["getAll"]["books"][number];
 
 interface BookCoverProps {
   book: BookType;

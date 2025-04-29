@@ -51,9 +51,9 @@ export default function ProfileForm({ profile }: ProfileFormProps) {
   });
 
   const updateProfile = api.userProfile.updateProfile.useMutation({
-    onSuccess: () => {
+    onSuccess: async () => {
+      await utils.userProfile.getProfile.invalidate();
       toast.success("Profile updated successfully");
-      void utils.userProfile.getProfile.invalidate();
     },
     onError: (error) => {
       toast.error(`Error updating profile: ${error.message}`);

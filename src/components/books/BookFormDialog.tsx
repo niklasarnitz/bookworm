@@ -1,20 +1,21 @@
 "use client";
 
 import { type Book } from "~/schemas/book";
-import { BookForm } from "./BookForm";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { BookForm } from "~/components/books/bookForm/BookForm";
+import type { RouterOutputs } from "~/trpc/react";
 
 interface BookFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
   initialData?: Partial<Book & { id?: string }>;
-  authors: { id: string; name: string }[];
-  series: { id: string; name: string }[];
+  authors: RouterOutputs["author"]["getAll"] | undefined;
+  series: RouterOutputs["series"]["getAll"] | undefined;
   onSuccess?: () => void;
   title?: string;
 }

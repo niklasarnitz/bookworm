@@ -12,6 +12,13 @@ import { BookFormDialog } from "~/components/books/BookFormDialog";
 import { BookFilter } from "~/components/books/BookFilter";
 import { useCookieViewMode } from "~/hooks/useCookieViewMode";
 import { Pagination } from "~/components/ui/pagination";
+import { ChevronDown, Plus, Scan, Search } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { BarcodeScanner } from "~/components/books/BarcodeScanner";
 
 interface BooksClientProps {
   initialViewMode: "grid" | "table";
@@ -21,6 +28,14 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
   const [viewMode, setViewMode] = useCookieViewMode(initialViewMode);
   const [isAddingBook, setIsAddingBook] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showAmazonSearch, setShowAmazonSearch] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [addBookType, setAddBookType] = useState<"manual" | "isbn" | "barcode">(
+    "manual",
+  );
+  const [scannedIsbn, setScannedIsbn] = useState<string>("");
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -74,19 +89,44 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
     setIsAddingBook(false);
   };
 
-  const handleAddBook = () => {
-    setIsAddingBook(true);
-    setEditingBook(null);
+  const handleAddBook = (type: "manual" | "isbn" | "barcode") => {
+    setAddBookType(type);
+    setScannedIsbn(""); // Reset any previously scanned ISBN
+
+    if (type === "isbn") {
+      setIsAddingBook(true);
+      setEditingBook(null);
+      setShowAmazonSearch(true);
+      setShowBarcodeScanner(false);
+    } else if (type === "barcode") {
+      // Don't open the form dialog immediately for barcode scanning
+      setIsAddingBook(false);
+      setEditingBook(null);
+      setShowAmazonSearch(false);
+      setShowBarcodeScanner(true);
+    } else {
+      setIsAddingBook(true);
+      setEditingBook(null);
+      setShowAmazonSearch(false);
+      setShowBarcodeScanner(false);
+    }
+
+    setShowAddMenu(false);
   };
 
   const handleCloseDialog = () => {
     setIsAddingBook(false);
     setEditingBook(null);
+    setShowAmazonSearch(false);
+    setShowBarcodeScanner(false);
+    setScannedIsbn("");
   };
 
-  const handleFormSuccess = () => {
-    setIsAddingBook(false);
-    setEditingBook(null);
+  const handleBarcodeScanComplete = (isbn: string) => {
+    setScannedIsbn(isbn);
+    setShowBarcodeScanner(false);
+    setIsAddingBook(true); // Now open the form dialog
+    setShowAmazonSearch(true);
   };
 
   useEffect(() => {
@@ -119,7 +159,39 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
             </TabsList>
           </Tabs>
 
-          <Button onClick={handleAddBook}>Add Book</Button>
+          <Popover open={showAddMenu} onOpenChange={setShowAddMenu}>
+            <PopoverTrigger asChild>
+              <Button className="flex items-center gap-1">
+                <Plus className="mr-1 h-4 w-4" />
+                Add Book <ChevronDown className="ml-1 h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-0">
+              <div className="flex flex-col py-1">
+                <button
+                  className="flex w-full items-center px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                  onClick={() => handleAddBook("manual")}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create from Scratch
+                </button>
+                <button
+                  className="flex w-full items-center px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                  onClick={() => handleAddBook("isbn")}
+                >
+                  <Search className="mr-2 h-4 w-4" />
+                  Import via ISBN
+                </button>
+                <button
+                  className="flex w-full items-center px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                  onClick={() => handleAddBook("barcode")}
+                >
+                  <Scan className="mr-2 h-4 w-4" />
+                  Scan Barcode
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -147,15 +219,28 @@ export function BooksClient({ initialViewMode }: Readonly<BooksClientProps>) {
         />
       )}
 
-      <BookFormDialog
-        isOpen={isAddingBook || !!editingBook}
-        onClose={handleCloseDialog}
-        initialData={editingBook ?? undefined}
-        authors={authors}
-        series={series}
-        onSuccess={handleFormSuccess}
-        title={isAddingBook ? "Add New Book" : "Edit Book"}
-      />
+      {(isAddingBook || !!editingBook) && (
+        <BookFormDialog
+          isOpen={true}
+          onClose={handleCloseDialog}
+          initialData={editingBook ?? undefined}
+          authors={authors}
+          series={series}
+          onSuccess={handleCloseDialog}
+          title={isAddingBook ? "Add New Book" : "Edit Book"}
+          showAmazonSearch={showAmazonSearch}
+          setShowAmazonSearch={setShowAmazonSearch}
+          addBookType={addBookType}
+          scannedIsbn={scannedIsbn}
+        />
+      )}
+
+      {showBarcodeScanner && (
+        <BarcodeScanner
+          onScanComplete={handleBarcodeScanComplete}
+          onClose={() => setShowBarcodeScanner(false)}
+        />
+      )}
     </>
   );
 }

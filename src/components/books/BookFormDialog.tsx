@@ -18,6 +18,10 @@ interface BookFormDialogProps {
   series: RouterOutputs["series"]["getAll"] | undefined;
   onSuccess?: () => void;
   title?: string;
+  showAmazonSearch?: boolean;
+  setShowAmazonSearch?: (show: boolean) => void;
+  addBookType?: "manual" | "isbn" | "barcode";
+  scannedIsbn?: string;
 }
 
 export function BookFormDialog({
@@ -28,6 +32,10 @@ export function BookFormDialog({
   series,
   onSuccess,
   title,
+  showAmazonSearch = false,
+  setShowAmazonSearch,
+  addBookType = "manual",
+  scannedIsbn,
 }: Readonly<BookFormDialogProps>) {
   const isEditing = !!initialData?.id;
 
@@ -50,6 +58,9 @@ export function BookFormDialog({
           series={series}
           onSuccess={handleSuccess}
           onCancel={onClose}
+          showAmazonSearch={showAmazonSearch}
+          setShowAmazonSearch={setShowAmazonSearch}
+          scannedIsbn={scannedIsbn}
         />
       </DialogContent>
     </Dialog>

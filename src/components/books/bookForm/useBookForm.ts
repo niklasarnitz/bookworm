@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useFieldArray,
   useForm,
@@ -10,9 +10,16 @@ import type { AmazonBookDetail } from "~/lib/amazon-scraper";
 import { bookCreateSchema, type BookCreate } from "~/schemas/book";
 import { api } from "~/trpc/react";
 
+interface UseBookFormOptions {
+  showAmazonSearch?: boolean;
+  setShowAmazonSearch?: (show: boolean) => void;
+  scannedIsbn?: string;
+}
+
 export const useBookForm = (
   initialData?: Partial<BookCreate & { id?: string }>,
   onSuccess?: () => void,
+  options?: UseBookFormOptions,
 ) => {
   // API utils
   const utils = api.useUtils();
@@ -22,12 +29,20 @@ export const useBookForm = (
     Record<number, boolean>
   >({});
   const [showNewSeriesInput, setShowNewSeriesInput] = useState(false);
-  const [showAmazonSearch, setShowAmazonSearch] = useState(false);
+  const [internalShowAmazonSearch, setInternalShowAmazonSearch] =
+    useState(false);
   const [showCoverFetcher, setShowCoverFetcher] = useState(false);
 
   const [isProcessingCover, setIsProcessingCover] = useState(false);
 
   const isEditing = !!initialData?.id;
+
+  // Use external state if provided, otherwise use internal state
+  const showAmazonSearch =
+    options?.showAmazonSearch ?? internalShowAmazonSearch;
+
+  const setShowAmazonSearch =
+    options?.setShowAmazonSearch ?? setInternalShowAmazonSearch;
 
   // Form
   const transformedInitialData =
@@ -61,6 +76,13 @@ export const useBookForm = (
       pages: null,
     },
   });
+
+  // If we have a scanned ISBN, set it in the form
+  useEffect(() => {
+    if (options?.scannedIsbn) {
+      form.setValue("isbn", options.scannedIsbn);
+    }
+  }, [options?.scannedIsbn, form]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -152,26 +174,66 @@ export const useBookForm = (
   };
 
   const handleBookSelect = (bookData: AmazonBookDetail) => {
-    form.setValue("name", bookData.title);
-    form.setValue("subtitle", bookData.subtitle ?? "");
-    form.setValue("isbn", bookData.isbn ?? "");
+    try {
+      // Use requestAnimationFrame to ensure UI stays responsive during complex DOM updates
+      requestAnimationFrame(() => {
+        // Basic field updates that won't cause layout thrashing
+        form.setValue("name", bookData.title);
+        form.setValue("subtitle", bookData.subtitle ?? "");
+        form.setValue("isbn", bookData.isbn ?? "");
+        form.setValue("publisher", bookData.publisher ?? "");
 
-    if (bookData.authors.length > 0) {
-      while (fields.length > 0) {
-        remove(0);
-      }
+        // Delay the more complex operations that might trigger heavy DOM updates
+        setTimeout(() => {
+          try {
+            // Handle author updates in batches if there are many
+            if (bookData.authors.length > 0) {
+              // First remove existing authors
+              const fieldsToRemove = fields.length;
+              for (let i = 0; i < fieldsToRemove; i++) {
+                remove(0);
+              }
 
-      bookData.authors.forEach((authorName, index) => {
-        append({ authorName, authorId: "", tag: "" });
-        setShowNewAuthorInputs((prev) => ({ ...prev, [index]: true }));
+              // Then add new authors with a small delay between batches if needed
+              const addAuthors = (startIdx: number, batchSize: number) => {
+                const endIdx = Math.min(
+                  startIdx + batchSize,
+                  bookData.authors.length,
+                );
+
+                for (let i = startIdx; i < endIdx; i++) {
+                  const authorName = bookData.authors[i];
+                  append({ authorName, authorId: undefined, tag: "" });
+                  setShowNewAuthorInputs((prev) => ({ ...prev, [i]: true }));
+                }
+
+                // If there are more authors to process, schedule the next batch
+                if (endIdx < bookData.authors.length) {
+                  setTimeout(() => addAuthors(endIdx, batchSize), 0);
+                }
+              };
+
+              // Start adding authors in batches of 5 (adjust as needed)
+              addAuthors(0, 5);
+            }
+
+            // Finally update the cover URL in the next event loop turn
+            setTimeout(() => {
+              if (bookData.coverImageUrl) {
+                form.setValue("coverUrl", bookData.coverImageUrl);
+              }
+
+              // Finally close the dialog
+              setShowAmazonSearch(false);
+            }, 0);
+          } catch (err) {
+            console.error("Error processing author data:", err);
+          }
+        }, 10);
       });
+    } catch (err) {
+      console.error("Error in handleBookSelect:", err);
     }
-
-    if (bookData.coverImageUrl) {
-      form.setValue("coverUrl", bookData.coverImageUrl);
-    }
-
-    setShowAmazonSearch(false);
   };
 
   // Handle cover selection with proper loading state management
@@ -259,6 +321,7 @@ export const useBookForm = (
   };
 
   const onInvalid: SubmitErrorHandler<BookCreate> = (errors) => {
+    console.error("Form validation errors:", errors);
     const firstError = Object.values(errors)[0];
     const errorMessage =
       firstError?.message ?? "Please check the form for errors";

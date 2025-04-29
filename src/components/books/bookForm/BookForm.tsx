@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 
 import {
   Form,
@@ -11,7 +11,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { type BookCreate } from "~/schemas/book";
-import { X, Plus, ChevronDown } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { CoverUploader } from "../CoverUploader";
 import { AmazonBookSearch } from "../AmazonBookSearch";
 import { AmazonCoverFetcher } from "../AmazonCoverFetcher";
@@ -23,11 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import { useBookForm } from "~/components/books/bookForm/useBookForm";
 import type { RouterOutputs } from "~/trpc/react";
 
@@ -37,6 +32,9 @@ interface BookFormProps {
   series: RouterOutputs["series"]["getAll"] | undefined;
   onSuccess?: () => void;
   onCancel?: () => void;
+  showAmazonSearch?: boolean;
+  setShowAmazonSearch?: (show: boolean) => void;
+  scannedIsbn?: string;
 }
 
 export function BookForm({
@@ -45,9 +43,10 @@ export function BookForm({
   series,
   onSuccess,
   onCancel,
+  showAmazonSearch: externalShowAmazonSearch,
+  setShowAmazonSearch: externalSetShowAmazonSearch,
+  scannedIsbn,
 }: Readonly<BookFormProps>) {
-  const [showAddMenu, setShowAddMenu] = useState(false);
-
   const {
     handleCoverImageUpload,
     handleRemoveCover,
@@ -70,42 +69,21 @@ export function BookForm({
     isProcessingCover,
     showAmazonSearch,
     showCoverFetcher,
-  } = useBookForm(initialData, onSuccess);
+  } = useBookForm(initialData, onSuccess, {
+    showAmazonSearch: externalShowAmazonSearch,
+    setShowAmazonSearch: externalSetShowAmazonSearch,
+    scannedIsbn,
+  });
+
+  // Set ISBN from scan if available and update form
+  useEffect(() => {
+    if (scannedIsbn && !initialData?.id) {
+      form.setValue("isbn", scannedIsbn);
+    }
+  }, [scannedIsbn, form, initialData?.id]);
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex items-center justify-between">
-        {!isEditing && (
-          <div className="relative">
-            <Popover open={showAddMenu} onOpenChange={setShowAddMenu}>
-              <PopoverTrigger asChild>
-                <Button className="flex items-center gap-1" variant="outline">
-                  Add Book <ChevronDown className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-0">
-                <div className="flex flex-col py-1">
-                  <button
-                    className="flex w-full items-center px-4 py-2 text-left text-sm hover:bg-gray-100"
-                    onClick={() => {
-                      setShowAddMenu(false);
-                      setShowAmazonSearch(true);
-                    }}
-                  >
-                    Import via ISBN
-                  </button>
-                  <button
-                    className="flex w-full items-center px-4 py-2 text-left text-sm hover:bg-gray-100"
-                    onClick={() => setShowAddMenu(false)}
-                  >
-                    Create from Scratch
-                  </button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        )}
-      </div>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit, onInvalid)}
@@ -124,6 +102,7 @@ export function BookForm({
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="subtitle"
@@ -207,6 +186,7 @@ export function BookForm({
               </FormItem>
             )}
           />
+
           <div className="flex items-center justify-between">
             <FormLabel id="authors-section-label">Authors</FormLabel>
             <Button
@@ -487,10 +467,18 @@ export function BookForm({
           </div>
         </form>
       </Form>
+
       {showAmazonSearch && (
         <AmazonBookSearch
           onBookSelect={handleBookSelect}
-          onClose={() => setShowAmazonSearch(false)}
+          onClose={() => {
+            if (externalSetShowAmazonSearch) {
+              externalSetShowAmazonSearch(false);
+            } else {
+              setShowAmazonSearch(false);
+            }
+          }}
+          initialIsbn={scannedIsbn}
         />
       )}
 

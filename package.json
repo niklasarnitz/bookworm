@@ -67,6 +67,8 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.56.1",
     "react-image-crop": "^11.0.10",
+    "react-media-devices": "^1.2.1",
+    "react-zxing": "^2.1.0",
     "server-only": "^0.0.1",
     "sharp": "^0.34.1",
     "sonner": "^2.0.3",

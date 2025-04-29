@@ -20,7 +20,6 @@ interface BookFormDialogProps {
   title?: string;
   showAmazonSearch?: boolean;
   setShowAmazonSearch?: (show: boolean) => void;
-  addBookType?: "manual" | "isbn" | "barcode";
   scannedIsbn?: string;
 }
 
@@ -34,7 +33,6 @@ export function BookFormDialog({
   title,
   showAmazonSearch = false,
   setShowAmazonSearch,
-  addBookType = "manual",
   scannedIsbn,
 }: Readonly<BookFormDialogProps>) {
   const isEditing = !!initialData?.id;

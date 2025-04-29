@@ -18,25 +18,22 @@ import {
   DialogTitle,
   DialogFooter,
 } from "~/components/ui/dialog";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { type SeriesCreate, seriesCreateSchema } from "~/schemas/series";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-type Series = {
-  id: string;
-  name: string;
-  _count?: { books: number };
-};
+type Series = RouterOutputs["series"]["getAll"]["series"][number];
 
+// This component is no longer needed since we're using SeriesDialog directly in the table
+// It's kept for backward compatibility but should eventually be removed
 export function SeriesManager() {
+  const utils = api.useUtils();
+
   const [openDialog, setOpenDialog] = useState(false);
   const [editingSeries, setEditingSeries] = useState<Series | null>(null);
-
-  const { data: series = [], refetch: refetchSeries } =
-    api.series.getAll.useQuery();
 
   const form = useForm<SeriesCreate>({
     resolver: zodResolver(seriesCreateSchema),
@@ -47,7 +44,7 @@ export function SeriesManager() {
 
   const createMutation = api.series.create.useMutation({
     onSuccess: async () => {
-      await refetchSeries();
+      await utils.series.getAll.invalidate();
       toast.success("Series created successfully");
       resetForm();
     },
@@ -58,7 +55,8 @@ export function SeriesManager() {
 
   const updateMutation = api.series.update.useMutation({
     onSuccess: async () => {
-      await refetchSeries();
+      await utils.series.getAll.invalidate();
+      await utils.series.getById.invalidate({ id: editingSeries?.id ?? "" });
       toast.success("Series updated successfully");
       resetForm();
     },
@@ -90,28 +88,6 @@ export function SeriesManager() {
     resetForm();
     setOpenDialog(true);
   };
-
-  const handleOpenEdit = (series: Series) => {
-    setEditingSeries(series);
-    form.reset({ name: series.name });
-    setOpenDialog(true);
-  };
-
-  // Create a custom event listener to handle edit requests from the SeriesTable
-  React.useEffect(() => {
-    const handleEditEvent = (event: Event) => {
-      const customEvent = event as CustomEvent<Series>;
-      handleOpenEdit(customEvent.detail);
-    };
-
-    window.addEventListener("edit-series", handleEditEvent as EventListener);
-    return () => {
-      window.removeEventListener(
-        "edit-series",
-        handleEditEvent as EventListener,
-      );
-    };
-  }, []);
 
   return (
     <>

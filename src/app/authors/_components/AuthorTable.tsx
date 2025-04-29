@@ -12,7 +12,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { toast } from "sonner";
-import { Edit, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +29,7 @@ import { Badge } from "~/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Pagination } from "~/components/ui/pagination";
 import { useDebounce } from "use-debounce";
+import { AuthorDialog } from "./AuthorDialog";
 
 type Author = {
   id: string;
@@ -84,12 +85,6 @@ export function AuthorTable() {
       setAuthorToDelete(null);
     },
   });
-
-  const handleEdit = (author: Author) => {
-    // Dispatch a custom event that the parent component will listen for
-    const event = new CustomEvent("edit-author", { detail: author });
-    window.dispatchEvent(event);
-  };
 
   const handleDeleteConfirm = () => {
     if (authorToDelete) {
@@ -227,16 +222,7 @@ export function AuthorTable() {
                       )}
                     </TableCell>
                     <TableCell className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(author)}
-                      >
-                        <Edit className="mr-1 h-4 w-4" />
-                        <span className="sr-only sm:not-sr-only sm:inline-block">
-                          Edit
-                        </span>
-                      </Button>
+                      <AuthorDialog author={author} />
                       <Button
                         variant="ghost"
                         size="sm"

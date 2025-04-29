@@ -10,9 +10,9 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import { toast } from "sonner";
-import { Edit, Trash } from "lucide-react";
+import { Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,12 +28,9 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Badge } from "~/components/ui/badge";
 import { Pagination } from "~/components/ui/pagination";
 import { useRouter, useSearchParams } from "next/navigation";
+import { SeriesDialog } from "./SeriesDialog";
 
-type Series = {
-  id: string;
-  name: string;
-  _count?: { books: number };
-};
+type Series = RouterOutputs["series"]["getAll"]["series"][number];
 
 export function SeriesTable() {
   const searchParams = useSearchParams();
@@ -70,12 +67,6 @@ export function SeriesTable() {
       setSeriesToDelete(null);
     },
   });
-
-  const handleEdit = (series: Series) => {
-    // Dispatch a custom event that the parent component will listen for
-    const event = new CustomEvent("edit-series", { detail: series });
-    window.dispatchEvent(event);
-  };
 
   const handleDeleteConfirm = () => {
     if (seriesToDelete) {
@@ -201,16 +192,7 @@ export function SeriesTable() {
                       )}
                     </TableCell>
                     <TableCell className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(series)}
-                      >
-                        <Edit className="mr-1 h-4 w-4" />
-                        <span className="sr-only sm:not-sr-only sm:inline-block">
-                          Edit
-                        </span>
-                      </Button>
+                      <SeriesDialog series={series} />
                       <Button
                         variant="ghost"
                         size="sm"

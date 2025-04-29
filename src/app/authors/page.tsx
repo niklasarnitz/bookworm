@@ -1,6 +1,6 @@
 import React from "react";
-import { AuthorManager } from "~/app/authors/_components/AuthorManager";
 import { AuthorTable } from "~/app/authors/_components/AuthorTable";
+import { AuthorDialog } from "~/app/authors/_components/AuthorDialog";
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ export default function AuthorsPage() {
           </div>
 
           <div className="ml-auto">
-            <AuthorManager />
+            <AuthorDialog />
           </div>
         </CardHeader>
 

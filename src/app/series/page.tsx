@@ -1,6 +1,6 @@
 import React from "react";
-import { SeriesManager } from "~/app/series/_components/SeriesManager";
 import { SeriesTable } from "~/app/series/_components/SeriesTable";
+import { SeriesDialog } from "~/app/series/_components/SeriesDialog";
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ export default function SeriesPage() {
           </div>
 
           <div className="ml-auto">
-            <SeriesManager />
+            <SeriesDialog />
           </div>
         </CardHeader>
 

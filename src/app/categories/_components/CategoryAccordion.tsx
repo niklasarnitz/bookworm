@@ -1,9 +1,7 @@
 "use client";
 import type React from "react";
 import { CategoryItem } from "~/app/categories/_components/CategoryItem";
-import type { RouterOutputs } from "~/trpc/react";
-
-type CategoryWithChildren = RouterOutputs["category"]["getTree"][number];
+import type { Category } from "~/schemas/category";
 
 export function CategoryAccordion({
   categories,
@@ -13,11 +11,11 @@ export function CategoryAccordion({
   onDelete,
   level = 0,
 }: Readonly<{
-  categories: CategoryWithChildren[];
+  categories: Category[];
   expandedIds: Set<string>;
   toggleExpand: (id: string) => void;
-  onEdit: (category: CategoryWithChildren) => void;
-  onDelete: (category: CategoryWithChildren) => void;
+  onEdit: (category: Category) => void;
+  onDelete: (category: Category) => void;
   level?: number;
 }>) {
   if (!categories.length) return null;

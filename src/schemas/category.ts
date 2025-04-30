@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { RouterOutputs } from "~/trpc/react";
 
 // Schema for categories
 export const categorySchema = z.object({
@@ -39,6 +40,7 @@ export const categorySearchSchema = z.object({
   parentId: z.string().nullable().optional(),
 });
 
-export type Category = z.infer<typeof categorySchema>;
 export type CreateCategory = z.infer<typeof createCategorySchema>;
 export type UpdateCategory = z.infer<typeof updateCategorySchema>;
+
+export type Category = RouterOutputs["category"]["getTree"][number];

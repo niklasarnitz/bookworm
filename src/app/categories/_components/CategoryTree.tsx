@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { api, type RouterOutputs } from "~/trpc/react";
+import { api } from "~/trpc/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,18 +14,18 @@ import {
 } from "~/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { CategoryAccordion } from "~/app/categories/_components/CategoryAccordion";
-
-type CategoryWithChildren = RouterOutputs["category"]["getTree"][number];
+import type { Category } from "~/schemas/category";
 
 type CategoryTreeProps = {
-  onEdit?: (category: CategoryWithChildren) => void;
+  onEdit?: (category: Category) => void;
 };
 
 export function CategoryTree({ onEdit }: Readonly<CategoryTreeProps>) {
   const { data: categories = [], refetch } = api.category.getTree.useQuery();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [categoryToDelete, setCategoryToDelete] =
-    useState<CategoryWithChildren | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(
+    null,
+  );
 
   const deleteCategory = api.category.delete.useMutation({
     onSuccess: async () => {
@@ -50,7 +50,7 @@ export function CategoryTree({ onEdit }: Readonly<CategoryTreeProps>) {
     });
   };
 
-  const handleEdit = (category: CategoryWithChildren) => {
+  const handleEdit = (category: Category) => {
     if (onEdit) {
       onEdit(category);
     }

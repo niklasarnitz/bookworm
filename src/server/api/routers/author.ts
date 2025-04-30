@@ -32,8 +32,7 @@ export const authorRouter = createTRPCRouter({
         where,
         orderBy: { name: "asc" },
         include: { _count: { select: { books: true } } },
-        skip,
-        take: pageSize,
+        ...(input?.pagination ? { skip, take: pageSize } : {}),
       });
 
       return {

@@ -21,15 +21,17 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type SeriesCreate, seriesCreateSchema } from "~/schemas/series";
-import { api, type RouterOutputs } from "~/trpc/react";
+import {
+  type Series,
+  type SeriesCreate,
+  seriesCreateSchema,
+} from "~/schemas/series";
+import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { Edit, Plus } from "lucide-react";
 
-type Series = RouterOutputs["series"]["getAll"]["series"][number];
-
 interface SeriesDialogProps {
-  series?: Series; // If provided, we're editing an existing series
+  series?: Series;
   trigger?: React.ReactNode; // Optional custom trigger
   triggerClassName?: string;
   onComplete?: () => void;

@@ -1,8 +1,8 @@
-import type { RouterOutputs } from "~/trpc/react";
+import type { Category } from "~/schemas/category";
 
-type Category = RouterOutputs["book"]["getAll"]["books"][number]["category"];
-
-export const getCategoryName = (category: Category | undefined) => {
+export const getCategoryName = (
+  category: Omit<Category, "children"> | undefined,
+) => {
   if (category) {
     return `${category.path} ${category.name}`;
   }

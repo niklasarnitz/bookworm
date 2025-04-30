@@ -222,7 +222,15 @@ export const userProfileRouter = createTRPCRouter({
               author: true,
             },
           },
-          category: true,
+          category: {
+            include: {
+              _count: {
+                select: {
+                  books: true,
+                },
+              },
+            },
+          },
           series: true,
         },
       });

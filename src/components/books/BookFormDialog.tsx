@@ -1,6 +1,5 @@
 "use client";
 
-import { type Book } from "~/schemas/book";
 import {
   Dialog,
   DialogContent,
@@ -8,56 +7,55 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { BookForm } from "~/components/books/bookForm/BookForm";
-import type { RouterOutputs } from "~/trpc/react";
+import { useBooksPageStore } from "~/stores/booksPageStore/booksPageStore";
+import type { Author } from "~/schemas/author";
+import type { Series } from "~/schemas/series";
 
-interface BookFormDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  initialData?: Partial<Book & { id?: string }>;
-  authors: RouterOutputs["author"]["getAll"] | undefined;
-  series: RouterOutputs["series"]["getAll"] | undefined;
-  onSuccess?: () => void;
-  title?: string;
-  showAmazonSearch?: boolean;
-  setShowAmazonSearch?: (show: boolean) => void;
-  scannedIsbn?: string;
-}
+type BookFormDialogProps = {
+  authors: Author[];
+  series: Series[];
+};
 
 export function BookFormDialog({
-  isOpen,
-  onClose,
-  initialData,
   authors,
   series,
-  onSuccess,
-  title,
-  showAmazonSearch = false,
-  setShowAmazonSearch,
-  scannedIsbn,
 }: Readonly<BookFormDialogProps>) {
-  const isEditing = !!initialData?.id;
+  const {
+    isAddingBook,
+    bookBeingEdited,
+    scannedIsbn,
+    setIsAddingBook,
+    setBookBeingEdited,
+    setShowAmazonSearch,
+    setShowBarcodeScanner,
+    setScannedIsbn,
+  } = useBooksPageStore();
 
-  const handleSuccess = () => {
-    onSuccess?.();
-    onClose();
+  const isEditing = !!bookBeingEdited?.id;
+
+  const handleCloseDialog = () => {
+    setIsAddingBook(false);
+    setBookBeingEdited(undefined);
+    setShowAmazonSearch(false);
+    setShowBarcodeScanner(false);
+    setScannedIsbn(undefined);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isAddingBook || !!bookBeingEdited}
+      onOpenChange={(open) => !open && handleCloseDialog()}
+    >
       <DialogContent className="max-h-[90vh] w-full max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {title ?? (isEditing ? "Edit Book" : "Add New Book")}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Book" : "Add New Book"}</DialogTitle>
         </DialogHeader>
         <BookForm
-          initialData={initialData}
+          initialData={bookBeingEdited ?? undefined}
           authors={authors}
           series={series}
-          onSuccess={handleSuccess}
-          onCancel={onClose}
-          showAmazonSearch={showAmazonSearch}
-          setShowAmazonSearch={setShowAmazonSearch}
+          onSuccess={handleCloseDialog}
+          onCancel={handleCloseDialog}
           scannedIsbn={scannedIsbn}
         />
       </DialogContent>

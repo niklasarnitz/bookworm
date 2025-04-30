@@ -13,12 +13,14 @@ import {
 import { BookForm } from "~/components/books/bookForm/BookForm";
 import { BookCover } from "~/components/books/BookCover";
 import { api } from "~/trpc/react";
-import { type RouterOutputs } from "~/trpc/react";
+import type { Author } from "~/schemas/author";
+import type { Series } from "~/schemas/series";
+import type { Book } from "~/schemas/book";
 
 interface BookDetailProps {
-  book: RouterOutputs["book"]["getById"];
-  authors: RouterOutputs["author"]["getAll"];
-  series: RouterOutputs["series"]["getAll"];
+  book: Book;
+  authors: Author[];
+  series: Series[];
 }
 
 export function BookDetail({ book, authors, series }: BookDetailProps) {

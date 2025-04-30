@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { useZxing } from "react-zxing";

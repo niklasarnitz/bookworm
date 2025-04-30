@@ -18,9 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
-import type { RouterOutputs } from "~/trpc/react";
-
-type CategoryWithChildren = RouterOutputs["category"]["getTree"][number];
+import type { Category } from "~/schemas/category";
 
 export function CategoryItem({
   category,
@@ -30,11 +28,11 @@ export function CategoryItem({
   onDelete,
   level,
 }: Readonly<{
-  category: CategoryWithChildren;
+  category: Category;
   expandedIds: Set<string>;
   toggleExpand: (id: string) => void;
-  onEdit: (category: CategoryWithChildren) => void;
-  onDelete: (category: CategoryWithChildren) => void;
+  onEdit: (category: Category) => void;
+  onDelete: (category: Category) => void;
   level: number;
 }>) {
   const hasChildren = !!category.children?.length;

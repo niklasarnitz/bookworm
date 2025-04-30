@@ -25,13 +25,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "~/components/ui/dialog";
-import { api, type RouterOutputs } from "~/trpc/react";
+import { api } from "~/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { CategoryTree } from "./CategoryTree";
+import type { Category } from "~/schemas/category";
 
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -39,8 +40,6 @@ const categoryFormSchema = z.object({
 });
 
 type CategoryFormValues = z.infer<typeof categoryFormSchema>;
-
-type CategoryWithChildren = RouterOutputs["category"]["getTree"][number];
 
 export function CategoryManager() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -107,7 +106,7 @@ export function CategoryManager() {
     setOpenDialog(true);
   };
 
-  const handleOpenEdit = (category: CategoryWithChildren) => {
+  const handleOpenEdit = (category: Category) => {
     setEditingCategory({
       id: category.id,
       name: category.name,
@@ -218,7 +217,7 @@ function CategoryOptionGroup({
   currentEditId,
   level = 0,
 }: Readonly<{
-  category: CategoryWithChildren;
+  category: Category;
   currentEditId?: string;
   level: number;
 }>) {

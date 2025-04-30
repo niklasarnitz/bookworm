@@ -62,7 +62,7 @@ export function CategorySearch({
     if (!categories) return [];
 
     const formatCategory = (
-      category: Category,
+      category: Omit<Category, "children">,
     ): { id: string; display: string } => {
       return {
         id: category.id,

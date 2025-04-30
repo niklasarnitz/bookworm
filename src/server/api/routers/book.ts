@@ -78,7 +78,15 @@ export const bookRouter = createTRPCRouter({
             },
           },
           series: true,
-          category: true,
+          category: {
+            include: {
+              _count: {
+                select: {
+                  books: true,
+                },
+              },
+            },
+          },
         },
         orderBy: [
           // Books with series come first (non-null seriesId)
@@ -123,7 +131,15 @@ export const bookRouter = createTRPCRouter({
             },
           },
           series: true,
-          category: true,
+          category: {
+            include: {
+              _count: {
+                select: {
+                  books: true,
+                },
+              },
+            },
+          },
         },
       });
 

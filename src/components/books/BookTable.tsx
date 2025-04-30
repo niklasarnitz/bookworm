@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { getCategoryName } from "~/app/helpers/getCategoryName";
@@ -25,6 +27,8 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { toast } from "sonner";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Edit, Trash } from "lucide-react";
+import { useHandleEditBook } from "~/stores/booksPageStore/helpers/useHandleEditBook";
+import { useRouter } from "next/navigation";
 
 export function formatAuthors(
   bookAuthorRelations: { id: string; author: { id: string; name: string } }[],
@@ -34,15 +38,10 @@ export function formatAuthors(
 
 interface BookTableProps {
   books: RouterOutputs["book"]["getAll"]["books"];
-  onEditBook: (book: RouterOutputs["book"]["getAll"]["books"][number]) => void;
-  isLoading?: boolean;
 }
 
-export function BookTable({
-  books,
-  onEditBook,
-  isLoading = false,
-}: Readonly<BookTableProps>) {
+const BookTableInternal = ({ books }: Readonly<BookTableProps>) => {
+  const router = useRouter();
   const [bookToDelete, setBookToDelete] = useState<
     RouterOutputs["book"]["getAll"]["books"][number] | null
   >(null);
@@ -50,6 +49,7 @@ export function BookTable({
   const utils = api.useUtils();
   const deleteMutation = api.book.delete.useMutation({
     onSuccess: async () => {
+      router.refresh();
       await utils.book.getAll.invalidate();
       toast.success("Book deleted successfully");
       setBookToDelete(null);
@@ -60,54 +60,7 @@ export function BookTable({
     },
   });
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <div className="overflow-x-auto rounded-md border">
-          <Table className="w-full min-w-[800px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Series</TableHead>
-                <TableHead>ISBN</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Array.from({ length: 5 }, (_, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <Skeleton className="h-5 w-full max-w-[250px]" />
-                    <Skeleton className="mt-2 h-4 w-2/3" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[120px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[80px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[100px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[80px]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Skeleton className="h-8 w-16" />
-                      <Skeleton className="h-8 w-16" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    );
-  }
+  const onEditBook = useHandleEditBook();
 
   return (
     <div className="space-y-4">
@@ -253,4 +206,55 @@ export function BookTable({
       </AlertDialog>
     </div>
   );
+};
+
+export function BookTableSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="overflow-x-auto rounded-md border">
+        <Table className="w-full min-w-[800px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Author</TableHead>
+              <TableHead>Series</TableHead>
+              <TableHead>ISBN</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }, (_, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <Skeleton className="h-5 w-full max-w-[250px]" />
+                  <Skeleton className="mt-2 h-4 w-2/3" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[120px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[80px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[80px]" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Skeleton className="h-8 w-16" />
+                    <Skeleton className="h-8 w-16" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
 }
+
+export const BookTable = BookTableInternal;

@@ -65,9 +65,7 @@ async function UserContent({ username }: { username: string }) {
             <CardDescription>
               @{user.username} • Member since{" "}
               {user.createdAt
-                ? formatDistanceToNow(new Date(user.createdAt), {
-                    addSuffix: true,
-                  })
+                ? formatDistanceToNow(new Date(user.createdAt))
                 : "N/A"}
             </CardDescription>
           </div>

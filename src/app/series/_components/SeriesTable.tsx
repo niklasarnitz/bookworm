@@ -29,8 +29,7 @@ import { Badge } from "~/components/ui/badge";
 import { Pagination } from "~/components/ui/pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SeriesDialog } from "./SeriesDialog";
-
-type Series = RouterOutputs["series"]["getAll"]["series"][number];
+import type { Series } from "~/schemas/series";
 
 export function SeriesTable() {
   const searchParams = useSearchParams();
@@ -87,12 +86,6 @@ export function SeriesTable() {
     // Reset to page 1 when searching
     params.delete("page");
 
-    router.push(`/series?${params.toString()}`);
-  };
-
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", page.toString());
     router.push(`/series?${params.toString()}`);
   };
 
@@ -218,7 +211,6 @@ export function SeriesTable() {
             <Pagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}
-              onPageChange={handlePageChange}
             />
           )}
         </>

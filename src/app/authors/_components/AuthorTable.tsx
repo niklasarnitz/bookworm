@@ -92,19 +92,6 @@ export function AuthorTable() {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", page.toString());
-
-    if (searchQuery) {
-      params.set("query", searchQuery);
-    } else {
-      params.delete("query");
-    }
-
-    router.push(`?${params.toString()}`);
-  };
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
 
@@ -248,7 +235,6 @@ export function AuthorTable() {
             <Pagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}
-              onPageChange={handlePageChange}
             />
           )}
         </>

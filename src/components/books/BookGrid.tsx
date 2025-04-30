@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import { type Book } from "~/schemas/book";
@@ -24,28 +26,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { useHandleEditBook } from "~/stores/booksPageStore/helpers/useHandleEditBook";
+import { useRouter } from "next/navigation";
 
 interface BookGridProps {
   books: RouterOutputs["book"]["getAll"]["books"];
-  onEditBook: (book: Book) => void;
-  isLoading?: boolean;
-  _authors?: { id: string; name: string }[];
-  _series?: { id: string; name: string }[];
 }
 
-export function BookGrid({
-  books,
-  onEditBook,
-  isLoading = false,
-  _authors = [],
-  _series = [],
-}: Readonly<BookGridProps>) {
+function BookGrid({ books }: Readonly<BookGridProps>) {
   const utils = api.useUtils();
+  const router = useRouter();
   const [bookToDelete, setBookToDelete] = useState<Book | null>(null);
 
   const deleteMutation = api.book.delete.useMutation({
     onSuccess: async () => {
       await utils.book.getAll.invalidate();
+      router.refresh();
       toast.success("Book deleted successfully");
       setBookToDelete(null);
     },
@@ -55,35 +51,7 @@ export function BookGrid({
     },
   });
 
-  const handleEditBook = (book: Book) => {
-    onEditBook(book);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {Array.from<number>({ length: 8 }).map((_, i) => (
-          <Card
-            // Using static but unique key for loading cards
-            key={`loading-card-${i}`}
-            className="flex h-full flex-col overflow-hidden"
-          >
-            <div className="bg-muted relative h-64 animate-pulse"></div>
-            <CardHeader className="pb-0">
-              <div className="bg-muted h-6 w-3/4 animate-pulse rounded"></div>
-            </CardHeader>
-            <CardContent className="flex-grow-0 pb-0">
-              <div className="bg-muted h-4 w-1/2 animate-pulse rounded"></div>
-            </CardContent>
-            <CardFooter className="flex justify-between pt-2">
-              <div className="bg-muted h-8 w-16 animate-pulse rounded"></div>
-              <div className="bg-muted h-8 w-16 animate-pulse rounded"></div>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  const handleEditBook = useHandleEditBook();
 
   return (
     <>
@@ -212,3 +180,31 @@ export function BookGrid({
     </>
   );
 }
+
+export function BookGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {Array.from<number>({ length: 8 }).map((_, i) => (
+        <Card
+          // Using static but unique key for loading cards
+          key={`loading-card-${i}`}
+          className="flex h-full flex-col overflow-hidden"
+        >
+          <div className="bg-muted relative h-64 animate-pulse"></div>
+          <CardHeader className="pb-0">
+            <div className="bg-muted h-6 w-3/4 animate-pulse rounded"></div>
+          </CardHeader>
+          <CardContent className="flex-grow-0 pb-0">
+            <div className="bg-muted h-4 w-1/2 animate-pulse rounded"></div>
+          </CardContent>
+          <CardFooter className="flex justify-between pt-2">
+            <div className="bg-muted h-8 w-16 animate-pulse rounded"></div>
+            <div className="bg-muted h-8 w-16 animate-pulse rounded"></div>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+export { BookGrid };

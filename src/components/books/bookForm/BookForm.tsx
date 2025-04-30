@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
   Form,
@@ -10,7 +10,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-import { type BookCreate } from "~/schemas/book";
+import { type Book, type BookCreate } from "~/schemas/book";
 import { X, Plus } from "lucide-react";
 import { CoverUploader } from "../CoverUploader";
 import { AmazonBookSearch } from "../AmazonBookSearch";
@@ -23,17 +23,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import type { Author } from "~/schemas/author";
+import type { Series } from "~/schemas/series";
+import { toast } from "sonner";
 import { useBookForm } from "~/components/books/bookForm/useBookForm";
-import type { RouterOutputs } from "~/trpc/react";
+import { useBookFormOnSubmit } from "~/components/books/bookForm/useBookFormOnSubmit";
+import type { SubmitErrorHandler } from "react-hook-form";
+import { useBooksPageStore } from "~/stores/booksPageStore/booksPageStore";
+import { useBookFormSelectAmazonBook } from "~/components/books/bookForm/useBookFormSelectAmazonBook";
 
 interface BookFormProps {
-  initialData?: Partial<BookCreate & { id?: string }>;
-  authors: RouterOutputs["author"]["getAll"] | undefined;
-  series: RouterOutputs["series"]["getAll"] | undefined;
+  initialData: Book | undefined;
+  authors: Author[] | undefined;
+  series: Series[] | undefined;
   onSuccess?: () => void;
   onCancel?: () => void;
-  showAmazonSearch?: boolean;
-  setShowAmazonSearch?: (show: boolean) => void;
   scannedIsbn?: string;
 }
 
@@ -43,37 +47,102 @@ export function BookForm({
   series,
   onSuccess,
   onCancel,
-  showAmazonSearch: externalShowAmazonSearch,
-  setShowAmazonSearch: externalSetShowAmazonSearch,
   scannedIsbn,
 }: Readonly<BookFormProps>) {
+  const [showNewAuthorInputs, setShowNewAuthorInputs] = useState<
+    Record<number, boolean>
+  >({});
+  const [showNewSeriesInput, setShowNewSeriesInput] = useState(false);
+  const [showCoverFetcher, setShowCoverFetcher] = useState(false);
+  const [isProcessingCover, setIsProcessingCover] = useState(false);
+
+  const { showAmazonSearch, setShowAmazonSearch } = useBooksPageStore();
+
   const {
-    handleCoverImageUpload,
-    handleRemoveCover,
-    onInvalid,
-    onSubmit,
-    handleBookSelect,
-    handleCoverSelect,
-    isEditing,
-    toggleNewAuthorInput,
-    toggleNewSeriesInput,
-    setShowAmazonSearch,
+    form,
+    appendAuthor,
+    authors: authorFields,
+    removeAuthor,
+  } = useBookForm({
+    initialData,
+  });
+
+  const { onSubmit, isPending } = useBookFormOnSubmit(
+    initialData,
+    form,
+    onSuccess,
+  );
+
+  const selectAmazonBook = useBookFormSelectAmazonBook(
+    form,
+    authorFields,
     appendAuthor,
     removeAuthor,
-    authorFields,
-    showNewAuthorInputs,
-    showNewSeriesInput,
-    setShowCoverFetcher,
-    form,
-    isPending,
-    isProcessingCover,
-    showAmazonSearch,
-    showCoverFetcher,
-  } = useBookForm(initialData, onSuccess, {
-    showAmazonSearch: externalShowAmazonSearch,
-    setShowAmazonSearch: externalSetShowAmazonSearch,
-    scannedIsbn,
-  });
+    setShowNewAuthorInputs,
+    authors,
+  );
+
+  const onInvalid: SubmitErrorHandler<BookCreate> = useCallback((errors) => {
+    console.error("Form validation errors:", errors);
+    const firstError = Object.values(errors)[0];
+    const errorMessage =
+      firstError?.message ?? "Please check the form for errors";
+    toast.error(errorMessage);
+  }, []);
+
+  const toggleNewAuthorInput = useCallback(
+    (index: number) => {
+      setShowNewAuthorInputs((prev) => ({
+        ...prev,
+        [index]: !prev[index],
+      }));
+
+      if (!showNewAuthorInputs[index]) {
+        // Switching to "Create New" - clear authorId
+        form.setValue(`bookAuthors.${index}.authorId`, undefined);
+      } else {
+        // Switching to "Select Existing" - clear authorName
+        form.setValue(`bookAuthors.${index}.authorName`, undefined);
+      }
+    },
+    [form, showNewAuthorInputs],
+  );
+
+  const toggleNewSeriesInput = useCallback(() => {
+    setShowNewSeriesInput(!showNewSeriesInput);
+    if (showNewSeriesInput) {
+      // Switching to "Select Existing" - clear newSeriesName
+      form.setValue("newSeriesName", undefined);
+    } else {
+      // Switching to "Create New" - clear seriesId
+      form.setValue("seriesId", null);
+    }
+  }, [form, showNewSeriesInput]);
+
+  const handleCoverImageUpload = (url: string) => {
+    form.setValue("coverUrl", url);
+  };
+
+  const handleRemoveCover = () => {
+    form.setValue("coverUrl", null);
+  };
+
+  const handleCoverSelect = async (coverUrl: string) => {
+    try {
+      setIsProcessingCover(true);
+      // We don't need to preload here, as the CoverUploader component will handle the image processing
+      form.setValue("coverUrl", coverUrl);
+      setShowCoverFetcher(false);
+    } catch (error) {
+      console.error("Failed to handle cover selection:", error);
+      toast.error("Failed to process the selected cover");
+    } finally {
+      // Short delay to ensure state changes are applied in the right order
+      setTimeout(() => {
+        setIsProcessingCover(false);
+      }, 100);
+    }
+  };
 
   // Set ISBN from scan if available and update form
   useEffect(() => {
@@ -248,7 +317,7 @@ export function BookForm({
                                 <SelectItem value="placeholder">
                                   Select an author
                                 </SelectItem>
-                                {authors?.authors.map((author) => (
+                                {authors?.map((author) => (
                                   <SelectItem key={author.id} value={author.id}>
                                     {author.name}
                                   </SelectItem>
@@ -348,7 +417,7 @@ export function BookForm({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
-                          {series?.series.map((series) => (
+                          {series?.map((series) => (
                             <SelectItem key={series.id} value={series.id}>
                               {series.name}
                             </SelectItem>
@@ -458,10 +527,10 @@ export function BookForm({
               {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
-                  {isEditing ? "Updating..." : "Saving..."}
+                  {initialData?.id ? "Updating..." : "Saving..."}
                 </span>
               ) : (
-                <>{isEditing ? "Update Book" : "Add Book"}</>
+                <>{initialData?.id ? "Update Book" : "Add Book"}</>
               )}
             </Button>
           </div>
@@ -470,13 +539,9 @@ export function BookForm({
 
       {showAmazonSearch && (
         <AmazonBookSearch
-          onBookSelect={handleBookSelect}
+          onBookSelect={selectAmazonBook}
           onClose={() => {
-            if (externalSetShowAmazonSearch) {
-              externalSetShowAmazonSearch(false);
-            } else {
-              setShowAmazonSearch(false);
-            }
+            setShowAmazonSearch(false);
           }}
           initialIsbn={scannedIsbn}
         />

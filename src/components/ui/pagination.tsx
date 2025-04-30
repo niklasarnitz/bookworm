@@ -2,18 +2,17 @@ import React from "react";
 import { Button } from "./button";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { cn } from "~/lib/utils";
+import Link from "next/link";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
   className?: string;
 }
 
 export function Pagination({
   currentPage,
   totalPages,
-  onPageChange,
   className,
 }: Readonly<PaginationProps>) {
   // Don't render pagination if there's only one page
@@ -67,15 +66,23 @@ export function Pagination({
     >
       <ul className="flex flex-wrap items-center gap-2">
         <li>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            aria-label="Previous page"
+          <Link
+            href={{
+              query: {
+                page: currentPage === 1 ? undefined : currentPage - 1,
+              },
+            }}
+            prefetch={true}
           >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage === 1}
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </Link>
         </li>
 
         {pageNumbers.map((pageNum, index) => (
@@ -85,30 +92,45 @@ export function Pagination({
                 <MoreHorizontal className="h-4 w-4" />
               </span>
             ) : (
-              <Button
-                variant={currentPage === pageNum ? "default" : "outline"}
-                size="icon"
-                onClick={() => onPageChange(pageNum)}
-                className="h-9 w-9"
-                aria-current={currentPage === pageNum ? "page" : undefined}
-                aria-label={`Page ${pageNum}`}
+              <Link
+                href={{
+                  query: {
+                    page: pageNum === 1 ? undefined : pageNum,
+                  },
+                }}
               >
-                <span>{pageNum}</span>
-              </Button>
+                <Button
+                  variant={currentPage === pageNum ? "default" : "outline"}
+                  size="icon"
+                  className="h-9 w-9"
+                  aria-current={currentPage === pageNum ? "page" : undefined}
+                  aria-label={`Page ${pageNum}`}
+                >
+                  <span>{pageNum}</span>
+                </Button>
+              </Link>
             )}
           </li>
         ))}
 
         <li>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            aria-label="Next page"
+          <Link
+            href={{
+              query: {
+                page: currentPage === totalPages ? undefined : currentPage + 1,
+              },
+            }}
+            prefetch={true}
           >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage === totalPages}
+              aria-label="Next page"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </li>
       </ul>
     </nav>

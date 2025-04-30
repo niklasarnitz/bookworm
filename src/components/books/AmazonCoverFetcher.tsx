@@ -34,7 +34,6 @@ export function AmazonCoverFetcher({
   onCoverSelect,
   onClose,
 }: Readonly<AmazonCoverFetcherProps>) {
-  const [error, setError] = useState<string | null>(null);
   const [selectedCoverIndex, setSelectedCoverIndex] = useState<number | null>(
     null,
   );
@@ -83,12 +82,6 @@ export function AmazonCoverFetcher({
         </DialogHeader>
 
         <div className="py-2">
-          {error && (
-            <div className="mb-4 rounded border border-red-400 bg-red-100 p-3 text-red-700">
-              {error}
-            </div>
-          )}
-
           {coversQuery.isLoading ? (
             <div className="flex justify-center p-8 text-center">
               <div>
@@ -145,11 +138,9 @@ export function AmazonCoverFetcher({
                   ))}
                 </div>
               ) : (
-                !error && (
-                  <p className="py-8 text-center text-gray-500">
-                    No covers found for this ISBN.
-                  </p>
-                )
+                <p className="py-8 text-center text-gray-500">
+                  No covers found for this ISBN.
+                </p>
               )}
 
               <div className="mt-4 flex justify-end">

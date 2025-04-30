@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { RouterOutputs } from "~/trpc/react";
 
 export const bookAuthorCreateSchema = z.object({
   authorId: z.string().min(1, "Author ID is required").optional(),
@@ -46,8 +47,9 @@ export const bookSearchSchema = z.object({
 export type BookAuthorCreate = z.infer<typeof bookAuthorCreateSchema>;
 export type BookAuthor = z.infer<typeof bookAuthorSchema>;
 export type BookCreate = z.infer<typeof bookCreateSchema>;
-export type Book = z.infer<typeof bookSchema>;
 export type BookSearch = z.infer<typeof bookSearchSchema>;
 
 export const viewModeSchema = z.enum(["grid", "table"]);
 export type ViewMode = z.infer<typeof viewModeSchema>;
+
+export type Book = RouterOutputs["book"]["getAll"]["books"][number];

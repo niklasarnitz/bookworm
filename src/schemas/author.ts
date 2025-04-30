@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { RouterOutputs } from "~/trpc/react";
 
 export const authorCreateSchema = z.object({
   name: z.string().min(1, "Author name is required"),
@@ -20,5 +21,6 @@ export const authorSearchSchema = z.object({
 });
 
 export type AuthorCreate = z.infer<typeof authorCreateSchema>;
-export type Author = z.infer<typeof authorSchema>;
 export type AuthorSearch = z.infer<typeof authorSearchSchema>;
+
+export type Author = RouterOutputs["author"]["getAll"]["authors"][number];

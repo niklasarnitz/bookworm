@@ -9,8 +9,8 @@ export default async function BookDetailPage({
   const { id } = await params;
 
   const book = await api.book.getById({ id });
-  const authors = await api.author.getAll();
-  const series = await api.series.getAll();
+  const { authors } = await api.author.getAll();
+  const { series } = await api.series.getAll();
 
   if (!book) {
     return (

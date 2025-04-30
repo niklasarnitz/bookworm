@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { RouterOutputs } from "~/trpc/react";
 
 export const seriesCreateSchema = z.object({
   name: z.string().min(1, "Series name is required"),
@@ -19,5 +20,5 @@ export const seriesSearchSchema = z.object({
 });
 
 export type SeriesCreate = z.infer<typeof seriesCreateSchema>;
-export type Series = z.infer<typeof seriesSchema>;
+export type Series = RouterOutputs["series"]["getAll"]["series"][number];
 export type SeriesSearch = z.infer<typeof seriesSearchSchema>;

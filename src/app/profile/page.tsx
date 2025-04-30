@@ -76,9 +76,7 @@ async function ProfileContent() {
             <CardDescription>
               @{profile.username} • Member since{" "}
               {profile.createdAt
-                ? formatDistanceToNow(new Date(profile.createdAt), {
-                    addSuffix: true,
-                  })
+                ? formatDistanceToNow(new Date(profile.createdAt))
                 : "N/A"}
             </CardDescription>
           </div>

@@ -21,15 +21,17 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type AuthorCreate, authorCreateSchema } from "~/schemas/author";
-import { api, type RouterOutputs } from "~/trpc/react";
+import {
+  type Author,
+  type AuthorCreate,
+  authorCreateSchema,
+} from "~/schemas/author";
+import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { Edit, Plus } from "lucide-react";
 
-type Author = RouterOutputs["author"]["getAll"]["authors"][number];
-
 interface AuthorDialogProps {
-  author?: Author; // If provided, we're editing an existing author
+  author?: Author;
   trigger?: React.ReactNode; // Optional custom trigger
   triggerClassName?: string;
   onComplete?: () => void;

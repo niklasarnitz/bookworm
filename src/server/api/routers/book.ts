@@ -64,6 +64,10 @@ export const bookRouter = createTRPCRouter({
         where.categoryId = null;
       }
 
+      if (input?.onlyRead) {
+        where.readDate = { not: null };
+      }
+
       // Get total count for pagination
       const totalCount = await ctx.db.book.count({ where });
       const totalPages = Math.ceil(totalCount / pageSize);
@@ -103,8 +107,7 @@ export const bookRouter = createTRPCRouter({
           // Finally, sort by book name
           { name: "asc" },
         ],
-        skip,
-        take: pageSize,
+        ...(input?.pagination ? { skip, take: pageSize } : {}),
       });
 
       return {
@@ -310,6 +313,39 @@ export const bookRouter = createTRPCRouter({
       // Then delete the book
       return ctx.db.book.delete({
         where: { id: input.id },
+      });
+    }),
+
+  toggleReadStatus: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // Check if book exists and belongs to the current user
+      const book = await ctx.db.book.findUnique({
+        where: { id: input.id },
+        select: { userId: true, readDate: true },
+      });
+
+      if (!book) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Book not found",
+        });
+      }
+
+      if (book.userId !== ctx.session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You don't have permission to update this book",
+        });
+      }
+
+      // Toggle read status: If readDate is null, set to current date, otherwise set to null
+      const readDate = book.readDate ? null : new Date();
+
+      // Update the book with the new read status
+      return ctx.db.book.update({
+        where: { id: input.id },
+        data: { readDate },
       });
     }),
 });

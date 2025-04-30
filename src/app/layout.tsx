@@ -95,6 +95,9 @@ export default async function RootLayout({
                           <Link href="/categories" className="hover:underline">
                             Categories
                           </Link>
+                          <Link href="/statistics" className="hover:underline">
+                            Statistics
+                          </Link>
                           {session.user.role === "ADMIN" && (
                             <Link
                               href="/admin"

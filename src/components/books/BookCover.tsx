@@ -2,6 +2,7 @@ import Image from "next/image";
 import { type RouterOutputs } from "~/trpc/react";
 import { formatAuthors } from "./BookTable";
 import { clsx } from "clsx";
+import { Check } from "lucide-react";
 
 // Function to generate a pseudo-random color based on book data
 export function generateBookColor(bookId: string, index = 0) {
@@ -40,17 +41,26 @@ export function BookCover({
     return null;
   }
 
+  const isRead = !!book.readDate;
+
   if (book.coverUrl) {
     return (
-      <Image
-        src={book.coverUrl}
-        alt={`Cover for ${book.name}`}
-        fill
-        sizes="(max-width: 768px) 100vw, 33vw"
-        style={{ objectFit: "contain" }}
-        className={`transition-opacity hover:opacity-80 ${className}`}
-        priority={priority}
-      />
+      <div className="relative h-full w-full">
+        <Image
+          src={book.coverUrl}
+          alt={`Cover for ${book.name}`}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          style={{ objectFit: "contain" }}
+          className={`transition-opacity hover:opacity-80 ${className}`}
+          priority={priority}
+        />
+        {isRead && (
+          <div className="absolute top-2 right-2 rounded-full bg-green-500 p-1 text-white shadow-md">
+            <Check className="h-3 w-3" />
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -58,61 +68,68 @@ export function BookCover({
   const secondHue = (baseHue + 40) % 360; // Complementary color
 
   return (
-    <div
-      className={`mx-auto my-auto flex aspect-[3/4] h-full max-w-[75%] overflow-hidden rounded bg-gradient-to-br from-[hsl(var(--hue),70%,80%)] to-[hsl(var(--secondary-hue),60%,60%)] shadow-md dark:from-[hsl(var(--hue),60%,30%)] dark:to-[hsl(var(--secondary-hue),50%,20%)] ${className}`}
-      style={
-        {
-          "--hue": `${baseHue}deg`,
-          "--secondary-hue": `${secondHue}deg`,
-        } as React.CSSProperties
-      }
-    >
-      {showDetails && (
-        <div className="flex h-full w-full flex-col items-center justify-between p-4 text-center">
-          <div className={clsx("flex-1", isDetail ? "mt-4" : "mt-2")}>
-            <h3
-              className={clsx(
-                "text-foreground line-clamp-3 font-bold",
-                isDetail ? "mb-3 text-xl" : "mb-2 text-lg",
-              )}
-            >
-              {book.name}
-            </h3>
-
-            {book.subtitle && (
-              <p
+    <div className="relative h-full w-full">
+      <div
+        className={`mx-auto my-auto flex aspect-[3/4] h-full max-w-[75%] overflow-hidden rounded bg-gradient-to-br from-[hsl(var(--hue),70%,80%)] to-[hsl(var(--secondary-hue),60%,60%)] shadow-md dark:from-[hsl(var(--hue),60%,30%)] dark:to-[hsl(var(--secondary-hue),50%,20%)] ${className}`}
+        style={
+          {
+            "--hue": `${baseHue}deg`,
+            "--secondary-hue": `${secondHue}deg`,
+          } as React.CSSProperties
+        }
+      >
+        {showDetails && (
+          <div className="flex h-full w-full flex-col items-center justify-between p-4 text-center">
+            <div className={clsx("flex-1", isDetail ? "mt-4" : "mt-2")}>
+              <h3
                 className={clsx(
-                  "text-muted-foreground line-clamp-2",
-                  isDetail ? "mb-4 text-base" : "mb-3 text-sm",
+                  "text-foreground line-clamp-3 font-bold",
+                  isDetail ? "mb-3 text-xl" : "mb-2 text-lg",
                 )}
               >
-                {book.subtitle}
-              </p>
-            )}
+                {book.name}
+              </h3>
 
-            {book.series && (
+              {book.subtitle && (
+                <p
+                  className={clsx(
+                    "text-muted-foreground line-clamp-2",
+                    isDetail ? "mb-4 text-base" : "mb-3 text-sm",
+                  )}
+                >
+                  {book.subtitle}
+                </p>
+              )}
+
+              {book.series && (
+                <p
+                  className={clsx(
+                    "text-muted-foreground line-clamp-3 italic",
+                    isDetail ? "mb-2 text-base" : "mb-1 text-sm",
+                  )}
+                >
+                  {book.series.name}
+                  {book.seriesNumber !== null && ` #${book.seriesNumber}`}
+                </p>
+              )}
+            </div>
+
+            <div className={clsx("w-full", isDetail ? "mb-4" : "mb-2")}>
               <p
                 className={clsx(
-                  "text-muted-foreground line-clamp-3 italic",
-                  isDetail ? "mb-2 text-base" : "mb-1 text-sm",
+                  "text-muted-foreground line-clamp-3",
+                  isDetail ? "text-sm" : "text-xs",
                 )}
               >
-                {book.series.name}
-                {book.seriesNumber !== null && ` #${book.seriesNumber}`}
+                {formatAuthors(book.bookAuthors)}
               </p>
-            )}
+            </div>
           </div>
-
-          <div className={clsx("w-full", isDetail ? "mb-4" : "mb-2")}>
-            <p
-              className={clsx(
-                "text-muted-foreground line-clamp-3",
-                isDetail ? "text-sm" : "text-xs",
-              )}
-            >
-              {formatAuthors(book.bookAuthors)}
-            </p>
-          </div>
+        )}
+      </div>
+      {isRead && (
+        <div className="absolute top-2 right-2 rounded-full bg-green-500 p-1 text-white shadow-md">
+          <Check className="h-3 w-3" />
         </div>
       )}
     </div>

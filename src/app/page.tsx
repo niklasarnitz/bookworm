@@ -20,6 +20,7 @@ type PageProps = {
     categoryId?: string;
     noCover?: boolean;
     noCategory?: boolean;
+    onlyRead?: boolean;
     page?: string;
   }>;
 };
@@ -40,6 +41,7 @@ export default async function BooksPage({ searchParams }: Readonly<PageProps>) {
     categoryId: params.categoryId ?? undefined,
     noCover: params.noCover ? true : undefined,
     noCategory: params.noCategory ? true : undefined,
+    onlyRead: params.onlyRead ? true : undefined,
     pagination: {
       page: params.page ? Number(params.page) : 1,
       pageSize,

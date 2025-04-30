@@ -23,10 +23,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { Skeleton } from "~/components/ui/skeleton";
 import { toast } from "sonner";
 import { api, type RouterOutputs } from "~/trpc/react";
-import { Edit, Trash } from "lucide-react";
+import {
+  Edit,
+  MoreVertical,
+  Trash,
+  BookOpen,
+  BookX,
+  Check,
+} from "lucide-react";
 import { useHandleEditBook } from "~/stores/booksPageStore/helpers/useHandleEditBook";
 import { useRouter } from "next/navigation";
 
@@ -60,7 +73,24 @@ const BookTableInternal = ({ books }: Readonly<BookTableProps>) => {
     },
   });
 
+  const toggleReadStatusMutation = api.book.toggleReadStatus.useMutation({
+    onSuccess: async () => {
+      router.refresh();
+      await utils.book.getAll.invalidate();
+      toast.success("Read status updated");
+    },
+    onError: (error) => {
+      toast.error(`Error updating read status: ${error.message}`);
+    },
+  });
+
   const onEditBook = useHandleEditBook();
+
+  const handleToggleReadStatus = (
+    book: RouterOutputs["book"]["getAll"]["books"][number],
+  ) => {
+    toggleReadStatusMutation.mutate({ id: book.id });
+  };
 
   return (
     <div className="space-y-4">
@@ -87,14 +117,21 @@ const BookTableInternal = ({ books }: Readonly<BookTableProps>) => {
               books.map((book) => (
                 <TableRow key={book.id}>
                   <TableCell>
-                    <Link
-                      href={`/books/${book.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      <p className="break-words hyphens-auto whitespace-normal">
-                        {book.name}
-                      </p>
-                    </Link>
+                    <div className="flex items-center">
+                      <Link
+                        href={`/books/${book.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        <p className="break-words hyphens-auto whitespace-normal">
+                          {book.name}
+                        </p>
+                      </Link>
+                      {book.readDate && (
+                        <div className="ml-2 rounded-full bg-green-500 p-[2px] text-white">
+                          <Check className="h-3 w-3" />
+                        </div>
+                      )}
+                    </div>
                     {book.subtitle && (
                       <p className="text-sm break-words hyphens-auto whitespace-normal text-gray-500">
                         {book.subtitle}
@@ -148,25 +185,46 @@ const BookTableInternal = ({ books }: Readonly<BookTableProps>) => {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEditBook(book)}
-                      >
-                        <Edit className="mr-1 h-4 w-4" />
-                        <span className="sr-only sm:not-sr-only">Edit</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:bg-red-100 hover:text-red-700"
-                        onClick={() => setBookToDelete(book)}
-                      >
-                        <Trash className="mr-1 h-4 w-4" />
-                        <span className="sr-only sm:not-sr-only">Delete</span>
-                      </Button>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <span className="sr-only">Open menu</span>
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {book.readDate ? (
+                          <DropdownMenuItem
+                            onClick={() => handleToggleReadStatus(book)}
+                          >
+                            <BookX className="mr-2 h-4 w-4" />
+                            <span>Mark as Unread</span>
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => handleToggleReadStatus(book)}
+                          >
+                            <BookOpen className="mr-2 h-4 w-4" />
+                            <span>Mark as Read</span>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem onClick={() => onEditBook(book)}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setBookToDelete(book)}
+                          className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))

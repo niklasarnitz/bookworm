@@ -52,6 +52,7 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     if (searchParams.has("categoryId")) count++;
     if (searchParams.has("noCover")) count++;
     if (searchParams.has("noCategory")) count++;
+    if (searchParams.has("onlyRead")) count++;
     setActiveFilters(count);
 
     // Set active accordion items based on active filters
@@ -59,7 +60,11 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     if (searchParams.has("authorId")) items.push("author");
     if (searchParams.has("seriesId")) items.push("series");
     if (searchParams.has("categoryId")) items.push("category");
-    if (searchParams.has("noCover") || searchParams.has("noCategory"))
+    if (
+      searchParams.has("noCover") ||
+      searchParams.has("noCategory") ||
+      searchParams.has("onlyRead")
+    )
       items.push("special");
     setActiveAccordionItems(items);
   }, [searchParams]);
@@ -310,7 +315,8 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
                 <span className="flex items-center">
                   Special Filters
                   {(searchParams.has("noCover") ||
-                    searchParams.has("noCategory")) && (
+                    searchParams.has("noCategory") ||
+                    searchParams.has("onlyRead")) && (
                     <span className="bg-muted text-muted-foreground ml-2 rounded-full px-1.5 py-0.5 text-xs">
                       Active
                     </span>
@@ -337,6 +343,16 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
                     />
                     <Label htmlFor="noCategory" className="text-sm">
                       Books without categories
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="onlyRead"
+                      checked={searchParams.has("onlyRead")}
+                      onCheckedChange={() => handleCheckboxChange("onlyRead")}
+                    />
+                    <Label htmlFor="onlyRead" className="text-sm">
+                      Only read books
                     </Label>
                   </div>
                 </div>

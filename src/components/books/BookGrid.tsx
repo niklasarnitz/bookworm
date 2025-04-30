@@ -10,12 +10,18 @@ import {
   CardFooter,
   CardHeader,
 } from "~/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { BookCover } from "./BookCover";
 import { getCategoryName } from "~/app/helpers/getCategoryName";
 import { LinkTag } from "~/components/LinkTag";
 import { toast } from "sonner";
-import { Edit, Trash } from "lucide-react";
+import { Edit, MoreVertical, Trash, BookOpen, BookX } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +57,22 @@ function BookGrid({ books }: Readonly<BookGridProps>) {
     },
   });
 
+  const toggleReadStatusMutation = api.book.toggleReadStatus.useMutation({
+    onSuccess: async () => {
+      await utils.book.getAll.invalidate();
+      router.refresh();
+      toast.success("Read status updated");
+    },
+    onError: (error) => {
+      toast.error(`Error updating read status: ${error.message}`);
+    },
+  });
+
   const handleEditBook = useHandleEditBook();
+
+  const handleToggleReadStatus = (book: Book) => {
+    toggleReadStatusMutation.mutate({ id: book.id });
+  };
 
   return (
     <>
@@ -122,25 +143,43 @@ function BookGrid({ books }: Readonly<BookGridProps>) {
                   )}
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1"
-                  onClick={() => handleEditBook(book)}
-                >
-                  <Edit className="h-4 w-4" />
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1 text-red-600 hover:bg-red-50 hover:text-red-700"
-                  onClick={() => setBookToDelete(book)}
-                >
-                  <Trash className="h-4 w-4" />
-                  Delete
-                </Button>
+              <CardFooter className="flex justify-end pt-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {book.readDate ? (
+                      <DropdownMenuItem
+                        onClick={() => handleToggleReadStatus(book)}
+                      >
+                        <BookX className="mr-2 h-4 w-4" />
+                        <span>Mark as Unread</span>
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem
+                        onClick={() => handleToggleReadStatus(book)}
+                      >
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        <span>Mark as Read</span>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={() => handleEditBook(book)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      <span>Edit</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setBookToDelete(book)}
+                      className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                    >
+                      <Trash className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </CardFooter>
             </Card>
           ))
@@ -197,9 +236,8 @@ export function BookGridSkeleton() {
           <CardContent className="flex-grow-0 pb-0">
             <div className="bg-muted h-4 w-1/2 animate-pulse rounded"></div>
           </CardContent>
-          <CardFooter className="flex justify-between pt-2">
-            <div className="bg-muted h-8 w-16 animate-pulse rounded"></div>
-            <div className="bg-muted h-8 w-16 animate-pulse rounded"></div>
+          <CardFooter className="flex justify-end pt-2">
+            <div className="bg-muted h-8 w-8 animate-pulse rounded-full"></div>
           </CardFooter>
         </Card>
       ))}

@@ -1,5 +1,7 @@
+import Link from "next/link";
 import React from "react";
 import { CategoryManager } from "~/app/categories/_components/CategoryManager";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -18,6 +20,9 @@ export default function CategoryPage() {
         </CardHeader>
         <CardContent>
           <CategoryManager />
+          <Link href="/api/categories/tree">
+            <Button className="mt-4">Generate Category Tree</Button>
+          </Link>
         </CardContent>
       </Card>
     </div>

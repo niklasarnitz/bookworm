@@ -1,8 +1,11 @@
+"use client";
+
 import React from "react";
 import { Button } from "./button";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { cn } from "~/lib/utils";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface PaginationProps {
   currentPage: number;
@@ -15,6 +18,8 @@ export function Pagination({
   totalPages,
   className,
 }: Readonly<PaginationProps>) {
+  const searchParams = useSearchParams();
+
   // Don't render pagination if there's only one page
   if (totalPages <= 1) {
     return null;
@@ -69,6 +74,7 @@ export function Pagination({
           <Link
             href={{
               query: {
+                ...Object.fromEntries(searchParams.entries()),
                 page: currentPage === 1 ? undefined : currentPage - 1,
               },
             }}
@@ -95,6 +101,7 @@ export function Pagination({
               <Link
                 href={{
                   query: {
+                    ...Object.fromEntries(searchParams.entries()),
                     page: pageNum === 1 ? undefined : pageNum,
                   },
                 }}
@@ -117,6 +124,7 @@ export function Pagination({
           <Link
             href={{
               query: {
+                ...Object.fromEntries(searchParams.entries()),
                 page: currentPage === totalPages ? undefined : currentPage + 1,
               },
             }}

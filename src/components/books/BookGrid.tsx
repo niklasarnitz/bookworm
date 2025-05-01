@@ -143,56 +143,56 @@ function BookGrid({ books }: Readonly<BookGridProps>) {
                     </LinkTag>
                   )}
                 </div>
+                <div className="flex justify-end">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {book.readDate ? (
+                        <DropdownMenuItem
+                          onClick={() => handleToggleReadStatus(book)}
+                        >
+                          <BookX className="mr-2 h-4 w-4" />
+                          <span>Mark as Unread</span>
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() => handleToggleReadStatus(book)}
+                        >
+                          <BookOpen className="mr-2 h-4 w-4" />
+                          <span>Mark as Read</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(
+                            `${book.name} by ${formatAuthors(book.bookAuthors)}`,
+                          );
+                          toast.success("Book data copied to clipboard");
+                        }}
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        <span>Copy Book Data</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditBook(book)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setBookToDelete(book)}
+                        className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                      >
+                        <Trash className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </CardContent>
-              <CardFooter className="flex justify-end pt-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {book.readDate ? (
-                      <DropdownMenuItem
-                        onClick={() => handleToggleReadStatus(book)}
-                      >
-                        <BookX className="mr-2 h-4 w-4" />
-                        <span>Mark as Unread</span>
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem
-                        onClick={() => handleToggleReadStatus(book)}
-                      >
-                        <BookOpen className="mr-2 h-4 w-4" />
-                        <span>Mark as Read</span>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(
-                          `${book.name} by ${formatAuthors(book.bookAuthors)}`,
-                        );
-                        toast.success("Book data copied to clipboard");
-                      }}
-                    >
-                      <Copy className="mr-2 h-4 w-4" />
-                      <span>Copy Book Data</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEditBook(book)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setBookToDelete(book)}
-                      className="text-red-600 focus:bg-red-50 focus:text-red-600"
-                    >
-                      <Trash className="mr-2 h-4 w-4" />
-                      <span>Delete</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardFooter>
             </Card>
           ))
         )}

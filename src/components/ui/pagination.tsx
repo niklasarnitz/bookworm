@@ -75,7 +75,7 @@ export function Pagination({
             href={{
               query: {
                 ...Object.fromEntries(searchParams.entries()),
-                page: currentPage === 1 ? undefined : currentPage - 1,
+                page: 1,
               },
             }}
             prefetch={true}
@@ -102,7 +102,7 @@ export function Pagination({
                 href={{
                   query: {
                     ...Object.fromEntries(searchParams.entries()),
-                    page: pageNum === 1 ? undefined : pageNum,
+                    page: pageNum === currentPage ? undefined : pageNum,
                   },
                 }}
               >
@@ -125,7 +125,7 @@ export function Pagination({
             href={{
               query: {
                 ...Object.fromEntries(searchParams.entries()),
-                page: currentPage === totalPages ? undefined : currentPage + 1,
+                page: currentPage === totalPages ? undefined : totalPages,
               },
             }}
             prefetch={true}

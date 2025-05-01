@@ -39,6 +39,7 @@ import {
   BookOpen,
   BookX,
   Check,
+  Copy,
 } from "lucide-react";
 import { useHandleEditBook } from "~/stores/booksPageStore/helpers/useHandleEditBook";
 import { useRouter } from "next/navigation";
@@ -212,6 +213,17 @@ const BookTableInternal = ({ books }: Readonly<BookTableProps>) => {
                             <span>Mark as Read</span>
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            await navigator.clipboard.writeText(
+                              `${book.name} by ${formatAuthors(book.bookAuthors)}`,
+                            );
+                            toast.success("Book data copied to clipboard");
+                          }}
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          <span>Copy Book Data</span>
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEditBook(book)}>
                           <Edit className="mr-2 h-4 w-4" />
                           <span>Edit</span>

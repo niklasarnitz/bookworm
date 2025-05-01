@@ -21,7 +21,7 @@ import { BookCover } from "./BookCover";
 import { getCategoryName } from "~/app/helpers/getCategoryName";
 import { LinkTag } from "~/components/LinkTag";
 import { toast } from "sonner";
-import { Edit, MoreVertical, Trash, BookOpen, BookX } from "lucide-react";
+import { Edit, MoreVertical, Trash, BookOpen, BookX, Copy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,7 @@ import {
 } from "~/components/ui/alert-dialog";
 import { useHandleEditBook } from "~/stores/booksPageStore/helpers/useHandleEditBook";
 import { useRouter } from "next/navigation";
+import { formatAuthors } from "~/components/books/BookTable";
 
 interface BookGridProps {
   books: RouterOutputs["book"]["getAll"]["books"];
@@ -167,6 +168,17 @@ function BookGrid({ books }: Readonly<BookGridProps>) {
                         <span>Mark as Read</span>
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await navigator.clipboard.writeText(
+                          `${book.name} by ${formatAuthors(book.bookAuthors)}`,
+                        );
+                        toast.success("Book data copied to clipboard");
+                      }}
+                    >
+                      <Copy className="mr-2 h-4 w-4" />
+                      <span>Copy Book Data</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleEditBook(book)}>
                       <Edit className="mr-2 h-4 w-4" />
                       <span>Edit</span>

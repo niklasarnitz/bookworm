@@ -207,7 +207,12 @@ export function AvatarUploader({
         body: formData,
       });
 
-      const rawData = (await response.json()) as unknown;
+      // Use response.json() directly instead of processing the text
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
+      
+      const rawData = await response.json() as unknown;
 
       // Validate the response using Zod
       const result = uploadResponseSchema.safeParse(rawData);

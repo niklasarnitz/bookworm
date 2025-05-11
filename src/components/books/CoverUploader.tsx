@@ -216,14 +216,8 @@ export function CoverUploader({
         );
       }
 
-      // Check if the response has content
-      const responseText = await response.text();
-      if (!responseText || responseText.trim() === "") {
-        throw new Error("Server returned an empty response");
-      }
-
-      // Now try to parse the JSON from the text
-      const rawData = JSON.parse(responseText) as unknown;
+      // Use response.json() directly instead of response.text()
+      const rawData = (await response.json()) as unknown;
 
       // Validate the response using Zod
       const result = uploadResponseSchema.safeParse(rawData);

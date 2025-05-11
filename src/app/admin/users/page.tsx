@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
+import { PageHeader } from "~/components/ui/page-header";
 import {
   Card,
   CardContent,
@@ -13,18 +14,15 @@ import { Skeleton } from "~/components/ui/skeleton";
 
 export default function UsersPage() {
   return (
-    <>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">User Management</h2>
-          <p className="text-muted-foreground">
-            Manage system users and their roles
-          </p>
-        </div>
+    <div className="container mx-auto p-4">
+      <PageHeader
+        title="User Management"
+        description="Manage system users and their roles"
+      >
         <Button asChild>
           <Link href="/admin/users/new">Add New User</Link>
         </Button>
-      </div>
+      </PageHeader>
 
       <Card>
         <CardHeader>
@@ -46,6 +44,6 @@ export default function UsersPage() {
           </Suspense>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }

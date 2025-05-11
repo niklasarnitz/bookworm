@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { api } from "~/trpc/server";
 import { auth } from "~/server/auth";
 import { formatDistanceToNow } from "date-fns";
+import { PageHeader } from "~/components/ui/page-header";
 
 import {
   Card,
@@ -26,19 +27,29 @@ export default async function ProfilePage() {
 
   if (!session?.user?.id) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Authentication Required</CardTitle>
-          <CardDescription>Please sign in to view your profile</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="container mx-auto p-4">
+        <PageHeader title="Profile" />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Authentication Required</CardTitle>
+            <CardDescription>
+              Please sign in to view your profile
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Suspense fallback={<ProfileSkeleton />}>
-      <ProfileContent />
-    </Suspense>
+    <div className="container mx-auto p-4">
+      <PageHeader title="Profile" />
+
+      <Suspense fallback={<ProfileSkeleton />}>
+        <ProfileContent />
+      </Suspense>
+    </div>
   );
 }
 
@@ -67,21 +78,15 @@ async function ProfileContent() {
   }
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl">
-              {profile.name}&apos;s Profile
-            </CardTitle>
-            <CardDescription>
-              @{profile.username} • Member since{" "}
-              {profile.createdAt
-                ? formatDistanceToNow(new Date(profile.createdAt))
-                : "N/A"}
-            </CardDescription>
-          </div>
-        </div>
+        <CardTitle className="text-xl">{profile.name}&apos;s Profile</CardTitle>
+        <CardDescription>
+          @{profile.username} • Member since{" "}
+          {profile.createdAt
+            ? formatDistanceToNow(new Date(profile.createdAt))
+            : "N/A"}
+        </CardDescription>
       </CardHeader>
 
       <CardContent>

@@ -12,6 +12,8 @@ import { BookPageBarcodeScanner } from "~/components/BookPageBarcodeScanner";
 import { BookPageAddBookPopover } from "~/components/books/BookPageAddBookPopover";
 import { BookFilter } from "~/components/books/BookFilter";
 import { BookSort } from "~/components/books/BookSort";
+import { PageHeader } from "~/components/ui/page-header";
+import { BookSearch as BookSearchComponent } from "~/components/books/BookSearch";
 
 type PageProps = {
   searchParams: Promise<{
@@ -65,9 +67,7 @@ export default async function BooksPage({ searchParams }: Readonly<PageProps>) {
 
   return (
     <div className="container mx-auto p-4">
-      <div className="mb-6 flex flex-col items-start justify-between sm:flex-row sm:items-center">
-        <h1 className="mb-4 text-2xl font-bold sm:mb-0">Books</h1>
-
+      <PageHeader title="Books" description="Manage your book collection">
         <div className="flex items-center gap-4">
           <Tabs
             defaultValue={viewMode}
@@ -82,10 +82,16 @@ export default async function BooksPage({ searchParams }: Readonly<PageProps>) {
 
           <BookPageAddBookPopover />
         </div>
+      </PageHeader>
+
+      <div className="w-full">
+        <BookSearchComponent />
       </div>
 
-      <BookFilter />
-      <BookSort />
+      <div className="flex items-center justify-between py-4">
+        <BookFilter />
+        <BookSort />
+      </div>
 
       <Suspense
         fallback={

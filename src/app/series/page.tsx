@@ -1,33 +1,27 @@
 import React from "react";
 import { SeriesTable } from "~/app/series/_components/SeriesTable";
 import { SeriesDialog } from "~/app/series/_components/SeriesDialog";
+import { PageHeader } from "~/components/ui/page-header";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "~/components/ui/card";
 
 export default function SeriesPage() {
   return (
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4">
-        <div>
-          <CardTitle>Series</CardTitle>
-          <CardDescription>Manage your book series</CardDescription>
-        </div>
+    <div className="container mx-auto p-4">
+      <PageHeader 
+        title="Series" 
+        description="Manage your book series"
+      >
+        <SeriesDialog />
+      </PageHeader>
 
-        <div className="ml-auto">
-          <SeriesDialog />
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <div className="mt-4">
+      <Card>
+        <CardContent className="pt-6">
           <SeriesTable />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import { BookDetail } from "~/app/books/[id]/_components/BookDetail";
 import { api } from "~/trpc/server";
+import { PageHeader } from "~/components/ui/page-header";
 
 export default async function BookDetailPage({
   params,
@@ -14,8 +15,13 @@ export default async function BookDetailPage({
 
   if (!book) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center">
-        <h2 className="mb-4 text-xl font-semibold">Book not found</h2>
+      <div className="container mx-auto p-4">
+        <PageHeader title="Book not found" />
+        <div className="flex h-64 flex-col items-center justify-center">
+          <p className="text-muted-foreground">
+            The requested book could not be found
+          </p>
+        </div>
       </div>
     );
   }

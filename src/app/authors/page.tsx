@@ -1,33 +1,21 @@
 import React from "react";
 import { AuthorTable } from "~/app/authors/_components/AuthorTable";
 import { AuthorDialog } from "~/app/authors/_components/AuthorDialog";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { PageHeader } from "~/components/ui/page-header";
+import { Card, CardContent } from "~/components/ui/card";
 
 export default function AuthorsPage() {
   return (
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4">
-        <div>
-          <CardTitle>Authors</CardTitle>
-          <CardDescription>Manage your book authors</CardDescription>
-        </div>
+    <div className="container mx-auto p-4">
+      <PageHeader title="Authors" description="Manage your book authors">
+        <AuthorDialog />
+      </PageHeader>
 
-        <div className="ml-auto">
-          <AuthorDialog />
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <div className="mt-4">
+      <Card>
+        <CardContent className="pt-6">
           <AuthorTable />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

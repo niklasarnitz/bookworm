@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { type Metadata } from "next";
 import { StatsPage } from "./_components/StatsPage";
 import { Spinner } from "~/components/ui/spinner";
+import { PageHeader } from "~/components/ui/page-header";
 
 export const metadata: Metadata = {
   title: "Statistics | BookWorm",
@@ -10,8 +11,12 @@ export const metadata: Metadata = {
 
 export default function StatisticsPage() {
   return (
-    <>
-      <h1 className="mb-6 text-3xl font-bold">Library Statistics</h1>
+    <div className="container mx-auto p-4">
+      <PageHeader
+        title="Library Statistics"
+        description="View insights about your reading habits and collection"
+      />
+
       <Suspense
         fallback={
           <div className="flex flex-col items-center justify-center p-12">
@@ -24,6 +29,6 @@ export default function StatisticsPage() {
       >
         <StatsPage />
       </Suspense>
-    </>
+    </div>
   );
 }

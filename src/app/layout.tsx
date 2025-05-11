@@ -12,6 +12,7 @@ import { ThemeProvider } from "~/contexts/ThemeContext";
 import { ThemeToggle } from "~/components/ThemeToggle";
 import { Toaster } from "~/components/ui/sonner";
 import { UserAvatar } from "~/components/UserAvatar";
+import { MobileNav } from "~/components/MobileNav";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -64,6 +65,7 @@ export default async function RootLayout({
     <html lang="en" style={{ visibility: "hidden" }}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body
         className={cn("font-sans", inter.variable)}
@@ -81,6 +83,7 @@ export default async function RootLayout({
                         BookWorm
                       </Link>
 
+                      {/* Desktop navigation */}
                       {session?.user && (
                         <nav className="hidden items-center gap-4 md:flex">
                           <Link href="/" className="hover:underline">
@@ -110,15 +113,24 @@ export default async function RootLayout({
                       )}
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       <ThemeToggle />
-                      {session?.user ? (
-                        <UserAvatar user={session.user} />
-                      ) : (
-                        <Button asChild size="sm">
-                          <Link href="/api/auth/signin">Sign in</Link>
-                        </Button>
-                      )}
+
+                      {/* User avatar for desktop */}
+                      <div className="hidden md:block">
+                        {session?.user ? (
+                          <UserAvatar user={session.user} />
+                        ) : (
+                          <Button asChild size="sm">
+                            <Link href="/api/auth/signin">Sign in</Link>
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Mobile navigation button */}
+                      <div className="md:hidden">
+                        <MobileNav session={session} />
+                      </div>
                     </div>
                   </div>
                 </header>

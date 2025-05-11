@@ -2,14 +2,9 @@ import { Suspense } from "react";
 import { api } from "~/trpc/server";
 import { notFound } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import { PageHeader } from "~/components/ui/page-header";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { BookIcon, UsersIcon, LibraryIcon, FolderIcon } from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { UserPageClientWrapper } from "~/components/UserPageClientWrapper";
@@ -22,9 +17,11 @@ export default async function UserPage({
   const { username } = await params;
 
   return (
-    <Suspense fallback={<UserSkeleton />}>
-      <UserContent username={username} />
-    </Suspense>
+    <div className="container mx-auto p-4">
+      <Suspense fallback={<UserSkeleton />}>
+        <UserContent username={username} />
+      </Suspense>
+    </div>
   );
 }
 
@@ -53,60 +50,53 @@ async function UserContent({ username }: { username: string }) {
   }
 
   return (
-    <Card className="mb-6">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-2xl">
-              {user.name}&apos;s Profile
-            </CardTitle>
-            <CardDescription>
-              @{user.username} • Member since{" "}
-              {user.createdAt
-                ? formatDistanceToNow(new Date(user.createdAt))
-                : "N/A"}
-            </CardDescription>
+    <>
+      <PageHeader
+        title={`${user.name}'s Profile`}
+        description={`@${user.username} • Member since ${
+          user.createdAt ? formatDistanceToNow(new Date(user.createdAt)) : "N/A"
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <UserPageClientWrapper />
+        </div>
+      </PageHeader>
+
+      <Card>
+        <CardContent className="pt-6">
+          <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <Card className="flex items-center space-x-2 p-3">
+              <BookIcon className="h-4 w-4 opacity-70" />
+              <span className="text-sm font-medium">
+                {user._count.books} Books
+              </span>
+            </Card>
+            <Card className="flex items-center space-x-2 p-3">
+              <UsersIcon className="h-4 w-4 opacity-70" />
+              <span className="text-sm font-medium">
+                {user._count.authors} Authors
+              </span>
+            </Card>
+            <Card className="flex items-center space-x-2 p-3">
+              <LibraryIcon className="h-4 w-4 opacity-70" />
+              <span className="text-sm font-medium">
+                {user._count.series} Series
+              </span>
+            </Card>
+            <Card className="flex items-center space-x-2 p-3">
+              <FolderIcon className="h-4 w-4 opacity-70" />
+              <span className="text-sm font-medium">
+                {user._count.categories} Categories
+              </span>
+            </Card>
           </div>
 
-          <div className="flex items-center gap-3">
-            <UserPageClientWrapper />
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <div className="mb-6 flex flex-wrap gap-4">
-          <Card className="flex items-center space-x-2 p-3">
-            <BookIcon className="h-4 w-4 opacity-70" />
-            <span className="text-sm font-medium">
-              {user._count.books} Books
-            </span>
-          </Card>
-          <Card className="flex items-center space-x-2 p-3">
-            <UsersIcon className="h-4 w-4 opacity-70" />
-            <span className="text-sm font-medium">
-              {user._count.authors} Authors
-            </span>
-          </Card>
-          <Card className="flex items-center space-x-2 p-3">
-            <LibraryIcon className="h-4 w-4 opacity-70" />
-            <span className="text-sm font-medium">
-              {user._count.series} Series
-            </span>
-          </Card>
-          <Card className="flex items-center space-x-2 p-3">
-            <FolderIcon className="h-4 w-4 opacity-70" />
-            <span className="text-sm font-medium">
-              {user._count.categories} Categories
-            </span>
-          </Card>
-        </div>
-
-        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
-          <UserStats username={username} />
-        </Suspense>
-      </CardContent>
-    </Card>
+          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+            <UserStats username={username} />
+          </Suspense>
+        </CardContent>
+      </Card>
+    </>
   );
 }
 
@@ -116,7 +106,7 @@ async function UserStats({ username }: { username: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>User Activity</CardTitle>
+        <CardTitle className="text-lg">User Activity</CardTitle>
       </CardHeader>
       <CardContent>
         <UserPageClientWrapper stats={stats} />

@@ -1,13 +1,14 @@
+import { PageHeader } from "~/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { UserForm } from "../_components/UserForm";
 
 export default function NewUserPage() {
   return (
-    <>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold">Create New User</h2>
-        <p className="text-muted-foreground">Add a new user to the system</p>
-      </div>
+    <div className="container mx-auto p-4">
+      <PageHeader
+        title="Create New User"
+        description="Add a new user to the system"
+      />
 
       <Card>
         <CardHeader>
@@ -17,6 +18,6 @@ export default function NewUserPage() {
           <UserForm mode="create" />
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }

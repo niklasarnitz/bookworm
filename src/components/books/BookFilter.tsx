@@ -18,6 +18,7 @@ import {
   AccordionTrigger,
 } from "~/components/ui/accordion";
 import { api } from "~/trpc/react";
+import { useCreateQueryString } from "~/hooks/useCreateQueryString";
 
 export interface BookFilterProps {
   className?: string;
@@ -44,6 +45,8 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     { enabled: !!selectedCategoryId },
   );
 
+  const createQueryString = useCreateQueryString(searchParams);
+
   useEffect(() => {
     let count = 0;
     if (searchParams.has("query")) count++;
@@ -69,19 +72,6 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     setActiveAccordionItems(items);
   }, [searchParams]);
 
-  const createQueryString = useCallback(
-    (name: string, value: string | undefined) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(name, value);
-      } else {
-        params.delete(name);
-      }
-      return params.toString();
-    },
-    [searchParams],
-  );
-
   const handleCheckboxChange = (name: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (params.has(name)) {
@@ -90,11 +80,6 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
       params.set(name, "true");
     }
     router.push(`/?${params.toString()}`);
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push(`/?${createQueryString("query", searchValue)}`);
   };
 
   const handleFilterChange = (type: string, value: string | undefined) => {
@@ -121,20 +106,7 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
       : undefined;
 
   return (
-    <div className={`space-y-4 pb-3 ${className}`}>
-      <form onSubmit={handleSearch} className="relative">
-        <Input
-          placeholder="Search book name, subtitle, author name, or ISBN..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="pr-20"
-        />
-        <Button type="submit" size="sm" className="absolute top-1 right-1">
-          <Search className="mr-1 h-4 w-4" />
-          Search
-        </Button>
-      </form>
-
+    <div className={`space-y-4 ${className}`}>
       <div className="flex flex-wrap items-center gap-2">
         {activeFilters > 0 && (
           <Button variant="outline" size="sm" onClick={clearAllFilters}>

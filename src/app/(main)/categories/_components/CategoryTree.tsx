@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { CategoryAccordion } from "~/app/categories/_components/CategoryAccordion";
+import { CategoryAccordion } from "~/app/(main)/categories/_components/CategoryAccordion";
 import type { Category } from "~/schemas/category";
 
 type CategoryTreeProps = {

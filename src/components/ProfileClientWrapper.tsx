@@ -8,6 +8,7 @@ import { api } from "~/trpc/react";
 import ProfileForm from "~/components/profile/ProfileForm";
 import PasswordChangeForm from "~/components/profile/PasswordChangeForm";
 import { AvatarUploader } from "~/components/AvatarUploader";
+import PublicReadingListSettingsForm from "~/components/profile/PublicReadingListSettingsForm";
 
 interface ProfileClientWrapperProps {
   profile: RouterOutputs["userProfile"]["getProfile"];
@@ -32,10 +33,13 @@ export const ProfileClientWrapper = ({
       onValueChange={setActiveTab}
       className="w-full"
     >
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="avatar">Avatar</TabsTrigger>
         <TabsTrigger value="password">Password</TabsTrigger>
+        <TabsTrigger value="public-reading-list">
+          Public Reading List
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="profile">
         <ProfileForm profile={profile} />
@@ -51,6 +55,9 @@ export const ProfileClientWrapper = ({
       </TabsContent>
       <TabsContent value="password">
         <PasswordChangeForm />
+      </TabsContent>
+      <TabsContent value="public-reading-list">
+        <PublicReadingListSettingsForm />
       </TabsContent>
     </Tabs>
   );

@@ -1,6 +1,6 @@
 "use client";
 import type React from "react";
-import { CategoryItem } from "~/app/categories/_components/CategoryItem";
+import { CategoryItem } from "~/app/(main)/categories/_components/CategoryItem";
 import type { Category } from "~/schemas/category";
 
 export function CategoryAccordion({

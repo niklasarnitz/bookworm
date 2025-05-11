@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { CategoryManager } from "~/app/categories/_components/CategoryManager";
+import { CategoryManager } from "~/app/(main)/categories/_components/CategoryManager";
 import { Button } from "~/components/ui/button";
 import { PageHeader } from "~/components/ui/page-header";
 import { Card, CardContent } from "~/components/ui/card";

@@ -29,6 +29,7 @@ export const userProfileRouter = createTRPCRouter({
         createdAt: true,
         updatedAt: true,
         role: true,
+        isSharingReadingList: true,
         _count: {
           select: {
             books: true,
@@ -81,6 +82,7 @@ export const userProfileRouter = createTRPCRouter({
           image: true,
           createdAt: true,
           role: true,
+          isSharingReadingList: true,
           _count: {
             select: {
               books: true,
@@ -276,5 +278,19 @@ export const userProfileRouter = createTRPCRouter({
         recentBooks,
         topAuthors,
       };
+    }),
+  updateReadingListSharing: protectedProcedure
+    .input(z.object({ isSharingReadingList: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      const updatedUser = await ctx.db.user.update({
+        where: { id: userId },
+        data: {
+          isSharingReadingList: input.isSharingReadingList,
+        },
+      });
+
+      return updatedUser;
     }),
 });

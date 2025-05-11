@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { UserTable } from "~/app/admin/users/_components/UserTable";
+import { UserTable } from "~/app/(main)/admin/users/_components/UserTable";
 import { Skeleton } from "~/components/ui/skeleton";
 
 export default function UsersPage() {

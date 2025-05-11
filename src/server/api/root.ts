@@ -9,6 +9,7 @@ import { userProfileRouter } from "~/server/api/routers/userProfile";
 import { statisticsRouter } from "~/server/api/routers/statistics";
 
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { embeddableRouter } from "~/server/api/routers/embeddable";
 
 /**
  * This is the primary router for your server.
@@ -25,6 +26,7 @@ export const appRouter = createTRPCRouter({
   userManagement: userManagementRouter,
   userProfile: userProfileRouter,
   statistics: statisticsRouter,
+  embeddable: embeddableRouter,
 });
 
 // export type definition of API

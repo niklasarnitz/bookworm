@@ -11,7 +11,16 @@ export default auth((req) => {
     nextUrl.pathname.startsWith(route),
   );
 
-  if (isPublicRoute || nextUrl.pathname.startsWith("/api/")) {
+  // Check if the path matches /users/{username}/embeddable/* pattern
+  const isEmbeddablePath = /^\/users\/[^/]+\/embeddable\//.test(
+    nextUrl.pathname,
+  );
+
+  if (
+    isPublicRoute ||
+    nextUrl.pathname.startsWith("/api/") ||
+    isEmbeddablePath
+  ) {
     return NextResponse.next();
   }
 

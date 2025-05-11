@@ -146,6 +146,8 @@ model User {
     emailVerified DateTime?
     image         String?
 
+    isSharingReadingList Boolean @default(false)
+
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt @default(now())
 

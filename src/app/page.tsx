@@ -11,6 +11,7 @@ import { BookFormDialog } from "~/components/books/BookFormDialog";
 import { BookPageBarcodeScanner } from "~/components/BookPageBarcodeScanner";
 import { BookPageAddBookPopover } from "~/components/books/BookPageAddBookPopover";
 import { BookFilter } from "~/components/books/BookFilter";
+import { BookSort } from "~/components/books/BookSort";
 
 type PageProps = {
   searchParams: Promise<{
@@ -22,6 +23,8 @@ type PageProps = {
     noCategory?: boolean;
     onlyRead?: boolean;
     page?: string;
+    sortBy?: string;
+    sortOrder?: string;
   }>;
 };
 
@@ -42,6 +45,14 @@ export default async function BooksPage({ searchParams }: Readonly<PageProps>) {
     noCover: params.noCover ? true : undefined,
     noCategory: params.noCategory ? true : undefined,
     onlyRead: params.onlyRead ? true : undefined,
+    sortBy: params.sortBy as
+      | "createdAt"
+      | "name"
+      | "author"
+      | "series"
+      | "readDate"
+      | undefined,
+    sortOrder: params.sortOrder as "asc" | "desc" | undefined,
     pagination: {
       page: params.page ? Number(params.page) : 1,
       pageSize,
@@ -74,6 +85,7 @@ export default async function BooksPage({ searchParams }: Readonly<PageProps>) {
       </div>
 
       <BookFilter />
+      <BookSort />
 
       <Suspense
         fallback={

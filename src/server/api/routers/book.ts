@@ -72,6 +72,63 @@ export const bookRouter = createTRPCRouter({
       const totalCount = await ctx.db.book.count({ where });
       const totalPages = Math.ceil(totalCount / pageSize);
 
+      // Define the order by clause based on sort options
+      const orderBy: Prisma.BookOrderByWithRelationInput[] = [];
+
+      // Set up sorting based on input params or default to createdAt desc
+      const sortBy = input?.sortBy ?? "createdAt";
+      const sortOrder = input?.sortOrder ?? "desc";
+
+      switch (sortBy) {
+        case "name":
+          orderBy.push({ name: sortOrder });
+          break;
+        case "author":
+          /*
+           * Unfortunately Prisma doesn't have great support for sorting by related many-to-many relationships
+           * We'll use a simple approach of sorting by first author relationship
+           */
+          orderBy.push({
+            bookAuthors: {
+              _count: sortOrder,
+            },
+          });
+          // Secondary sort by name to ensure consistent results
+          orderBy.push({ name: "asc" });
+          break;
+        case "series":
+          // Books with series come first (non-null seriesId)
+          orderBy.push({ seriesId: "asc" });
+          // Then sort by series name
+          orderBy.push({ series: { name: sortOrder } });
+          // Then by series number (nulls come last)
+          orderBy.push({
+            seriesNumber: {
+              sort: sortOrder,
+              nulls: "last",
+            },
+          });
+          break;
+        case "readDate":
+          // Null readDates come last when sorting by readDate
+          orderBy.push({
+            readDate: {
+              sort: sortOrder,
+              nulls: "last",
+            },
+          });
+          break;
+        case "createdAt":
+        default:
+          orderBy.push({ createdAt: sortOrder });
+          break;
+      }
+
+      // Always add a secondary sort by name to ensure consistent ordering
+      if (sortBy !== "name") {
+        orderBy.push({ name: "asc" });
+      }
+
       // Get paginated results
       const books = await ctx.db.book.findMany({
         where,
@@ -92,21 +149,7 @@ export const bookRouter = createTRPCRouter({
             },
           },
         },
-        orderBy: [
-          // Books with series come first (non-null seriesId)
-          { seriesId: "asc" },
-          // Then sort by series name
-          { series: { name: "asc" } },
-          // Then by series number (nulls come last)
-          {
-            seriesNumber: {
-              sort: "asc",
-              nulls: "last",
-            },
-          },
-          // Finally, sort by book name
-          { name: "asc" },
-        ],
+        orderBy,
         ...(input?.pagination ? { skip, take: pageSize } : {}),
       });
 

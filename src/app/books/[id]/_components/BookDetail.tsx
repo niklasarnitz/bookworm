@@ -44,7 +44,7 @@ export function BookDetail({ book, authors, series }: BookDetailProps) {
 
   if (isEditing) {
     return (
-      <div className="mb-6">
+      <div className="mb-6 p-4">
         <BookForm
           initialData={book}
           authors={authors}

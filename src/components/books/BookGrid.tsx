@@ -97,7 +97,7 @@ function BookGrid({ books }: Readonly<BookGridProps>) {
                     {book.name}
                   </h3>
                   {book.subtitle && (
-                    <p className="text-muted-foreground line-clamp-1 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       {book.subtitle}
                     </p>
                   )}

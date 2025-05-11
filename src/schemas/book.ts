@@ -39,6 +39,10 @@ export const bookSearchSchema = z.object({
   noCover: z.boolean().optional(),
   noCategory: z.boolean().optional(),
   onlyRead: z.boolean().optional(),
+  sortBy: z
+    .enum(["createdAt", "name", "author", "series", "readDate"])
+    .optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
   pagination: z.object({
     page: z.number().int().positive().optional().default(1),
     pageSize: z.number().int().positive().optional().default(12),

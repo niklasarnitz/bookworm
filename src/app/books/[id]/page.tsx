@@ -14,10 +14,8 @@ export default async function BookDetailPage({
 
   if (!book) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="flex h-64 flex-col items-center justify-center">
-          <h2 className="mb-4 text-xl font-semibold">Book not found</h2>
-        </div>
+      <div className="flex h-64 flex-col items-center justify-center">
+        <h2 className="mb-4 text-xl font-semibold">Book not found</h2>
       </div>
     );
   }

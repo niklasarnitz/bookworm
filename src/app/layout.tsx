@@ -122,7 +122,9 @@ export default async function RootLayout({
                     </div>
                   </div>
                 </header>
-                <main className="bg-background flex-1">{children}</main>
+                <main className="bg-background container mx-auto flex-1 p-4 md:p-8">
+                  {children}
+                </main>
                 <footer className="border-t py-4">
                   <div className="text-muted-foreground container mx-auto text-center text-sm">
                     © {new Date().getFullYear()} BookWorm

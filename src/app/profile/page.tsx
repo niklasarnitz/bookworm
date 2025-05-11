@@ -10,34 +10,35 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { BookIcon, UsersIcon, LibraryIcon, FolderIcon } from "lucide-react";
+import {
+  BookIcon,
+  UsersIcon,
+  LibraryIcon,
+  FolderIcon,
+  BookOpenIcon,
+} from "lucide-react";
 import { Skeleton } from "~/components/ui/skeleton";
 import { ProfileClientWrapper } from "~/components/ProfileClientWrapper";
+import { Progress } from "~/components/ui/progress";
 
 export default async function ProfilePage() {
   const session = await auth();
 
   if (!session?.user?.id) {
     return (
-      <div className="container py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Authentication Required</CardTitle>
-            <CardDescription>
-              Please sign in to view your profile
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Authentication Required</CardTitle>
+          <CardDescription>Please sign in to view your profile</CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
   return (
-    <div className="container p-8">
-      <Suspense fallback={<ProfileSkeleton />}>
-        <ProfileContent />
-      </Suspense>
-    </div>
+    <Suspense fallback={<ProfileSkeleton />}>
+      <ProfileContent />
+    </Suspense>
   );
 }
 
@@ -84,7 +85,7 @@ async function ProfileContent() {
       </CardHeader>
 
       <CardContent>
-        <div className="mb-6 flex flex-wrap gap-4">
+        <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-5">
           <Card className="flex items-center space-x-2 p-3">
             <BookIcon className="h-4 w-4 opacity-70" />
             <span className="text-sm font-medium">
@@ -108,6 +109,21 @@ async function ProfileContent() {
             <span className="text-sm font-medium">
               {profile._count.categories} Categories
             </span>
+          </Card>
+          <Card className="col-span-2 flex flex-col p-3 md:col-span-4 lg:col-span-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <BookOpenIcon className="h-4 w-4 opacity-70" />
+                <span className="text-sm font-medium">
+                  {profile.readBooks.count} of {profile._count.books} Books Read
+                  ({profile.readBooks.percentage}%)
+                </span>
+              </div>
+            </div>
+            <Progress
+              value={profile.readBooks.percentage}
+              className="mt-2 h-2"
+            />
           </Card>
         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getCategoryName } from "~/app/helpers/getCategoryName";
+import { getCategoryName } from "~/helpers/getCategoryName";
 import { LinkTag } from "~/components/LinkTag";
 import { Button } from "~/components/ui/button";
 import {

@@ -12,19 +12,17 @@ import {
 
 export default function CategoryPage() {
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Categories</CardTitle>
-          <CardDescription>Manage your book categories</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CategoryManager />
-          <Link href="/api/categories/tree">
-            <Button className="mt-4">Generate Category Tree</Button>
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Categories</CardTitle>
+        <CardDescription>Manage your book categories</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <CategoryManager />
+        <Link href="/api/categories/tree">
+          <Button className="mt-4">Generate Category Tree</Button>
+        </Link>
+      </CardContent>
+    </Card>
   );
 }

@@ -72,6 +72,18 @@ export const bookRouter = createTRPCRouter({
       const totalCount = await ctx.db.book.count({ where });
       const totalPages = Math.ceil(totalCount / pageSize);
 
+      // Get count of read books for statistics
+      const readCount = await ctx.db.book.count({
+        where: {
+          ...where,
+          readDate: { not: null },
+        },
+      });
+
+      // Calculate percentage of read books
+      const readPercentage =
+        totalCount > 0 ? Math.round((readCount / totalCount) * 100) : 0;
+
       // Define the order by clause based on sort options
       const orderBy: Prisma.BookOrderByWithRelationInput[] = [];
 
@@ -161,6 +173,11 @@ export const bookRouter = createTRPCRouter({
           totalCount,
           totalPages,
           hasMore: page < totalPages,
+        },
+        statistics: {
+          totalCount,
+          readCount,
+          readPercentage,
         },
       };
     }),

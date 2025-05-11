@@ -22,11 +22,9 @@ export default async function UserPage({
   const { username } = await params;
 
   return (
-    <div className="p-8">
-      <Suspense fallback={<UserSkeleton />}>
-        <UserContent username={username} />
-      </Suspense>
-    </div>
+    <Suspense fallback={<UserSkeleton />}>
+      <UserContent username={username} />
+    </Suspense>
   );
 }
 

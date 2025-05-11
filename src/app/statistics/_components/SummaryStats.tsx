@@ -1,6 +1,7 @@
 import { BookOpen, BookText, Library, FolderTree } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/trpc/server";
+import { Progress } from "~/components/ui/progress";
 
 export async function SummaryStats() {
   // Fetch data from server
@@ -27,11 +28,14 @@ export async function SummaryStats() {
           <BookOpen className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col">
+          <div className="flex flex-col space-y-2">
             <div className="text-2xl font-bold">{readBooks}</div>
-            <p className="text-muted-foreground text-xs">
-              {readPercentage}% of library read
-            </p>
+            <div className="space-y-1">
+              <Progress value={readPercentage} className="h-2" />
+              <p className="text-muted-foreground text-xs">
+                {readPercentage}% of library read ({readBooks} of {totalBooks})
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>

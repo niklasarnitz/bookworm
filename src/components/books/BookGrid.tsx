@@ -18,7 +18,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { BookCover } from "./BookCover";
-import { getCategoryName } from "~/app/helpers/getCategoryName";
+import { getCategoryName } from "~/helpers/getCategoryName";
 import { LinkTag } from "~/components/LinkTag";
 import { toast } from "sonner";
 import { Edit, MoreVertical, Trash, BookOpen, BookX, Copy } from "lucide-react";

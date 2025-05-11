@@ -10,9 +10,8 @@ export const metadata: Metadata = {
 
 export default function StatisticsPage() {
   return (
-    <div className="container mx-auto py-6">
+    <>
       <h1 className="mb-6 text-3xl font-bold">Library Statistics</h1>
-
       <Suspense
         fallback={
           <div className="flex flex-col items-center justify-center p-12">
@@ -25,6 +24,6 @@ export default function StatisticsPage() {
       >
         <StatsPage />
       </Suspense>
-    </div>
+    </>
   );
 }

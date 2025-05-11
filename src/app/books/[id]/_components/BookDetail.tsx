@@ -44,15 +44,13 @@ export function BookDetail({ book, authors, series }: BookDetailProps) {
 
   if (isEditing) {
     return (
-      <div className="mb-6 p-4">
-        <BookForm
-          initialData={book}
-          authors={authors}
-          series={series}
-          onSuccess={() => setIsEditing(false)}
-          onCancel={() => setIsEditing(false)}
-        />
-      </div>
+      <BookForm
+        initialData={book}
+        authors={authors}
+        series={series}
+        onSuccess={() => setIsEditing(false)}
+        onCancel={() => setIsEditing(false)}
+      />
     );
   }
 

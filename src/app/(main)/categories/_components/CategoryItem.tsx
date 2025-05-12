@@ -80,12 +80,21 @@ export function CategoryItem({
             <span className="font-medium">{category.name}</span>
           </Link>
 
-          {category._count && category._count.books > 0 && (
-            <Badge variant="outline" className="ml-2">
-              {category._count.books}{" "}
-              {category._count.books === 1 ? "book" : "books"}
-            </Badge>
-          )}
+          <div className="flex gap-2">
+            {category._count && category._count.books > 0 && (
+              <Badge variant="outline">
+                {category._count.books}{" "}
+                {category._count.books === 1 ? "book" : "books"}
+              </Badge>
+            )}
+
+            {category.totalBookCount !== undefined &&
+              category.totalBookCount !== (category._count?.books || 0) && (
+                <Badge variant="secondary">
+                  {category.totalBookCount} total
+                </Badge>
+              )}
+          </div>
         </div>
 
         <div className="flex items-center">

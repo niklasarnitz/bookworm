@@ -158,6 +158,7 @@ export const categoryRouter = createTRPCRouter({
     // Define the type for a category with children
     type CategoryWithChildren = (typeof allCategories)[0] & {
       children: CategoryWithChildren[];
+      totalBookCount?: number;
     };
 
     // Then build the tree recursively
@@ -173,7 +174,39 @@ export const categoryRouter = createTRPCRouter({
       }));
     }
 
-    return buildTree(null);
+    // Build the initial tree
+    const tree = buildTree(null);
+
+    // Function to calculate total book count for each category including its children
+    function calculateTotalBookCount(
+      categories: CategoryWithChildren[],
+    ): CategoryWithChildren[] {
+      return categories.map((category) => {
+        // Calculate total book count for children first
+        const children = calculateTotalBookCount(category.children);
+
+        // Sum up all book counts from children
+        const childrenBookCount = children.reduce(
+          (sum, child) => sum + (child.totalBookCount ?? 0),
+          0,
+        );
+
+        // Total is direct book count plus children's book count
+        const totalBookCount =
+          (category._count?.books ?? 0) + childrenBookCount;
+
+        return {
+          ...category,
+          children,
+          totalBookCount,
+        };
+      });
+    }
+
+    // Calculate total book counts for the tree
+    const treeWithTotalCounts = calculateTotalBookCount(tree);
+
+    return treeWithTotalCounts;
   }),
 
   getPath: protectedProcedure

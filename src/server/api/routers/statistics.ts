@@ -1,3 +1,4 @@
+import { READ_DATE_MINIMUM_DATE } from "~/server/api/routers/embeddable";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
@@ -65,6 +66,7 @@ export const statisticsRouter = createTRPCRouter({
           userId: ctx.session.user.id,
           readDate: {
             not: null,
+            gt: READ_DATE_MINIMUM_DATE,
           },
         },
         select: {

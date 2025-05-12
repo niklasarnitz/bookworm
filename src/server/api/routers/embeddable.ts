@@ -3,6 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
+export const READ_DATE_MINIMUM_DATE = new Date(new Date(1999, 1, 1));
+
 export const embeddableRouter = createTRPCRouter({
   getReadingList: publicProcedure
     .input(z.object({ username: z.string() }))
@@ -24,7 +26,7 @@ export const embeddableRouter = createTRPCRouter({
         where: {
           userId: user.id,
           readDate: {
-            gt: new Date(new Date().setFullYear(1900, 1, 1)),
+            gt: READ_DATE_MINIMUM_DATE,
           },
         },
         orderBy: {

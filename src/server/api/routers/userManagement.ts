@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { hash } from "bcryptjs";
-import { createTRPCRouter, adminProcedure } from "../trpc";
+import { createTRPCRouter, adminProcedure, protectedProcedure } from "../trpc";
 import { UserRole } from "@prisma/client";
 
 const userCreateSchema = z.object({
@@ -43,7 +43,17 @@ export const userManagementRouter = createTRPCRouter({
       orderBy: { createdAt: "desc" },
     });
   }),
-
+  getCurrentUser: protectedProcedure.query(async ({ ctx }) => {
+    return ctx.db.user.findUnique({
+      where: { id: ctx.session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+  }),
   getById: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {

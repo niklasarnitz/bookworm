@@ -8,6 +8,7 @@ import { LinkTag } from "~/components/LinkTag";
 import { Card, CardContent } from "~/components/ui/card";
 import { BookForm } from "~/components/books/bookForm/BookForm";
 import { BookCover } from "~/components/books/BookCover";
+import { Quotes } from "~/components/books/Quotes";
 import { api } from "~/trpc/react";
 import type { Author } from "~/schemas/author";
 import type { Series } from "~/schemas/series";
@@ -153,6 +154,8 @@ export function BookDetail({ book, authors, series }: BookDetailProps) {
               )}
             </CardContent>
           </Card>
+
+          <Quotes bookId={book.id} />
         </div>
       </div>
     </div>

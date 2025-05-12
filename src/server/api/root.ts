@@ -7,6 +7,7 @@ import { categoryRouter } from "~/server/api/routers/category";
 import { userManagementRouter } from "~/server/api/routers/userManagement";
 import { userProfileRouter } from "~/server/api/routers/userProfile";
 import { statisticsRouter } from "~/server/api/routers/statistics";
+import { quoteRouter } from "~/server/api/quote";
 
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { embeddableRouter } from "~/server/api/routers/embeddable";
@@ -27,6 +28,7 @@ export const appRouter = createTRPCRouter({
   userProfile: userProfileRouter,
   statistics: statisticsRouter,
   embeddable: embeddableRouter,
+  quote: quoteRouter,
 });
 
 // export type definition of API

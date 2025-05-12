@@ -77,7 +77,9 @@ export function CategoryItem({
           )}
 
           <Link href={`/?categoryId=${category.id}`}>
-            <span className="font-medium">{category.name}</span>
+            <span className="font-medium">
+              {category.path} {category.name}
+            </span>
           </Link>
 
           <div className="flex gap-2">

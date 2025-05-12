@@ -1,9 +1,9 @@
 "use client";
 
-import { type Quote } from "@prisma/client";
+import { type Quote, type Book } from "@prisma/client";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import { Pencil, Trash2, Quote as QuoteIcon } from "lucide-react";
+import { Copy, Pencil, Trash2, Quote as QuoteIcon } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,21 +15,56 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface QuoteItemProps {
   quote: Quote;
+  book: Book;
   onEdit: (quoteId: string) => void;
   onDelete: (quoteId: string) => void;
 }
 
 export function QuoteItem({
   quote,
+  book,
   onEdit,
   onDelete,
 }: Readonly<QuoteItemProps>) {
   const pageRange = quote.pageEnd
     ? `${quote.pageStart}-${quote.pageEnd}`
     : quote.pageStart;
+
+  // Function to copy quote in Markdown format
+  const copyQuoteAsMarkdown = () => {
+    const citation = `> "${quote.text}"
+>
+> — ${book.name}${book.subtitle ? `: ${book.subtitle}` : ""}, p. ${pageRange}${book.publisher ? ` (${book.publisher})` : ""}`;
+
+    navigator.clipboard.writeText(citation).then(
+      () => toast.success("Quote copied as Markdown"),
+      () => toast.error("Failed to copy quote"),
+    );
+  };
+
+  // Function to copy quote in LaTeX format
+  const copyQuoteAsLatex = () => {
+    const citation = `\\begin{quote}
+  "${quote.text}"
+
+  \\textit{${book.name}${book.subtitle ? `: ${book.subtitle}` : ""}}${book.publisher ? `, ${book.publisher}` : ""}, p. ${pageRange}
+\\end{quote}`;
+
+    navigator.clipboard.writeText(citation).then(
+      () => toast.success("Quote copied as LaTeX"),
+      () => toast.error("Failed to copy quote"),
+    );
+  };
 
   return (
     <Card>
@@ -46,6 +81,21 @@ export function QuoteItem({
             <p className="italic">{quote.text}</p>
           </div>
           <div className="ml-4 flex space-x-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Copy size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={copyQuoteAsMarkdown}>
+                  Copy as Markdown
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={copyQuoteAsLatex}>
+                  Copy as LaTeX
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="ghost"
               size="icon"

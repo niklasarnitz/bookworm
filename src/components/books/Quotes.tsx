@@ -10,18 +10,19 @@ import { Separator } from "~/components/ui/separator";
 import { toast } from "sonner";
 import { QuoteForm } from "./QuoteForm";
 import { QuoteItem } from "./QuoteItem";
+import type { Book } from "~/schemas/book";
 
 interface QuotesProps {
-  bookId: string;
+  book: Book;
 }
 
-export function Quotes({ bookId }: Readonly<QuotesProps>) {
+export function Quotes({ book }: Readonly<QuotesProps>) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null);
 
   // Fetch quotes for this book
   const quotesQuery = api.quote.getBookQuotes.useQuery(
-    { bookId },
+    { bookId: book.id },
     { suspense: false },
   );
 
@@ -101,7 +102,7 @@ export function Quotes({ bookId }: Readonly<QuotesProps>) {
         <Card>
           <CardContent className="pt-6">
             <QuoteForm
-              bookId={bookId}
+              bookId={book.id}
               onCancel={() => setIsAdding(false)}
               onSubmit={handleSubmitCreate}
               isSubmitting={createQuoteMutation.isPending}
@@ -124,7 +125,7 @@ export function Quotes({ bookId }: Readonly<QuotesProps>) {
               <Card key={quote.id}>
                 <CardContent className="pt-6">
                   <QuoteForm
-                    bookId={bookId}
+                    bookId={book.id}
                     defaultValues={quote}
                     onCancel={() => setEditingQuoteId(null)}
                     onSubmit={handleSubmitUpdate}
@@ -139,6 +140,7 @@ export function Quotes({ bookId }: Readonly<QuotesProps>) {
                 quote={quote}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                book={book}
               />
             ),
           )}

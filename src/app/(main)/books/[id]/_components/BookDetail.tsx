@@ -155,7 +155,7 @@ export function BookDetail({ book, authors, series }: BookDetailProps) {
             </CardContent>
           </Card>
 
-          <Quotes bookId={book.id} />
+          <Quotes book={book} />
         </div>
       </div>
     </div>

@@ -33,6 +33,20 @@ export default async function EmbeddableReadingList({
 
     return (
       <div className="max-w-full p-4 font-sans">
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">
+            {user.name}&apos;s Reading List
+          </h1>
+          <p className="mt-2 text-gray-500">
+            {user.readBooks.count} books of {user._count.books} read (
+            {user.readBooks.percentage}%)
+          </p>
+          <p className="mt-2 text-gray-500">{user._count.authors} authors</p>
+          <p className="mt-2 text-gray-500">{user._count.series} series</p>
+          <p className="mt-2 text-gray-500">
+            {user._count.categories} categories
+          </p>
+        </header>
         {Object.entries(readingList).map(([year, books]) => (
           <div key={year} className="mb-8">
             <h2 className="mb-3 border-b border-gray-200 pb-1 text-xl font-bold text-gray-800">

@@ -101,7 +101,25 @@ export const userProfileRouter = createTRPCRouter({
         });
       }
 
-      return user;
+      const readBooksCount = await ctx.db.book.count({
+        where: {
+          userId: user?.id,
+          readDate: { not: null },
+        },
+      });
+
+      const totalBooks = user?._count.books;
+
+      return {
+        ...user,
+        readBooks: {
+          count: readBooksCount,
+          percentage:
+            totalBooks > 0
+              ? Math.round((readBooksCount / totalBooks) * 100)
+              : 0,
+        },
+      };
     }),
 
   updateProfile: protectedProcedure

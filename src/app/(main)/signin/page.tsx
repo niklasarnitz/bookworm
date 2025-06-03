@@ -54,9 +54,6 @@ export default function SigninPage() {
         username: values.username,
         password: values.password,
       });
-
-      router.refresh();
-      router.push("/");
     } catch (error) {
       setError("An error occurred. Please try again.");
       console.error("Sign in error:", error);

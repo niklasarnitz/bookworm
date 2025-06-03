@@ -50,15 +50,10 @@ export default function SigninPage() {
     setError(null);
 
     try {
-      const result = await signIn("credentials", {
+      await signIn("credentials", {
         username: values.username,
         password: values.password,
       });
-
-      if (result?.error) {
-        setError("Invalid username or password");
-        return;
-      }
 
       router.refresh();
       router.push("/");

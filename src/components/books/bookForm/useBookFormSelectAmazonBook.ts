@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { useBookForm } from "~/components/books/bookForm/useBookForm";
-import type { AmazonBookDetail } from "~/lib/amazon-scraper";
+import type { BookDetail } from "~/lib/book-metadata/types";
 import type { Author } from "~/schemas/author";
 import { useBooksPageStore } from "~/stores/booksPageStore/booksPageStore";
 
@@ -17,7 +17,7 @@ export const useBookFormSelectAmazonBook = (
   const { setShowAmazonSearch } = useBooksPageStore();
 
   const addAuthors = useCallback(
-    (bookData: AmazonBookDetail, startIdx: number, batchSize: number) => {
+    (bookData: BookDetail, startIdx: number, batchSize: number) => {
       const endIdx = Math.min(startIdx + batchSize, bookData.authors.length);
 
       for (let i = startIdx; i < endIdx; i++) {
@@ -43,7 +43,7 @@ export const useBookFormSelectAmazonBook = (
   );
 
   return useCallback(
-    (bookData: AmazonBookDetail) => {
+    (bookData: BookDetail) => {
       try {
         // Use requestAnimationFrame to ensure UI stays responsive during complex DOM updates
         requestAnimationFrame(() => {

@@ -2,12 +2,12 @@ import { bookRouter } from "~/server/api/routers/book";
 import { authorRouter } from "~/server/api/routers/author";
 import { seriesRouter } from "~/server/api/routers/series";
 import { authRouter } from "~/server/api/routers/auth";
-import { amazonRouter } from "~/server/api/routers/amazon";
 import { categoryRouter } from "~/server/api/routers/category";
 import { userManagementRouter } from "~/server/api/routers/userManagement";
 import { userProfileRouter } from "~/server/api/routers/userProfile";
 import { statisticsRouter } from "~/server/api/routers/statistics";
 import { quoteRouter } from "~/server/api/quote";
+import { bookMetadataRouter } from "~/server/api/routers/bookMetadata";
 
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { embeddableRouter } from "~/server/api/routers/embeddable";
@@ -22,13 +22,13 @@ export const appRouter = createTRPCRouter({
   author: authorRouter,
   series: seriesRouter,
   auth: authRouter,
-  amazon: amazonRouter,
   category: categoryRouter,
   userManagement: userManagementRouter,
   userProfile: userProfileRouter,
   statistics: statisticsRouter,
   embeddable: embeddableRouter,
   quote: quoteRouter,
+  bookMetadata: bookMetadataRouter,
 });
 
 // export type definition of API

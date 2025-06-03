@@ -13,7 +13,7 @@ import { Button } from "~/components/ui/button";
 import { type Book, type BookCreate } from "~/schemas/book";
 import { X, Plus } from "lucide-react";
 import { CoverUploader } from "../CoverUploader";
-import { AmazonBookSearch } from "../AmazonBookSearch";
+import { BookSearchDialog } from "../BookSearchDialog";
 import { AmazonCoverFetcher } from "../AmazonCoverFetcher";
 import { CategorySearch } from "../CategorySearch";
 import {
@@ -355,7 +355,7 @@ export function BookForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="mt-2 md:mt-0 md:mb-[2px]"
+                  className="mt-2 md:mb-[2px] md:mt-0"
                   onClick={() => toggleNewAuthorInput(index)}
                 >
                   {showNewAuthorInputs[index]
@@ -492,7 +492,7 @@ export function BookForm({
                     onImageUpload={handleCoverImageUpload}
                     defaultImageUrl={field.value ?? undefined}
                     isbn={form.watch("isbn")}
-                    onFetchFromAmazon={() => setShowCoverFetcher(true)}
+                    onFetchFromService={() => setShowCoverFetcher(true)}
                     onRemoveCover={handleRemoveCover}
                   />
                 </FormControl>
@@ -538,12 +538,12 @@ export function BookForm({
       </Form>
 
       {showAmazonSearch && (
-        <AmazonBookSearch
+        <BookSearchDialog
           onBookSelect={selectAmazonBook}
           onClose={() => {
             setShowAmazonSearch(false);
           }}
-          initialIsbn={scannedIsbn}
+          initialIdentifier={scannedIsbn ?? ""}
         />
       )}
 
@@ -555,7 +555,7 @@ export function BookForm({
         />
       )}
       {isProcessingCover && (
-        <div className="bg-opacity-50 fixed inset-0 z-[60] flex items-center justify-center bg-black">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
           <div className="rounded-lg bg-white p-4 text-center">
             <div className="border-primary mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
             <p>Processing cover image...</p>

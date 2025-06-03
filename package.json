@@ -17,7 +17,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
-    "start": "next start",
+    "start": "bun run dev",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -109,5 +109,9 @@
   },
   "overrides": {
     "react-is": "^19.0.0"
-  }
+  },
+  "trustedDependencies": [
+    "@sentry/cli",
+    "unrs-resolver"
+  ]
 }

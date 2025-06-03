@@ -89,6 +89,10 @@
       },
     },
   },
+  "trustedDependencies": [
+    "unrs-resolver",
+    "@sentry/cli",
+  ],
   "overrides": {
     "react-is": "^19.0.0",
   },

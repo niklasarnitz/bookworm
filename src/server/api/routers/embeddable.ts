@@ -38,6 +38,7 @@ export const embeddableRouter = createTRPCRouter({
               author: true,
             },
           },
+          series: true,
         },
       });
 

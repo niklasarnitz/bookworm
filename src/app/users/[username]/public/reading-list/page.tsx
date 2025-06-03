@@ -79,6 +79,7 @@ export default async function EmbeddableReadingList({
                           .join(", ")}
                       </td>
                       <td className="border-b border-gray-100 p-2 font-medium text-gray-800">
+                        {book.series ? `${book.series.name} ` : ""}
                         {book.name}
                       </td>
                       <td className="border-b border-gray-100 p-2 text-gray-500">

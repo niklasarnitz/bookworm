@@ -14,7 +14,6 @@ import { type Book, type BookCreate } from "~/schemas/book";
 import { X, Plus } from "lucide-react";
 import { CoverUploader } from "../CoverUploader";
 import { BookSearchDialog } from "../BookSearchDialog";
-import { AmazonCoverFetcher } from "../AmazonCoverFetcher";
 import { CategorySearch } from "../CategorySearch";
 import {
   Select,
@@ -53,8 +52,6 @@ export function BookForm({
     Record<number, boolean>
   >({});
   const [showNewSeriesInput, setShowNewSeriesInput] = useState(false);
-  const [showCoverFetcher, setShowCoverFetcher] = useState(false);
-  const [isProcessingCover, setIsProcessingCover] = useState(false);
 
   const { showAmazonSearch, setShowAmazonSearch } = useBooksPageStore();
 
@@ -125,23 +122,6 @@ export function BookForm({
 
   const handleRemoveCover = () => {
     form.setValue("coverUrl", null);
-  };
-
-  const handleCoverSelect = async (coverUrl: string) => {
-    try {
-      setIsProcessingCover(true);
-      // We don't need to preload here, as the CoverUploader component will handle the image processing
-      form.setValue("coverUrl", coverUrl);
-      setShowCoverFetcher(false);
-    } catch (error) {
-      console.error("Failed to handle cover selection:", error);
-      toast.error("Failed to process the selected cover");
-    } finally {
-      // Short delay to ensure state changes are applied in the right order
-      setTimeout(() => {
-        setIsProcessingCover(false);
-      }, 100);
-    }
   };
 
   // Set ISBN from scan if available and update form
@@ -355,7 +335,7 @@ export function BookForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="mt-2 md:mb-[2px] md:mt-0"
+                  className="mt-2 md:mt-0 md:mb-[2px]"
                   onClick={() => toggleNewAuthorInput(index)}
                 >
                   {showNewAuthorInputs[index]
@@ -492,7 +472,6 @@ export function BookForm({
                     onImageUpload={handleCoverImageUpload}
                     defaultImageUrl={field.value ?? undefined}
                     isbn={form.watch("isbn")}
-                    onFetchFromService={() => setShowCoverFetcher(true)}
                     onRemoveCover={handleRemoveCover}
                   />
                 </FormControl>
@@ -545,22 +524,6 @@ export function BookForm({
           }}
           initialIdentifier={scannedIsbn ?? ""}
         />
-      )}
-
-      {showCoverFetcher && form.watch("isbn") && (
-        <AmazonCoverFetcher
-          isbn={form.watch("isbn")}
-          onCoverSelect={handleCoverSelect}
-          onClose={() => setShowCoverFetcher(false)}
-        />
-      )}
-      {isProcessingCover && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
-          <div className="rounded-lg bg-white p-4 text-center">
-            <div className="border-primary mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"></div>
-            <p>Processing cover image...</p>
-          </div>
-        </div>
       )}
     </div>
   );

@@ -12,7 +12,7 @@ interface ImageCropperProps {
   onCancel: () => void;
   onSave: () => void;
   isUploading: boolean;
-  imgRef: React.RefObject<HTMLImageElement>;
+  imgRef: React.RefObject<HTMLImageElement | null>;
   onImageLoad: (e: React.SyntheticEvent<HTMLImageElement>) => void;
 }
 

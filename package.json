@@ -17,7 +17,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "preview": "next build && next start",
-    "start": "bun run dev",
+    "start": "next start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

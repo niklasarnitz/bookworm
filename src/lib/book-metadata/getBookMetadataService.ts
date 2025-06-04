@@ -7,7 +7,9 @@ import type { BookMetadataService } from "~/lib/book-metadata/types";
  * @returns The service instance
  */
 
-export function getBookMetadataService(serviceId: string): BookMetadataService {
+export function getBookMetadataService(
+  serviceId: keyof typeof services,
+): BookMetadataService {
   const service = services[serviceId];
   if (!service) {
     throw new Error(`Book metadata service '${serviceId}' not found`);

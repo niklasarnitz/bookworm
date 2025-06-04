@@ -58,54 +58,151 @@ export class AmazonBookService implements BookMetadataService {
       const $ = cheerio.load(html);
       const results: BookSearchResult[] = [];
 
-      // Select search result items
+      // Select search result items using a more general selector first
       const searchResultItems = $('div[data-component-type="s-search-result"]');
       console.log(`Found ${searchResultItems.length} search result items`);
 
-      searchResultItems.each((index, element) => {
-        if (results.length >= 10) return false; // Limit to 10 results
+      if (searchResultItems.length === 0) {
+        // Try an alternative selector if the first one didn't work
+        const altSearchResultItems = $("div.s-result-item");
+        console.log(
+          `Found ${altSearchResultItems.length} alternative search result items`,
+        );
 
-        const $item = $(element);
+        // Use whatever selectors found items
+        const itemsToProcess =
+          searchResultItems.length > 0
+            ? searchResultItems
+            : altSearchResultItems;
 
-        // Using the specified CSS selectors
-        const titleElement = $item.find(".s-line-clamp-2 span").first();
-        const authorElement = $item
-          .find(".a-size-base .a-row a.a-size-base")
-          .first();
-        const detailLinkElement = $item.find("a.s-line-clamp-2").first();
+        itemsToProcess.each((index, element) => {
+          if (results.length >= 10) return false; // Limit to 10 results
 
-        // @ts-expect-error - Cheerio typings are incorrect
-        const title = getTextContent(titleElement);
-        // @ts-expect-error - Cheerio typings are incorrect
-        const author = getTextContent(authorElement) || "Unknown Author";
-        const detailUrlPath = detailLinkElement.attr("href");
+          const $item = $(element);
 
-        if (title && detailUrlPath) {
-          const detailUrl = new URL(detailUrlPath, this.baseUrl).toString();
+          // Try multiple possible selectors for title
+          let titleElement = $item.find("h2 .a-link-normal span").first();
+          if (titleElement.length === 0) {
+            titleElement = $item.find(".s-line-clamp-2 span").first();
+          }
 
-          const result = {
-            title,
-            author,
-            detailUrl,
-          };
+          // Try multiple possible selectors for author
+          let authorElement = $item.find(".a-color-secondary .a-row a").first();
+          if (authorElement.length === 0) {
+            authorElement = $item
+              .find(".a-size-base .a-row a.a-size-base")
+              .first();
+          }
 
-          console.log(`Found book: "${result.title}" by ${result.author}`);
-          console.log(`Detail URL: ${result.detailUrl}`);
+          // Try multiple possible selectors for detail link
+          let detailLinkElement = $item.find("h2 .a-link-normal").first();
+          if (!detailLinkElement.attr("href")) {
+            detailLinkElement = $item.find("a.s-line-clamp-2").first();
+          }
 
-          results.push(result);
-        } else {
-          console.log(
-            `Skipping item #${index + 1} - missing title or detail URL`,
-          );
-          if (!title) console.log("No title found");
-          if (!detailUrlPath) console.log("No detail URL found");
-        }
-      });
+          // @ts-expect-error - Cheerio typings are incorrect
+          const title = getTextContent(titleElement);
+          // @ts-expect-error - Cheerio typings are incorrect
+          const author = getTextContent(authorElement) || "Unknown Author";
+          const detailUrlPath = detailLinkElement.attr("href");
+
+          if (title && detailUrlPath) {
+            const detailUrl = new URL(detailUrlPath, this.baseUrl).toString();
+
+            // Create a proper BookSearchResult object with all required fields
+            const result: BookSearchResult = {
+              title: String(title),
+              author: String(author),
+              detailUrl: String(detailUrl),
+            };
+
+            console.log(`Found book: "${result.title}" by ${result.author}`);
+            console.log(`Detail URL: ${result.detailUrl}`);
+
+            results.push(result);
+          } else {
+            console.log(
+              `Skipping item #${index + 1} - missing title or detail URL`,
+            );
+            if (!title) console.log("No title found in selectors tried");
+            if (!detailUrlPath)
+              console.log("No detail URL found in selectors tried");
+          }
+        });
+      } else {
+        // Process with the original selectors
+        searchResultItems.each((index, element) => {
+          if (results.length >= 10) return false; // Limit to 10 results
+
+          const $item = $(element);
+
+          // Using the specified CSS selectors
+          const titleElement = $item.find(".s-line-clamp-2 span").first();
+          const authorElement = $item
+            .find(".a-size-base .a-row a.a-size-base")
+            .first();
+          const detailLinkElement = $item.find("a.s-line-clamp-2").first();
+
+          // @ts-expect-error - Cheerio typings are incorrect
+          const title = getTextContent(titleElement);
+          // @ts-expect-error - Cheerio typings are incorrect
+          const author = getTextContent(authorElement) || "Unknown Author";
+          const detailUrlPath = detailLinkElement.attr("href");
+
+          if (title && detailUrlPath) {
+            const detailUrl = new URL(detailUrlPath, this.baseUrl).toString();
+
+            // Create a proper BookSearchResult object with all required fields
+            const result: BookSearchResult = {
+              title: String(title),
+              author: String(author),
+              detailUrl: String(detailUrl),
+            };
+
+            console.log(`Found book: "${result.title}" by ${result.author}`);
+            console.log(`Detail URL: ${result.detailUrl}`);
+
+            results.push(result);
+          } else {
+            console.log(
+              `Skipping item #${index + 1} - missing title or detail URL`,
+            );
+            if (!title) console.log("No title found");
+            if (!detailUrlPath) console.log("No detail URL found");
+          }
+        });
+      }
 
       console.log(
         `Search complete, found ${results.length} results for ISBN: ${isbn}`,
       );
-      return results;
+
+      // Ensure we're returning a clean array of properly typed objects
+      const cleanResults = results.map((item) => {
+        // Make sure the detailUrl is valid
+        let safeDetailUrl = item.detailUrl;
+        try {
+          // Test if URL parsing works
+          new URL(safeDetailUrl);
+        } catch (error) {
+          // If there's an error, fix the URL
+          console.log(`Fixing invalid URL: ${safeDetailUrl}`);
+          safeDetailUrl = `${this.baseUrl}${safeDetailUrl.startsWith("/") ? "" : "/"}${safeDetailUrl}`;
+          console.log(error);
+        }
+
+        return {
+          title: String(item.title),
+          author: String(item.author),
+          detailUrl: String(safeDetailUrl),
+        };
+      });
+
+      console.log(
+        "Final search results to be returned:",
+        JSON.stringify(cleanResults),
+      );
+      return cleanResults;
     } catch (error) {
       console.log(`Error searching Amazon books with ISBN ${isbn}:`, error);
       throw new Error("Failed to search Amazon books. Please try again later.");
@@ -121,7 +218,22 @@ export class AmazonBookService implements BookMetadataService {
     try {
       console.log(`Fetching book details from: ${detailUrl}`);
 
-      const response = await fetch(detailUrl, {
+      // Validate and sanitize the URL to handle encoding issues
+      let validatedUrl = detailUrl;
+
+      try {
+        // Check if it's a valid URL by trying to parse it
+        new URL(validatedUrl);
+      } catch (err) {
+        // If URL parsing fails, it's malformed - fix it
+        console.log(
+          `Invalid book detail URL detected: ${detailUrl}, error: ${String(err)}`,
+        );
+        validatedUrl = `${this.baseUrl}${detailUrl.startsWith("/") ? "" : "/"}${detailUrl}`;
+        console.log(`URL fixed to: ${validatedUrl}`);
+      }
+
+      const response = await fetch(validatedUrl, {
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",

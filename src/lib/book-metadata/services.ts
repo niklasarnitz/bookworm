@@ -3,6 +3,6 @@ import type { BookMetadataService } from "~/lib/book-metadata/types";
 
 // Registry of available book metadata services
 
-export const services: Record<string, BookMetadataService> = {
+export const services: Record<"amazon", BookMetadataService> = {
   amazon: new AmazonBookService(),
-};
+} as const;

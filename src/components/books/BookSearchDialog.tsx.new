@@ -1,10 +1,8 @@
+// filepath: /Users/narnitz/privat/bookworm/src/components/books/BookSearchDialog.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import {
-  type BookDetail,
-  type BookSearchResult,
-} from "~/lib/book-metadata/types";
+import { type BookDetail, type BookSearchResult } from "~/lib/book-metadata/types";
 import {
   Dialog,
   DialogContent,
@@ -52,9 +50,7 @@ export function BookSearchDialog({
   const [error, setError] = useState<string | null>(null);
 
   // Search results state
-  const [searchResults, setSearchResults] = useState<
-    ServiceSearchResult[] | null
-  >(null);
+  const [searchResults, setSearchResults] = useState<ServiceSearchResult[] | null>(null);
 
   // Flag to prevent duplicate initial searches
   const [initialSearchComplete, setInitialSearchComplete] = useState(false);
@@ -69,46 +65,49 @@ export function BookSearchDialog({
     searchResults?.filter((service) => service.results.length > 0).length ?? 0;
 
   // Helper function to sanitize URLs and handle special characters
-  const sanitizeUrl = useCallback((url: string): string => {
-    // First, trim any whitespace
-    let sanitized = url.trim();
+  const sanitizeUrl = useCallback(
+    (url: string): string => {
+      // First, trim any whitespace
+      let sanitized = url.trim();
 
-    try {
-      // Test if it's already a valid URL
-      new URL(sanitized);
-      return sanitized;
-    } catch (err) {
-      console.log(`URL validation failed: ${String(err)}`);
+      try {
+        // Test if it's already a valid URL
+        new URL(sanitized);
+        return sanitized;
+      } catch (err) {
+        console.log(`URL validation failed: ${String(err)}`);
 
-      // Handle Amazon's special URL format with /dp/ or /gp/ paths
-      if (sanitized.includes("/dp/") || sanitized.includes("/gp/")) {
-        // Try to extract ASIN or ISBN from the URL
-        const regex = /\/(dp|gp)\/([A-Z0-9]{10})/i;
-        const execResult = regex.exec(sanitized);
-        if (execResult?.[2]) {
-          const asin = execResult[2];
-          return `https://www.amazon.de/dp/${asin}`;
+        // Handle Amazon's special URL format with /dp/ or /gp/ paths
+        if (sanitized.includes("/dp/") || sanitized.includes("/gp/")) {
+          // Try to extract ASIN or ISBN from the URL
+          const regex = /\/(dp|gp)\/([A-Z0-9]{10})/i;
+          const execResult = regex.exec(sanitized);
+          if (execResult?.[2]) {
+            const asin = execResult[2];
+            return `https://www.amazon.de/dp/${asin}`;
+          }
         }
-      }
 
-      // If it has percent-encoding, try to decode it (sometimes helps with Amazon URLs)
-      if (sanitized.includes("%")) {
-        try {
-          sanitized = decodeURIComponent(sanitized);
-        } catch (decodeErr) {
-          console.log(`URL decode failed: ${String(decodeErr)}`);
+        // If it has percent-encoding, try to decode it (sometimes helps with Amazon URLs)
+        if (sanitized.includes("%")) {
+          try {
+            sanitized = decodeURIComponent(sanitized);
+          } catch (decodeErr) {
+            console.log(`URL decode failed: ${String(decodeErr)}`);
+          }
         }
-      }
 
-      // Check if it's a relative URL and prepend the base URL
-      if (sanitized.startsWith("/")) {
-        return `https://www.amazon.de${sanitized}`;
-      }
+        // Check if it's a relative URL and prepend the base URL
+        if (sanitized.startsWith('/')) {
+          return `https://www.amazon.de${sanitized}`;
+        }
 
-      // Remove any problematic characters that might be causing issues
-      return sanitized.replace(/["'<>]/g, "");
-    }
-  }, []);
+        // Remove any problematic characters that might be causing issues
+        return sanitized.replace(/["'<>]/g, "");
+      }
+    },
+    []
+  );
 
   // Search handler - completely decoupled from React Query hooks
   const handleSearch = useCallback(async () => {
@@ -123,10 +122,9 @@ export function BookSearchDialog({
       setIsSearching(true);
 
       // Direct API fetch using uncached client instead of React Query
-      const results =
-        await uncachedApiClient.bookMetadata.searchAllServices.query({
-          identifier: identifier.trim(),
-        });
+      const results = await uncachedApiClient.bookMetadata.searchAllServices.query({
+        identifier: identifier.trim(),
+      });
 
       console.log("Search results received:", results);
 
@@ -134,7 +132,7 @@ export function BookSearchDialog({
       if (
         !results ||
         results.every(
-          (service) => !service.results || service.results.length === 0,
+          (service) => !service.results || service.results.length === 0
         )
       ) {
         throw new Error("No results found in any of the services.");
@@ -174,16 +172,14 @@ export function BookSearchDialog({
         // Sanitize URL to avoid validation issues
         const sanitizedUrl = sanitizeUrl(detailUrl);
         console.log(
-          `Getting details for book: serviceId=${serviceId}, url=${sanitizedUrl}`,
+          `Getting details for book: serviceId=${serviceId}, url=${sanitizedUrl}`
         );
 
         // Direct API call for details with type assertion for amazon service
-        const result = await uncachedApiClient.bookMetadata.getBookDetail.query(
-          {
-            serviceId: "amazon" as const, // Only amazon is currently supported
-            detailUrl: sanitizedUrl,
-          },
-        );
+        const result = await uncachedApiClient.bookMetadata.getBookDetail.query({
+          serviceId: "amazon" as const, // Only amazon is currently supported
+          detailUrl: sanitizedUrl,
+        });
 
         console.log("Book detail result:", result);
 
@@ -192,7 +188,9 @@ export function BookSearchDialog({
         onClose();
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Error getting book details";
+          err instanceof Error
+            ? err.message
+            : "Error getting book details";
         console.error("Error selecting book:", err);
         setError(errorMessage);
         setStep("select"); // Back to selection on error
@@ -200,7 +198,7 @@ export function BookSearchDialog({
         setIsLoadingDetails(false);
       }
     },
-    [onBookSelect, onClose, sanitizeUrl],
+    [onBookSelect, onClose, sanitizeUrl]
   );
 
   // Render search results with Accordion UI
@@ -208,7 +206,7 @@ export function BookSearchDialog({
     if (!searchResults) return null;
 
     const servicesWithResults = searchResults.filter(
-      (service) => service.results?.length > 0,
+      (service) => service.results?.length > 0
     );
 
     if (servicesWithResults.length === 0) {
@@ -265,7 +263,7 @@ export function BookSearchDialog({
                         </p>
                       </div>
                       <div
-                        className="text-foreground hover:bg-accent hover:text-accent-foreground ml-2 inline-flex h-8 items-center justify-center rounded-md bg-transparent px-3 text-sm font-medium"
+                        className="ml-2 inline-flex h-8 items-center justify-center rounded-md bg-transparent px-3 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
                         role="button"
                         tabIndex={0}
                         onClick={(e) => {

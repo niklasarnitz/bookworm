@@ -29,9 +29,7 @@ export const wishlistSearchSchema = z.object({
   query: z.string().optional(),
   authorId: z.string().optional(),
   seriesId: z.string().optional(),
-  sortBy: z
-    .enum(["createdAt", "name", "author", "series"])
-    .optional(),
+  sortBy: z.enum(["createdAt", "name", "author", "series"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
   pagination: z.object({
     page: z.number().int().positive().optional().default(1),
@@ -39,8 +37,11 @@ export const wishlistSearchSchema = z.object({
   }),
 });
 
-export type WishlistItemAuthorCreate = z.infer<typeof wishlistItemAuthorCreateSchema>;
+export type WishlistItemAuthorCreate = z.infer<
+  typeof wishlistItemAuthorCreateSchema
+>;
 export type WishlistItemAuthor = z.infer<typeof wishlistItemAuthorSchema>;
 export type WishlistItemCreate = z.infer<typeof wishlistItemCreateSchema>;
 export type WishlistSearch = z.infer<typeof wishlistSearchSchema>;
-export type WishlistItem = RouterOutputs["wishlist"]["getAll"]["wishlistItems"][number];
+export type WishlistItem =
+  RouterOutputs["wishlist"]["getAll"]["wishlistItems"][number];

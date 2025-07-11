@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { SubmitErrorHandler } from "react-hook-form";
+import { type SubmitErrorHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {

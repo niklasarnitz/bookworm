@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { useWishlistItemForm } from "~/components/wishlist/useWishlistItemForm";
+import { type useWishlistItemForm } from "~/components/wishlist/useWishlistItemForm";
 import type { WishlistItemCreate } from "~/schemas/wishlist";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/react";

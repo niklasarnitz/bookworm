@@ -1,4 +1,8 @@
 import { Suspense } from "react";
+import { CategoryDistributionChart } from "~/components/statistics/CategoryDistributionChart";
+import { PageStatistics } from "~/components/statistics/PageStatistics";
+import { ReadingProgressChart } from "~/components/statistics/ReadingProgressChart";
+import { SummaryStats } from "~/components/statistics/SummaryStats";
 import {
   Card,
   CardContent,
@@ -7,10 +11,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Spinner } from "~/components/ui/spinner";
-import { SummaryStats } from "./SummaryStats";
-import { ReadingProgressChart } from "./ReadingProgressChart";
-import { CategoryDistributionChart } from "./CategoryDistributionChart";
-import { PageStatistics } from "./PageStatistics";
 
 export function StatsPage() {
   return (

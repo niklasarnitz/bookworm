@@ -14,6 +14,27 @@ import { BookFilter } from "~/components/books/BookFilter";
 import { BookSort } from "~/components/books/BookSort";
 import { PageHeader } from "~/components/ui/page-header";
 import { BookSearch as BookSearchComponent } from "~/components/books/BookSearch";
+import { Skeleton } from "~/components/ui/skeleton";
+
+function BookFilterSkeleton() {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Skeleton className="h-8 w-24" />
+    </div>
+  );
+}
+
+function BookSearchSkeleton() {
+  return (
+    <div className="w-full">
+      <Skeleton className="h-10 w-full" />
+    </div>
+  );
+}
+
+function BookSortSkeleton() {
+  return <Skeleton className="h-8 w-32" />;
+}
 
 type PageProps = {
   searchParams: Promise<{
@@ -84,13 +105,19 @@ export default async function BooksPage({ searchParams }: Readonly<PageProps>) {
         </div>
       </PageHeader>
 
-      <div className="w-full">
-        <BookSearchComponent />
-      </div>
+      <Suspense fallback={<BookSearchSkeleton />}>
+        <div className="w-full">
+          <BookSearchComponent />
+        </div>
+      </Suspense>
 
       <div className="flex items-center justify-between py-4">
-        <BookFilter />
-        <BookSort />
+        <Suspense fallback={<BookFilterSkeleton />}>
+          <BookFilter />
+        </Suspense>
+        <Suspense fallback={<BookSortSkeleton />}>
+          <BookSort />
+        </Suspense>
       </div>
 
       <Suspense

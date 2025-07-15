@@ -8,7 +8,7 @@ import {
   Trash,
 } from "lucide-react";
 import Link from "next/link";
-import { CategoryAccordion } from "~/app/(main)/categories/_components/CategoryAccordion";
+import { CategoryAccordion } from "~/components/categories/CategoryAccordion";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {

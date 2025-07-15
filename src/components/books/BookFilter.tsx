@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
-import { Input } from "~/components/ui/input";
+import { useState, useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
-import { Search, Filter, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import { Label } from "~/components/ui/label";
 import Link from "next/link";
 import { CategorySearch } from "./CategorySearch";
@@ -27,9 +26,6 @@ export interface BookFilterProps {
 export function BookFilter({ className }: Readonly<BookFilterProps>) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [searchValue, setSearchValue] = useState(
-    searchParams.get("query") ?? "",
-  );
   const [activeFilters, setActiveFilters] = useState(0);
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeAccordionItems, setActiveAccordionItems] = useState<string[]>(

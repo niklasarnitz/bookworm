@@ -30,12 +30,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Pagination } from "~/components/ui/pagination";
 import { useDebounce } from "use-debounce";
 import { AuthorDialog } from "./AuthorDialog";
-
-type Author = {
-  id: string;
-  name: string;
-  _count?: { books: number };
-};
+import type { Author } from "~/schemas/author";
 
 export function AuthorTable() {
   const [searchQuery, setSearchQuery] = useState("");

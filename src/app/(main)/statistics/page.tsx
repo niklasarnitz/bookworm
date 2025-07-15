@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { type Metadata } from "next";
-import { StatsPage } from "./_components/StatsPage";
 import { Spinner } from "~/components/ui/spinner";
 import { PageHeader } from "~/components/ui/page-header";
+import { StatsPage } from "~/components/statistics/StatsPage";
 
 export const metadata: Metadata = {
   title: "Statistics | MediaWorm",

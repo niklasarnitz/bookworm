@@ -1,6 +1,6 @@
 import React from "react";
-import { AuthorTable } from "~/app/(main)/authors/_components/AuthorTable";
-import { AuthorDialog } from "~/app/(main)/authors/_components/AuthorDialog";
+import { AuthorTable } from "~/components/authors/AuthorTable";
+import { AuthorDialog } from "~/components/authors/AuthorDialog";
 import { PageHeader } from "~/components/ui/page-header";
 import { Card, CardContent } from "~/components/ui/card";
 

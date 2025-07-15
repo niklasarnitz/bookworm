@@ -1,4 +1,4 @@
-import { BookDetail } from "~/app/(main)/books/[id]/_components/BookDetail";
+import { BookDetail } from "~/components/books/BookDetail";
 import { api } from "~/trpc/server";
 import { PageHeader } from "~/components/ui/page-header";
 

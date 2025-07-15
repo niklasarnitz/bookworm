@@ -1,6 +1,6 @@
 import React from "react";
-import { SeriesTable } from "~/app/(main)/series/_components/SeriesTable";
-import { SeriesDialog } from "~/app/(main)/series/_components/SeriesDialog";
+import { SeriesTable } from "~/components/series/SeriesTable";
+import { SeriesDialog } from "~/components/series/SeriesDialog";
 import { PageHeader } from "~/components/ui/page-header";
 import { Card, CardContent } from "~/components/ui/card";
 

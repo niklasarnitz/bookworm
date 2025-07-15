@@ -1,6 +1,6 @@
 import { PageHeader } from "~/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { UserForm } from "../_components/UserForm";
+import { UserForm } from "../../../../../components/adminUsers/UserForm";
 
 export default function NewUserPage() {
   return (

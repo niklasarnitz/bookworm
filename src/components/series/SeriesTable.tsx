@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Button } from "~/components/ui/button";
-import { api, type RouterOutputs } from "~/trpc/react";
+import { api } from "~/trpc/react";
 import { toast } from "sonner";
 import { Trash } from "lucide-react";
 import {

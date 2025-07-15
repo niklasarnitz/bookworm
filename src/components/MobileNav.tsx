@@ -82,18 +82,6 @@ export function MobileNav({ session }: MobileNavProps) {
                     Books
                   </Link>
                   <Link
-                    href="/wishlist"
-                    className={cn(
-                      "border-l-4 px-2 py-2 text-lg",
-                      pathname === "/wishlist"
-                        ? "border-primary font-medium"
-                        : "border-transparent",
-                    )}
-                    onClick={handleLinkClick}
-                  >
-                    Wishlist
-                  </Link>
-                  <Link
                     href="/authors"
                     className={cn(
                       "border-l-4 px-2 py-2 text-lg",

@@ -24,45 +24,57 @@ export interface ImageUploadResult {
 export async function uploadCroppedImage(
   file: File,
   cropData: CropData,
+  retries = 3,
 ): Promise<ImageUploadResult> {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("cropData", JSON.stringify(cropData));
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("cropData", JSON.stringify(cropData));
 
-    const response = await fetch("/api/upload/cover", {
-      method: "POST",
-      body: formData,
-    });
+      const response = await fetch("/api/upload/cover", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (!response.ok) {
-      throw new Error(
-        `Server error: ${response.status} ${response.statusText}`,
+      if (!response.ok) {
+        throw new Error(
+          `Server error: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      const rawData = (await response.json()) as unknown;
+      const result = uploadResponseSchema.safeParse(rawData);
+
+      if (result.success) {
+        return {
+          success: true,
+          url: result.data.url,
+        };
+      } else {
+        throw new Error("Invalid response format from server");
+      }
+    } catch (error) {
+      console.error(`Upload attempt ${attempt} failed:`, error);
+
+      if (attempt === retries) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Upload failed",
+        };
+      }
+
+      // Wait before retrying (exponential backoff)
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.pow(2, attempt) * 1000),
       );
     }
-
-    const rawData = (await response.json()) as unknown;
-    const result = uploadResponseSchema.safeParse(rawData);
-
-    if (result.success) {
-      return {
-        success: true,
-        url: result.data.url,
-      };
-    } else {
-      console.error("Invalid response format:", rawData);
-      return {
-        success: false,
-        error: "Upload failed: Invalid server response",
-      };
-    }
-  } catch (error) {
-    console.error("Error uploading image:", error);
-    return {
-      success: false,
-      error: "Error uploading image. Please try again.",
-    };
   }
+
+  return {
+    success: false,
+    error: "Upload failed after all retries",
+  };
 }
 
 export async function processExternalImageUrl(

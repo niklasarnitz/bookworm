@@ -89,9 +89,6 @@ export default async function RootLayout({
                           <Link href="/" className="hover:underline">
                             Books
                           </Link>
-                          <Link href="/wishlist" className="hover:underline">
-                            Wishlist
-                          </Link>
                           <Link href="/authors" className="hover:underline">
                             Authors
                           </Link>

@@ -11,7 +11,6 @@ Bookworm is a comprehensive book management application that allows you to catal
 ## Features
 
 - **Book Management**: Add, edit, and organize your books with detailed information
-- **Wishlist Feature**: Keep track of books you want to add to your collection
 - **Author Management**: Track authors and their associated works
 - **Series Organization**: Group books by series with proper ordering
 - **Category System**: Organize books using a hierarchical category system

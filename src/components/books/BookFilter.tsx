@@ -229,7 +229,9 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
                 <div className="space-y-2 py-1">
                   <AuthorSearch
                     value={searchParams.get("authorId") ?? undefined}
-                    onChange={(value) => handleFilterChange("authorId", value)}
+                    onChange={(author) =>
+                      handleFilterChange("authorId", author?.id)
+                    }
                     placeholder="Search and select an author..."
                   />
                 </div>
@@ -251,7 +253,9 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
                 <div className="space-y-2 py-1">
                   <SeriesSearch
                     value={searchParams.get("seriesId") ?? undefined}
-                    onChange={(value) => handleFilterChange("seriesId", value)}
+                    onChange={(series) =>
+                      handleFilterChange("seriesId", series?.id)
+                    }
                     placeholder="Search and select a series..."
                   />
                 </div>

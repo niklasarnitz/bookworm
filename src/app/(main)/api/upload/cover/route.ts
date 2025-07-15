@@ -4,7 +4,7 @@ import {
   minioClient,
   MINIO_BUCKET_NAME,
   ensureBucketExists,
-  getObjectUrl,
+  getRobustImageUrl,
 } from "~/lib/minio-client";
 import { v4 as uuidv4 } from "uuid";
 import sharp from "sharp";
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     await minioClient.putObject(MINIO_BUCKET_NAME, objectName, processedBuffer);
 
     // Generate the URL for the uploaded object
-    const url = getObjectUrl(objectName);
+    const url = getRobustImageUrl(objectName);
 
     return NextResponse.json({
       success: true,

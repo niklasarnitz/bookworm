@@ -6,9 +6,8 @@ import { categoryRouter } from "~/server/api/routers/category";
 import { userManagementRouter } from "~/server/api/routers/userManagement";
 import { userProfileRouter } from "~/server/api/routers/userProfile";
 import { statisticsRouter } from "~/server/api/routers/statistics";
-import { quoteRouter } from "~/server/api/quote";
+import { quoteRouter } from "~/server/api/routers/quote";
 import { bookMetadataRouter } from "~/server/api/routers/bookMetadata";
-import { wishlistRouter } from "~/server/api/routers/wishlist";
 
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { embeddableRouter } from "~/server/api/routers/embeddable";
@@ -30,7 +29,6 @@ export const appRouter = createTRPCRouter({
   embeddable: embeddableRouter,
   quote: quoteRouter,
   bookMetadata: bookMetadataRouter,
-  wishlist: wishlistRouter,
 });
 
 // export type definition of API

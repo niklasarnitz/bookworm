@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "./trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { quoteSchema } from "~/schemas/quote";
 
 export const quoteRouter = createTRPCRouter({

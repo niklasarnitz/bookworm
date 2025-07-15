@@ -9,7 +9,6 @@ interface ImageUploaderProps {
 
 /**
  * A wrapper component for the CoverUploader component that doesn't include the ISBN-specific functionality
- * This is used by both books and wishlist items
  */
 export function ImageUploader({
   onImageUpload,

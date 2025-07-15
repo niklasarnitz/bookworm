@@ -86,7 +86,6 @@ model Author {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     books     BookAuthorRelation[]
-    wishlistItems WishlistItemAuthorRelation[]
 
     user       User      @relation(fields: [userId], references: [id])
     userId     String @default("cm9vhjvpo0000btb9gdu2ny14")
@@ -100,7 +99,6 @@ model Series {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     books     Book[]
-    wishlistItems WishlistItem[]
 
     user       User      @relation(fields: [userId], references: [id])
     userId     String @default("cm9vhjvpo0000btb9gdu2ny14")
@@ -182,7 +180,6 @@ model User {
     authors       Author[]
     series        Series[]
     quotes        Quote[]
-    wishlistItems WishlistItem[]
 
     role UserRole @default(USER)
 }
@@ -193,44 +190,4 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
-}
-
-model WishlistItem {
-    id        String    @id @default(cuid())
-    isbn      String?
-    name      String
-    subtitle  String?
-
-    publisher String?
-    pages     Int?
-
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-
-    wishlistItemAuthors WishlistItemAuthorRelation[]
-
-    series    Series?   @relation(fields: [seriesId], references: [id])
-    seriesId  String?
-    seriesNumber Float?
-
-    coverUrl  String?
-
-    user      User      @relation(fields: [userId], references: [id])
-    userId    String @default("cm9vhjvpo0000btb9gdu2ny14")
-
-    @@index([name])
-    @@index([seriesId])
-}
-
-model WishlistItemAuthorRelation {
-    id            String       @id @default(cuid())
-    wishlistItem  WishlistItem @relation(fields: [wishlistItemId], references: [id], onDelete: Cascade)
-    wishlistItemId String
-    author        Author       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-    authorId      String
-    tag           String?      // Optional tag like "herausgeber"
-
-    @@unique([wishlistItemId, authorId])
-    @@index([wishlistItemId])
-    @@index([authorId])
 }

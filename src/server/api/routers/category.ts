@@ -4,6 +4,8 @@ import {
   createCategorySchema,
   categorySearchSchema,
   getByPathSchema,
+  getCategoriesByMediaTypeSchema,
+  updateCategorySchema,
 } from "../../../schemas/category";
 import { ObjectHelper, type URecord } from "@ainias42/js-helper";
 import { sortCategoriesByPath } from "~/lib/category-utils";
@@ -20,6 +22,7 @@ export const categoryRouter = createTRPCRouter({
         _count: {
           select: {
             books: true,
+            movies: true,
           },
         },
       },
@@ -27,6 +30,27 @@ export const categoryRouter = createTRPCRouter({
 
     return sortCategoriesByPath(categories);
   }),
+
+  getByMediaType: protectedProcedure
+    .input(getCategoriesByMediaTypeSchema)
+    .query(async ({ ctx, input }) => {
+      const categories = await ctx.db.category.findMany({
+        where: {
+          userId: ctx.session.user.id,
+          mediaType: input.mediaType,
+        },
+        include: {
+          _count: {
+            select: {
+              books: true,
+              movies: true,
+            },
+          },
+        },
+      });
+
+      return sortCategoriesByPath(categories);
+    }),
 
   getByParent: protectedProcedure
     .input(z.object({ parentId: z.string().nullable().optional() }))
@@ -266,7 +290,7 @@ export const categoryRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createCategorySchema)
     .mutation(async ({ ctx, input }) => {
-      const { name, parentId } = input;
+      const { name, parentId, mediaType } = input;
 
       // If parent is provided, verify it belongs to the current user
       if (parentId) {
@@ -327,22 +351,17 @@ export const categoryRouter = createTRPCRouter({
             level,
             sortOrder,
             parentId,
-            userId: ctx.session.user.id, // Add user ID
+            userId: ctx.session.user.id, // Add user ID,
+            mediaType,
           },
         });
       });
     }),
 
   update: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        name: z.string().min(1),
-        parentId: z.string().nullable().optional(),
-      }),
-    )
+    .input(updateCategorySchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, name, parentId } = input;
+      const { id, name, parentId, mediaType } = input;
 
       // Check if the category belongs to the current user
       const existingCategory = await ctx.db.category.findUnique({
@@ -390,7 +409,7 @@ export const categoryRouter = createTRPCRouter({
       if (parentId === undefined) {
         return ctx.db.category.update({
           where: { id },
-          data: { name },
+          data: { name, mediaType },
         });
       }
 
@@ -481,6 +500,7 @@ export const categoryRouter = createTRPCRouter({
             path,
             level,
             sortOrder,
+            mediaType,
           },
         });
 

@@ -5,7 +5,7 @@ import { Spinner } from "~/components/ui/spinner";
 import { PageHeader } from "~/components/ui/page-header";
 
 export const metadata: Metadata = {
-  title: "Statistics | BookWorm",
+  title: "Statistics | MediaWorm",
   description: "Book collection statistics and reading progress",
 };
 

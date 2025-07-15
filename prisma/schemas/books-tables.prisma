@@ -1,0 +1,78 @@
+model Book {
+  id           String               @id @default(cuid())
+  isbn         String?
+  name         String
+  subtitle     String?
+  seriesId     String?
+  seriesNumber Float?
+  coverUrl     String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  publisher    String?
+  pages        Int?
+  categoryId   String?
+  userId       String               @default("cm9vhjvpo0000btb9gdu2ny14")
+  readDate     DateTime?
+  category     Category?            @relation(fields: [categoryId], references: [id])
+  series       Series?              @relation(fields: [seriesId], references: [id])
+  user         User                 @relation(fields: [userId], references: [id])
+  bookAuthors  BookAuthorRelation[]
+  quotes       Quote[]
+
+  @@index([name])
+  @@index([seriesId])
+  @@index([categoryId])
+}
+
+model BookAuthorRelation {
+  id       String  @id @default(cuid())
+  bookId   String
+  authorId String
+  tag      String?
+  author   Author  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  book     Book    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, authorId])
+  @@index([bookId])
+  @@index([authorId])
+}
+
+model Author {
+  id        String               @id @default(cuid())
+  name      String
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  userId    String               @default("cm9vhjvpo0000btb9gdu2ny14")
+  user      User                 @relation(fields: [userId], references: [id])
+  books     BookAuthorRelation[]
+
+  @@index([name])
+}
+
+model Series {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @default("cm9vhjvpo0000btb9gdu2ny14")
+  books     Book[]
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([name])
+}
+
+model Quote {
+  id        String   @id @default(cuid())
+  title     String?
+  pageStart Int
+  pageEnd   Int?
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bookId    String
+  userId    String   @default("cm9vhjvpo0000btb9gdu2ny14")
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([bookId])
+}

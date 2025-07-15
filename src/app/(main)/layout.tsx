@@ -49,8 +49,8 @@ const themeScript = `
 `;
 
 export const metadata = {
-  title: "BookWorm",
-  description: "Track your book collection with ease",
+  title: "MediaWorm",
+  description: "Track your book and movie collection with ease",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -80,7 +80,7 @@ export default async function RootLayout({
                   <div className="container mx-auto flex items-center justify-between p-4">
                     <div className="flex items-center gap-6">
                       <Link href="/" className="text-xl font-bold">
-                        BookWorm
+                        MediaWorm
                       </Link>
 
                       {/* Desktop navigation */}
@@ -94,6 +94,9 @@ export default async function RootLayout({
                           </Link>
                           <Link href="/series" className="hover:underline">
                             Series
+                          </Link>
+                          <Link href="/movies" className="hover:underline">
+                            Movies
                           </Link>
                           <Link href="/categories" className="hover:underline">
                             Categories
@@ -139,7 +142,7 @@ export default async function RootLayout({
                 </main>
                 <footer className="border-t py-4">
                   <div className="text-muted-foreground container mx-auto text-center text-sm">
-                    © {new Date().getFullYear()} BookWorm
+                    © {new Date().getFullYear()} MediaWorm
                   </div>
                 </footer>
               </div>

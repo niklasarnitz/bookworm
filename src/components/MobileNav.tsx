@@ -42,7 +42,7 @@ export function MobileNav({ session }: MobileNavProps) {
                 className="text-xl font-bold"
                 onClick={handleLinkClick}
               >
-                BookWorm
+                MediaWorm
               </Link>
               <Button
                 variant="ghost"
@@ -104,6 +104,18 @@ export function MobileNav({ session }: MobileNavProps) {
                     onClick={handleLinkClick}
                   >
                     Series
+                  </Link>
+                  <Link
+                    href="/movies"
+                    className={cn(
+                      "border-l-4 px-2 py-2 text-lg",
+                      pathname === "/movies" || pathname.startsWith("/movies/")
+                        ? "border-primary font-medium"
+                        : "border-transparent",
+                    )}
+                    onClick={handleLinkClick}
+                  >
+                    Movies
                   </Link>
                   <Link
                     href="/categories"

@@ -57,10 +57,7 @@ export function getObjectUrl(objectName: string): string {
   const protocol = env.MINIO_USE_SSL === "true" ? "https" : "http";
   const endpoint = env.MINIO_ENDPOINT || "localhost:9000";
 
-  // Handle cases where endpoint might not include port for localhost
-  const fullEndpoint = endpoint.includes(":") ? endpoint : `${endpoint}:9000`;
-
-  return `${protocol}://${fullEndpoint}/${MINIO_BUCKET_NAME}/${objectName}`;
+  return `${protocol}://${endpoint}/${MINIO_BUCKET_NAME}/${objectName}`;
 }
 
 /**

@@ -18,6 +18,7 @@ test("getCategoryName", () => {
     sortOrder: 1,
     updatedAt: new Date(),
     userId: "asdf",
+    mediaType: "BOOK",
   };
 
   expect(getCategoryName(category)).toBe("1.4.3 test");

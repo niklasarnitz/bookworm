@@ -1,0 +1,19 @@
+enum MediaType {
+  BOOK
+  MOVIE
+}
+
+enum VideoFormat {
+  DVD
+  BLURAY
+  BLURAY_4K
+  BLURAY_3D
+  LASERDISC
+  VHS
+  VCD
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}

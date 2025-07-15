@@ -5,7 +5,7 @@ import { PageHeader } from "~/components/ui/page-header";
 import { StatsPage } from "~/components/statistics/StatsPage";
 
 export const metadata: Metadata = {
-  title: "Statistics | BookWorm",
+  title: "Statistics | MediaWorm",
   description: "Book collection statistics and reading progress",
 };
 

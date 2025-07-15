@@ -111,5 +111,8 @@
   "trustedDependencies": [
     "@sentry/cli",
     "unrs-resolver"
-  ]
+  ],
+  "prisma": {
+    "schema": "./prisma"
+  }
 }

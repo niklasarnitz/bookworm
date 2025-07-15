@@ -288,6 +288,7 @@ async function createCategories(
         sortOrder,
         level,
         parentId,
+        mediaType: "BOOK", // Default to BOOK for existing categories
       },
     });
 

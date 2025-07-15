@@ -91,12 +91,14 @@ export function CategoryManager() {
       updateCategory.mutate({
         id: editingCategory.id,
         name: values.name,
-        parentId: values.parentId,
+        parentId: values.parentId ?? null,
+        mediaType: "BOOK", // Default to BOOK for existing category manager
       });
     } else {
       createCategory.mutate({
         name: values.name,
         parentId: values.parentId ?? undefined,
+        mediaType: "BOOK", // Default to BOOK for new categories
       });
     }
   };

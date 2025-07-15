@@ -44,8 +44,8 @@ const themeScript = `
 `;
 
 export const metadata = {
-  title: "BookWorm",
-  description: "Track your book collection with ease",
+  title: "MediaWorm",
+  description: "Track your book and movie collection with ease",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -75,7 +75,7 @@ export default function RootLayout({
                 </main>
                 <footer className="border-t py-4">
                   <div className="text-muted-foreground container mx-auto text-center text-sm">
-                    © {new Date().getFullYear()} BookWorm
+                    © {new Date().getFullYear()} MediaWorm
                   </div>
                 </footer>
               </div>

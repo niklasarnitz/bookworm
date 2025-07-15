@@ -21,7 +21,8 @@ export const env = createEnv({
     MINIO_SECRET_KEY: z.string().default("minioadmin"),
     MINIO_BUCKET_NAME: z.string().default("bookworm"),
     MINIO_REGION: z.string().default("us-east-1"),
-    SENTRY_DSN: z.string().nonempty()
+    TMDB_API_KEY: z.string().optional(),
+    SENTRY_DSN: z.string().nonempty(),
   },
 
   /**
@@ -48,6 +49,7 @@ export const env = createEnv({
     MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
     MINIO_BUCKET_NAME: process.env.MINIO_BUCKET_NAME,
     MINIO_REGION: process.env.MINIO_REGION,
+    TMDB_API_KEY: process.env.TMDB_API_KEY,
     SENTRY_DSN: process.env.SENTRY_DSN,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   },

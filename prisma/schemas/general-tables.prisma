@@ -1,0 +1,22 @@
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  path      String     @unique
+  sortOrder Int
+  level     Int
+  parentId  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String     @default("cm9vhjvpo0000btb9gdu2ny14")
+  mediaType MediaType
+  books     Book[]
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+  user      User       @relation(fields: [userId], references: [id])
+  movies    Movie[]
+
+  @@index([parentId])
+  @@index([path])
+  @@index([name])
+  @@index([mediaType])
+}

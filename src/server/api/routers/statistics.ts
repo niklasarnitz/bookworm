@@ -53,7 +53,7 @@ export const statisticsRouter = createTRPCRouter({
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch summary statistics",
+        message: "Failed to fetch summary statistics\n" + JSON.stringify(error),
       });
     }
   }),
@@ -105,7 +105,8 @@ export const statisticsRouter = createTRPCRouter({
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch reading progress data",
+        message:
+          "Failed to fetch reading progress data\n" + JSON.stringify(error),
       });
     }
   }),
@@ -145,7 +146,9 @@ export const statisticsRouter = createTRPCRouter({
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch category distribution data",
+        message:
+          "Failed to fetch category distribution data\n" +
+          JSON.stringify(error, null, 2),
       });
     }
   }),
@@ -192,7 +195,8 @@ export const statisticsRouter = createTRPCRouter({
     } catch (error) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch page count statistics",
+        message:
+          "Failed to fetch page count statistics\n " + JSON.stringify(error),
       });
     }
   }),

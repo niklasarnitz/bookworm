@@ -13,8 +13,8 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { CategoryAccordion } from "~/app/(main)/categories/_components/CategoryAccordion";
 import type { Category } from "~/schemas/category";
+import { CategoryAccordion } from "~/components/categories/CategoryAccordion";
 
 type CategoryTreeProps = {
   onEdit?: (category: Category) => void;

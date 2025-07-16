@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Media types enum
-export const mediaTypeSchema = z.enum(["BOOK", "MOVIE"]);
+export const mediaTypeSchema = z.enum(["BOOK", "MOVIE", "TV_SHOW"]);
 export type MediaType = z.infer<typeof mediaTypeSchema>;
 
 // Common pagination schema (shared between books and videos)

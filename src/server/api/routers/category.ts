@@ -23,6 +23,7 @@ export const categoryRouter = createTRPCRouter({
           select: {
             books: true,
             movies: true,
+            tvShows: true,
           },
         },
       },
@@ -44,6 +45,7 @@ export const categoryRouter = createTRPCRouter({
             select: {
               books: true,
               movies: true,
+              tvShows: true,
             },
           },
         },

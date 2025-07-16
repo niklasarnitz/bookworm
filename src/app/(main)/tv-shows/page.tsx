@@ -1,19 +1,19 @@
 import { Suspense } from "react";
 import { api } from "~/trpc/server";
 import { Skeleton } from "~/components/ui/skeleton";
-import type { MovieSearch as MovieSearchType } from "~/schemas/video";
-import { MovieSearch } from "~/components/movies/MovieSearch";
-import { MovieFilter } from "~/components/movies/MovieFilter";
-import { MovieSort } from "~/components/movies/MovieSort";
-import { MovieGrid } from "~/components/movies/MovieGrid";
+import type { TvShowSearch as TvShowSearchType } from "~/schemas/tvShow";
+import { TvShowSearch } from "~/components/tvShows/TvShowSearch";
+import { TvShowFilter } from "~/components/tvShows/TvShowFilter";
+import { TvShowSort } from "~/components/tvShows/TvShowSort";
+import { TvShowGrid } from "~/components/tvShows/TvShowGrid";
 
-interface MoviesPageProps {
+interface TvShowsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 function parseSearchParams(
   searchParams: Record<string, string | string[] | undefined>,
-): MovieSearchType {
+): TvShowSearchType {
   const query =
     typeof searchParams.query === "string" ? searchParams.query : undefined;
   const categoryId =
@@ -52,44 +52,44 @@ function parseSearchParams(
   };
 }
 
-async function MoviesContent({
+async function TvShowsContent({
   searchParams,
 }: {
-  searchParams: MovieSearchType;
+  searchParams: TvShowSearchType;
 }) {
-  const [moviesData, categories] = await Promise.all([
-    api.movie.getAll(searchParams),
-    api.category.getByMediaType({ mediaType: "MOVIE" }),
+  const [tvShowsData, categories] = await Promise.all([
+    api.tvShow.getAll(searchParams),
+    api.category.getByMediaType({ mediaType: "TV_SHOW" }),
   ]);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex flex-1 items-center gap-4">
-          <MovieSearch />
-          <MovieFilter categories={categories} />
+          <TvShowSearch />
+          <TvShowFilter categories={categories} />
         </div>
-        <MovieSort />
+        <TvShowSort />
       </div>
 
-      <MovieGrid
-        movies={moviesData.movies}
-        total={moviesData.total}
-        currentPage={moviesData.currentPage}
-        totalPages={moviesData.totalPages}
+      <TvShowGrid
+        tvShows={tvShowsData.tvShows}
+        total={tvShowsData.total}
+        currentPage={tvShowsData.currentPage}
+        totalPages={tvShowsData.totalPages}
       />
     </div>
   );
 }
 
-export default async function MoviesPage({ searchParams }: MoviesPageProps) {
+export default async function TvShowsPage({ searchParams }: TvShowsPageProps) {
   const parsedParams = parseSearchParams(await searchParams);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Movies</h1>
-        <p className="text-muted-foreground">Manage your movie collection</p>
+        <h1 className="text-3xl font-bold tracking-tight">TV Shows</h1>
+        <p className="text-muted-foreground">Manage your TV show collection</p>
       </div>
 
       <Suspense
@@ -110,7 +110,7 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
           </div>
         }
       >
-        <MoviesContent searchParams={parsedParams} />
+        <TvShowsContent searchParams={parsedParams} />
       </Suspense>
     </div>
   );

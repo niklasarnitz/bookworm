@@ -33,6 +33,9 @@ export async function NavBar() {
             <Link href="/movies" className="hover:underline">
               Movies
             </Link>
+            <Link href="/tv-shows" className="hover:underline">
+              TV Shows
+            </Link>
             <Link href="/categories" className="hover:underline">
               Categories
             </Link>

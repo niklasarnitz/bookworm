@@ -14,6 +14,7 @@ model Category {
   children  Category[] @relation("CategoryHierarchy")
   user      User       @relation(fields: [userId], references: [id])
   movies    Movie[]
+  tvShows   TvShow[]
 
   @@index([parentId])
   @@index([path])

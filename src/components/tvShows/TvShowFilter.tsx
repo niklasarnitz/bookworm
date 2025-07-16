@@ -14,11 +14,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCreateQueryString } from "~/hooks/useCreateQueryString";
 import type { RouterOutputs } from "~/trpc/react";
 
-interface MovieFilterProps {
+interface TvShowFilterProps {
   categories: RouterOutputs["category"]["getAll"];
 }
 
-export function MovieFilter({ categories }: MovieFilterProps) {
+export function TvShowFilter({ categories }: TvShowFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const createQueryString = useCreateQueryString(searchParams);
@@ -63,15 +63,15 @@ export function MovieFilter({ categories }: MovieFilterProps) {
       queryString = params.toString();
     }
 
-    router.push(`/movies?${queryString}`);
+    router.push(`/tv-shows?${queryString}`);
   };
 
-  const getFilterLabel = () => {
+  const getCurrentFilterLabel = () => {
     if (hasPhysicalItems === "true") return "With Physical Items";
     if (hasPhysicalItems === "false") return "Without Physical Items";
-    if (noCategory) return "No Category";
+    if (noCategory) return "Uncategorized";
     if (currentCategoryId) {
-      const category = categories.find((c) => c.id === currentCategoryId);
+      const category = categories.find((cat) => cat.id === currentCategoryId);
       return category?.name ?? "Unknown Category";
     }
     return "All Categories";
@@ -82,7 +82,7 @@ export function MovieFilter({ categories }: MovieFilterProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Filter className="h-4 w-4" />
-          {getFilterLabel()}
+          {getCurrentFilterLabel()}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
@@ -93,7 +93,7 @@ export function MovieFilter({ categories }: MovieFilterProps) {
           onClick={() => handleFilterChange()}
           className={
             !currentCategoryId && !noCategory && !hasPhysicalItems
-              ? "bg-muted"
+              ? "bg-accent"
               : ""
           }
         >
@@ -102,9 +102,9 @@ export function MovieFilter({ categories }: MovieFilterProps) {
 
         <DropdownMenuItem
           onClick={() => handleFilterChange(undefined, true)}
-          className={noCategory ? "bg-muted" : ""}
+          className={noCategory ? "bg-accent" : ""}
         >
-          No Category
+          Uncategorized
         </DropdownMenuItem>
 
         {categories.length > 0 && <DropdownMenuSeparator />}
@@ -113,7 +113,7 @@ export function MovieFilter({ categories }: MovieFilterProps) {
           <DropdownMenuItem
             key={category.id}
             onClick={() => handleFilterChange(category.id)}
-            className={currentCategoryId === category.id ? "bg-muted" : ""}
+            className={currentCategoryId === category.id ? "bg-accent" : ""}
           >
             {category.name}
           </DropdownMenuItem>
@@ -125,23 +125,23 @@ export function MovieFilter({ categories }: MovieFilterProps) {
 
         <DropdownMenuItem
           onClick={() => handleFilterChange(undefined, false, "true")}
-          className={hasPhysicalItems === "true" ? "bg-muted" : ""}
+          className={hasPhysicalItems === "true" ? "bg-accent" : ""}
         >
           With Physical Items
         </DropdownMenuItem>
 
         <DropdownMenuItem
           onClick={() => handleFilterChange(undefined, false, "false")}
-          className={hasPhysicalItems === "false" ? "bg-muted" : ""}
+          className={hasPhysicalItems === "false" ? "bg-accent" : ""}
         >
           Without Physical Items
         </DropdownMenuItem>
 
         <DropdownMenuItem
           onClick={() => handleFilterChange(undefined, false, "")}
-          className={!hasPhysicalItems ? "bg-muted" : ""}
+          className={!hasPhysicalItems ? "bg-accent" : ""}
         >
-          All Movies
+          All TV Shows
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

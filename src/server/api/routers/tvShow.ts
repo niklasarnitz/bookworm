@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
-  createMovieSchema,
-  updateMovieSchema,
-  movieSearchSchema,
-} from "~/schemas/video";
+  createTvShowSchema,
+  updateTvShowSchema,
+  tvShowSearchSchema,
+} from "~/schemas/tvShow";
 
-export const movieRouter = createTRPCRouter({
-  // Get all movies for the current user
+export const tvShowRouter = createTRPCRouter({
+  // Get all TV shows for the current user
   getAll: protectedProcedure
-    .input(movieSearchSchema)
+    .input(tvShowSearchSchema)
     .query(async ({ ctx, input }) => {
       const {
         query,
@@ -34,215 +34,210 @@ export const movieRouter = createTRPCRouter({
         ...(categoryId && { categoryId }),
         ...(noCategory && { categoryId: null }),
         ...(hasPhysicalItems !== undefined && {
-          releases: hasPhysicalItems
+          seasons: hasPhysicalItems
             ? {
                 some: {
-                  items: {
-                    some: {},
+                  releases: {
+                    some: {
+                      items: {
+                        some: {},
+                      },
+                    },
                   },
                 },
               }
             : {
                 none: {
-                  items: {
-                    some: {},
+                  releases: {
+                    some: {
+                      items: {
+                        some: {},
+                      },
+                    },
                   },
                 },
               },
         }),
       };
 
-      const [movies, total] = await Promise.all([
-        ctx.db.movie.findMany({
+      const [tvShows, total] = await Promise.all([
+        ctx.db.tvShow.findMany({
           where,
           include: {
             category: true,
-            releases: {
+            seasons: {
               include: {
-                items: {
+                releases: {
                   include: {
-                    audioTracks: true,
-                    subtitles: true,
+                    items: {
+                      include: {
+                        audioTracks: true,
+                        subtitles: true,
+                      },
+                    },
                   },
                 },
               },
+              orderBy: { seasonNumber: "asc" },
             },
           },
           orderBy: { [sortBy]: sortOrder },
           skip,
           take: pageSize,
         }),
-        ctx.db.movie.count({ where }),
+        ctx.db.tvShow.count({ where }),
       ]);
 
       return {
-        movies,
+        tvShows,
         total,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,
       };
     }),
 
-  // Get a single movie by ID
+  // Get a single TV show by ID
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const movie = await ctx.db.movie.findFirst({
+      const tvShow = await ctx.db.tvShow.findFirst({
         where: {
           id: input.id,
           userId: ctx.session.user.id,
         },
         include: {
           category: true,
-          releases: {
+          seasons: {
             include: {
-              items: {
+              releases: {
                 include: {
-                  audioTracks: true,
-                  subtitles: true,
+                  items: {
+                    include: {
+                      audioTracks: true,
+                      subtitles: true,
+                    },
+                  },
                 },
               },
             },
+            orderBy: { seasonNumber: "asc" },
           },
         },
       });
 
-      if (!movie) {
-        throw new Error("Movie not found");
+      if (!tvShow) {
+        throw new Error("TV Show not found");
       }
 
-      return movie;
+      return tvShow;
     }),
 
-  // Create a new movie
+  // Create a new TV show
   create: protectedProcedure
-    .input(createMovieSchema)
+    .input(createTvShowSchema)
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.movie.create({
-        data: {
-          ...input,
-          userId: ctx.session.user.id,
-        },
+      // Remove undefined/empty categoryId to avoid foreign key constraint issues
+      const { categoryId, ...restInput } = input;
+      const data = {
+        ...restInput,
+        userId: ctx.session.user.id,
+        ...(categoryId && categoryId.trim() !== "" ? { categoryId } : {}),
+      };
+
+      return ctx.db.tvShow.create({
+        data,
         include: {
           category: true,
-          releases: {
+          seasons: {
             include: {
-              items: {
+              releases: {
                 include: {
-                  audioTracks: true,
-                  subtitles: true,
+                  items: {
+                    include: {
+                      audioTracks: true,
+                      subtitles: true,
+                    },
+                  },
                 },
               },
             },
+            orderBy: { seasonNumber: "asc" },
           },
         },
       });
     }),
 
-  // Update a movie
+  // Update a TV show
   update: protectedProcedure
-    .input(updateMovieSchema)
+    .input(updateTvShowSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateData } = input;
 
       // Verify ownership
-      const existingMovie = await ctx.db.movie.findFirst({
+      const existingTvShow = await ctx.db.tvShow.findFirst({
         where: {
           id,
           userId: ctx.session.user.id,
         },
       });
 
-      if (!existingMovie) {
-        throw new Error("Movie not found");
+      if (!existingTvShow) {
+        throw new Error("TV Show not found");
       }
 
-      return ctx.db.movie.update({
+      // Remove undefined/empty categoryId to avoid foreign key constraint issues
+      const { categoryId, ...restUpdateData } = updateData;
+      const updatePayload = {
+        ...restUpdateData,
+        ...(categoryId && categoryId.trim() !== "" ? { categoryId } : {}),
+      };
+
+      return ctx.db.tvShow.update({
         where: { id },
-        data: {
-          ...updateData,
-          ...(updateData.categoryId === "" && { categoryId: null }),
-        },
+        data: updatePayload,
         include: {
           category: true,
-          releases: {
+          seasons: {
             include: {
-              items: {
+              releases: {
                 include: {
-                  audioTracks: true,
-                  subtitles: true,
+                  items: {
+                    include: {
+                      audioTracks: true,
+                      subtitles: true,
+                    },
+                  },
                 },
               },
             },
+            orderBy: { seasonNumber: "asc" },
           },
         },
       });
     }),
 
-  // Delete a movie
+  // Delete a TV show
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Verify ownership
-      const existingMovie = await ctx.db.movie.findFirst({
+      const existingTvShow = await ctx.db.tvShow.findFirst({
         where: {
           id: input.id,
           userId: ctx.session.user.id,
         },
       });
 
-      if (!existingMovie) {
-        throw new Error("Movie not found");
+      if (!existingTvShow) {
+        throw new Error("TV Show not found");
       }
 
-      return ctx.db.movie.delete({
+      return ctx.db.tvShow.delete({
         where: { id: input.id },
       });
     }),
 
-  // Toggle watched status
-  toggleWatched: protectedProcedure
-    .input(
-      z.object({
-        id: z.string(),
-        watchedAt: z.date().optional(),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      // Verify ownership
-      const existingMovie = await ctx.db.movie.findFirst({
-        where: {
-          id: input.id,
-          userId: ctx.session.user.id,
-        },
-      });
-
-      if (!existingMovie) {
-        throw new Error("Movie not found");
-      }
-
-      return ctx.db.movie.update({
-        where: { id: input.id },
-        data: {
-          watchedAt: input.watchedAt,
-        },
-        include: {
-          category: true,
-          releases: {
-            include: {
-              items: {
-                include: {
-                  audioTracks: true,
-                  subtitles: true,
-                },
-              },
-            },
-          },
-        },
-      });
-    }),
-
-  // Get movies by category
+  // Get TV shows by category
   getByCategory: protectedProcedure
     .input(
       z.object({
@@ -266,26 +261,31 @@ export const movieRouter = createTRPCRouter({
         categoryId,
       };
 
-      const [movies, total] = await Promise.all([
-        ctx.db.movie.findMany({
+      const [tvShows, total] = await Promise.all([
+        ctx.db.tvShow.findMany({
           where,
           include: {
             category: true,
-            releases: {
+            seasons: {
               include: {
-                items: true,
+                releases: {
+                  include: {
+                    items: true,
+                  },
+                },
               },
+              orderBy: { seasonNumber: "asc" },
             },
           },
           orderBy: { title: "asc" },
           skip,
           take: pageSize,
         }),
-        ctx.db.movie.count({ where }),
+        ctx.db.tvShow.count({ where }),
       ]);
 
       return {
-        movies,
+        tvShows,
         total,
         totalPages: Math.ceil(total / pageSize),
         currentPage: page,

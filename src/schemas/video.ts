@@ -76,6 +76,7 @@ export const movieSearchSchema = z.object({
   query: z.string().optional(),
   categoryId: z.string().optional(),
   noCategory: z.boolean().optional(),
+  hasPhysicalItems: z.boolean().optional(),
   sortBy: z
     .enum(["title", "originalReleaseYear", "createdAt", "watchedAt"])
     .optional()
@@ -112,8 +113,19 @@ export const updateMediaReleaseSchema = mediaReleaseSchema
 export const createPhysicalItemSchema = physicalItemSchema
   .omit({ id: true, audioTracks: true, subtitles: true })
   .extend({
-    mediaReleaseId: z.string().min(1, "Media release ID is required"),
-  });
+    mediaReleaseId: z
+      .string()
+      .min(1, "Media release ID is required")
+      .optional(),
+    tvSeasonReleaseId: z
+      .string()
+      .min(1, "TV Season release ID is required")
+      .optional(),
+  })
+  .refine(
+    (data) => data.mediaReleaseId ?? data.tvSeasonReleaseId,
+    "Either mediaReleaseId or tvSeasonReleaseId is required",
+  );
 export const updatePhysicalItemSchema = physicalItemSchema
   .partial()
   .omit({ audioTracks: true, subtitles: true })

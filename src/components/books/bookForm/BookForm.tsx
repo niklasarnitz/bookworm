@@ -10,6 +10,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import { type Book, type BookCreate } from "~/schemas/book";
 import { X, Plus } from "lucide-react";
 import { CoverUploader } from "../CoverUploader";
@@ -232,6 +233,27 @@ export function BookForm({
                   />
                 </FormControl>
                 <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="isEbook"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-y-0 space-x-3">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>E-book</FormLabel>
+                  <p className="text-muted-foreground text-sm">
+                    Check if this is an electronic book
+                  </p>
+                </div>
               </FormItem>
             )}
           />

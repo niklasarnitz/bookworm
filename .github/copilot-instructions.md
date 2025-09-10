@@ -19,7 +19,7 @@ Shadcn UI for frontend
 - use react-hook-form for form validation
 - use bun for package manager
 - everything should be 100% typesafe and striclty typed
-- server side rendering using transitions and suspense boundaries should be preferred over client side rendering
+- server side rendering using actionState, transitions and suspense boundaries should ALWAYS be preferred over client side rendering
   - when a client side component is needed, it should just be the component it self - not the whole page or the bigger component
   - when building components, try to make them reusable and not depend on the context of the page
 - make sure to invalidate react query hooks AND the server rendered routes when editing/deleting data

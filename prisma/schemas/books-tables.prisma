@@ -11,8 +11,9 @@ model Book {
   publisher    String?
   pages        Int?
   categoryId   String?
-  userId       String               @default("cm9vhjvpo0000btb9gdu2ny14")
+  userId       String
   readDate     DateTime?
+  isEbook      Boolean              @default(false)
   category     Category?            @relation(fields: [categoryId], references: [id])
   series       Series?              @relation(fields: [seriesId], references: [id])
   user         User                 @relation(fields: [userId], references: [id])

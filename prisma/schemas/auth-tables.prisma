@@ -26,29 +26,24 @@ model Session {
 }
 
 model User {
-  id                   String            @id @default(cuid())
+  id                   String     @id @default(cuid())
   name                 String?
-  email                String?           @unique
+  email                String?    @unique
   emailVerified        DateTime?
   image                String?
   password             String
-  username             String            @unique
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @default(now()) @updatedAt
-  role                 UserRole          @default(USER)
-  isSharingReadingList Boolean           @default(false)
+  username             String     @unique
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @default(now()) @updatedAt
+  role                 UserRole   @default(USER)
+  isSharingReadingList Boolean    @default(false)
   accounts             Account[]
   authors              Author[]
   books                Book[]
   categories           Category[]
-  mediaReleases        MediaRelease[]
-  movies               Movie[]
   quotes               Quote[]
   series               Series[]
   sessions             Session[]
-  tvShows              TvShow[]
-  tvSeasons            TvSeason[]
-  tvSeasonReleases     TvSeasonRelease[]
 }
 
 model VerificationToken {

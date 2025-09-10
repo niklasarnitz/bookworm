@@ -2,7 +2,7 @@ import Image from "next/image";
 import { type RouterOutputs } from "~/trpc/react";
 import { formatAuthors } from "./BookTable";
 import { clsx } from "clsx";
-import { Check } from "lucide-react";
+import { Check, Monitor } from "lucide-react";
 
 // Function to generate a pseudo-random color based on book data
 export function generateBookColor(bookId: string, index = 0) {
@@ -58,6 +58,11 @@ export function BookCover({
         {isRead && (
           <div className="absolute top-2 right-2 rounded-full bg-green-500 p-1 text-white shadow-md">
             <Check className="h-3 w-3" />
+          </div>
+        )}
+        {book.isEbook && (
+          <div className="absolute top-2 left-2 rounded-full bg-blue-500 p-1 text-white shadow-md">
+            <Monitor className="h-3 w-3" />
           </div>
         )}
       </div>
@@ -130,6 +135,11 @@ export function BookCover({
       {isRead && (
         <div className="absolute top-2 right-2 rounded-full bg-green-500 p-1 text-white shadow-md">
           <Check className="h-3 w-3" />
+        </div>
+      )}
+      {book.isEbook && (
+        <div className="absolute top-2 left-2 rounded-full bg-blue-500 p-1 text-white shadow-md">
+          <Monitor className="h-3 w-3" />
         </div>
       )}
     </div>

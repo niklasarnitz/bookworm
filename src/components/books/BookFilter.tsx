@@ -52,6 +52,8 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     if (searchParams.has("noCover")) count++;
     if (searchParams.has("noCategory")) count++;
     if (searchParams.has("onlyRead")) count++;
+    if (searchParams.has("onlyEbooks")) count++;
+    if (searchParams.has("onlyPhysical")) count++;
     setActiveFilters(count);
 
     // Set active accordion items based on active filters
@@ -62,7 +64,9 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
     if (
       searchParams.has("noCover") ||
       searchParams.has("noCategory") ||
-      searchParams.has("onlyRead")
+      searchParams.has("onlyRead") ||
+      searchParams.has("onlyEbooks") ||
+      searchParams.has("onlyPhysical")
     )
       items.push("special");
     setActiveAccordionItems(items);
@@ -74,6 +78,12 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
       params.delete(name);
     } else {
       params.set(name, "true");
+      // Handle mutually exclusive ebook filters
+      if (name === "onlyEbooks") {
+        params.delete("onlyPhysical");
+      } else if (name === "onlyPhysical") {
+        params.delete("onlyEbooks");
+      }
     }
     router.push(`/?${params.toString()}`);
   };
@@ -288,7 +298,9 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
                   Special Filters
                   {(searchParams.has("noCover") ||
                     searchParams.has("noCategory") ||
-                    searchParams.has("onlyRead")) && (
+                    searchParams.has("onlyRead") ||
+                    searchParams.has("onlyEbooks") ||
+                    searchParams.has("onlyPhysical")) && (
                     <span className="bg-muted text-muted-foreground ml-2 rounded-full px-1.5 py-0.5 text-xs">
                       Active
                     </span>
@@ -325,6 +337,28 @@ export function BookFilter({ className }: Readonly<BookFilterProps>) {
                     />
                     <Label htmlFor="onlyRead" className="text-sm">
                       Only read books
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="onlyEbooks"
+                      checked={searchParams.has("onlyEbooks")}
+                      onCheckedChange={() => handleCheckboxChange("onlyEbooks")}
+                    />
+                    <Label htmlFor="onlyEbooks" className="text-sm">
+                      Only e-books
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="onlyPhysical"
+                      checked={searchParams.has("onlyPhysical")}
+                      onCheckedChange={() =>
+                        handleCheckboxChange("onlyPhysical")
+                      }
+                    />
+                    <Label htmlFor="onlyPhysical" className="text-sm">
+                      Only physical books
                     </Label>
                   </div>
                 </div>

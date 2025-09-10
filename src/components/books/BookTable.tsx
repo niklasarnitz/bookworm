@@ -40,6 +40,7 @@ import {
   BookX,
   Check,
   Copy,
+  Monitor,
 } from "lucide-react";
 import { useHandleEditBook } from "~/stores/booksPageStore/helpers/useHandleEditBook";
 import { useRouter } from "next/navigation";
@@ -130,6 +131,11 @@ const BookTableInternal = ({ books }: Readonly<BookTableProps>) => {
                       {book.readDate && (
                         <div className="ml-2 rounded-full bg-green-500 p-[2px] text-white">
                           <Check className="h-3 w-3" />
+                        </div>
+                      )}
+                      {book.isEbook && (
+                        <div className="ml-2 rounded-full bg-blue-500 p-[2px] text-white">
+                          <Monitor className="h-3 w-3" />
                         </div>
                       )}
                     </div>

@@ -68,6 +68,14 @@ export const bookRouter = createTRPCRouter({
         where.readDate = { not: null };
       }
 
+      if (input?.onlyEbooks) {
+        where.isEbook = true;
+      }
+
+      if (input?.onlyPhysical) {
+        where.isEbook = false;
+      }
+
       // Get total count for pagination
       const totalCount = await ctx.db.book.count({ where });
       const totalPages = Math.ceil(totalCount / pageSize);

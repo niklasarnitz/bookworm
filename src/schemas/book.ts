@@ -25,6 +25,7 @@ export const bookCreateSchema = z.object({
   categoryId: z.string().optional().nullable(),
   publisher: z.string().optional().nullable(),
   pages: z.number().optional().nullable(),
+  isEbook: z.boolean().default(false),
 });
 
 export const bookSchema = bookCreateSchema.extend({
@@ -39,6 +40,8 @@ export const bookSearchSchema = z.object({
   noCover: z.boolean().optional(),
   noCategory: z.boolean().optional(),
   onlyRead: z.boolean().optional(),
+  onlyEbooks: z.boolean().optional(),
+  onlyPhysical: z.boolean().optional(),
   sortBy: z
     .enum(["createdAt", "name", "author", "series", "readDate"])
     .optional(),

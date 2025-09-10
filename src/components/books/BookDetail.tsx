@@ -152,6 +152,13 @@ export function BookDetail({ book, authors, series }: BookDetailProps) {
                   <p className="text-sm">{book.pages}</p>
                 </div>
               )}
+
+              <div>
+                <h3 className="mb-2 text-base font-semibold">Format</h3>
+                <p className="text-sm">
+                  {book.isEbook ? "📱 E-book" : "📖 Physical book"}
+                </p>
+              </div>
             </CardContent>
           </Card>
 

@@ -22,8 +22,6 @@ export const categoryRouter = createTRPCRouter({
         _count: {
           select: {
             books: true,
-            movies: true,
-            tvShows: true,
           },
         },
       },
@@ -44,8 +42,6 @@ export const categoryRouter = createTRPCRouter({
           _count: {
             select: {
               books: true,
-              movies: true,
-              tvShows: true,
             },
           },
         },

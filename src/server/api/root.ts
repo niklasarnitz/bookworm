@@ -8,14 +8,6 @@ import { userProfileRouter } from "~/server/api/routers/userProfile";
 import { statisticsRouter } from "~/server/api/routers/statistics";
 import { quoteRouter } from "~/server/api/routers/quote";
 import { bookMetadataRouter } from "~/server/api/routers/bookMetadata";
-import { movieMetadataRouter } from "~/server/api/routers/movieMetadata";
-import { tvShowMetadataRouter } from "~/server/api/routers/tvShowMetadata";
-import { movieRouter } from "~/server/api/routers/movie";
-import { mediaReleaseRouter } from "~/server/api/routers/mediaRelease";
-import { tvShowRouter } from "~/server/api/routers/tvShow";
-import { tvSeasonRouter } from "~/server/api/routers/tvSeason";
-import { tvSeasonReleaseRouter } from "~/server/api/routers/tvSeasonRelease";
-
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { embeddableRouter } from "~/server/api/routers/embeddable";
 
@@ -36,13 +28,6 @@ export const appRouter = createTRPCRouter({
   embeddable: embeddableRouter,
   quote: quoteRouter,
   bookMetadata: bookMetadataRouter,
-  movieMetadata: movieMetadataRouter,
-  tvShowMetadata: tvShowMetadataRouter,
-  movie: movieRouter,
-  mediaRelease: mediaReleaseRouter,
-  tvShow: tvShowRouter,
-  tvSeason: tvSeasonRouter,
-  tvSeasonRelease: tvSeasonReleaseRouter,
 });
 
 // export type definition of API
